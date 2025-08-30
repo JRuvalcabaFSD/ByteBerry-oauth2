@@ -26,9 +26,9 @@ src/
 ```
 
 ## 📜 Documentación
-- [Contributing](./CONTRIBUTING.md)
-- [Code of Conduct](./CODE_OF_CONDUCT.md)
-- [License](./LICENSE)
+- [Contributing](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2?tab=contributing-ov-file)
+- [Code of Conduct](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2?tab=coc-ov-file)
+- [License](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2?tab=license-ov-file)
 
 ## 🛠️ Instalación y uso
 ```bash
