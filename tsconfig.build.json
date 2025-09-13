@@ -27,6 +27,11 @@
       "@application": ["./application/index.ts"],
       "@domain": ["./domain/index.ts"],
       "@infrastructure": ["./infrastructure/index.ts"],
+      "@config": ["./config/index.ts"],
+      "@container": ["./container/index.ts"],
+      "@domain": ["./domain/index.ts"],
+      "@infrastructure": ["./infrastructure/index.ts"],
+      "@interfaces": ["./interfaces/index.ts"],
       "@presentation": ["./presentation/index.ts"],
       "@shared": ["./shared/index.ts"]
     },
