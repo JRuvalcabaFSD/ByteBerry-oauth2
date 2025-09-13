@@ -1,13 +1,12 @@
 # ByteBerry OAuth2
 
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JRuvalcabaFSD/ByteBerry-oauth2/ci-cd.yml?branch=main&logo=githubactions&logoColor=white&label=CI%2FCD&labelColor=blue)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/actions/new)
-[![GitHub Release](https://img.shields.io/github/v/release/JRuvalcabaFSD/ByteBerry-oauth2?display_name=release&logo=semanticrelease&logoColor=blue&label=Versi%C3%B3n)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JRuvalcabaFSD/ByteBerry-oauth2/ci-cd.yml?branch=main&logo=githubactions&logoColor=white&label=CI%2FCD)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/actions/new)
+[![GitHub Release](https://img.shields.io/github/v/release/JRuvalcabaFSD/ByteBerry-oauth2?display_name=release&logo=semanticrelease&logoColor=white&label=Versi%C3%B3n)
 ]()
-[![Node Version](https://img.shields.io/badge/dynamic/json?label=Node&query=$.engines.node&url=https://raw.githubusercontent.com/JRuvalcabaFSD/ByteBerry-oauth2/main/package.json&logo=node.js&logoColor=white&style=flat)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2)
+[![Node Version](https://img.shields.io/badge/dynamic/json?label=Node&query=$.engines.node&url=https://raw.githubusercontent.com/JRuvalcabaFSD/ByteBerry-oauth2/main/package.json&logo=node.js&logoColor=white&style=flat&cacheSeconds=60)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2)
 [![Docker Image Version](https://img.shields.io/docker/v/jruvalcabafsd/ByteBerry-oauth2?sort=semver&logo=docker&label=Image%20versi%C3%B3n)
 ]()
 [![GitHub License](https://img.shields.io/github/license/JRuvalcabaFSD/ByteBerry-oauth2?label=License)](./LICENSE)
-
 
 ## Descripción
 Servicio **OAuth2** del sistema ByteBerry. Implementa autenticación con OAuth2 (Authorization Code + PKCE, refresh tokens, logout y JWKS) siguiendo **Clean Architecture**, principios **SOLID** y **Dependency Injection Container**.  
