@@ -61,6 +61,8 @@ const config: Config = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@application$': '<rootDir>/application/index.ts',
+    '^@domain$': '<rootDir>/domain/index.ts',
+    '^@infrastructure$': '<rootDir>/infrastructure/index.ts',
     '^@config$': '<rootDir>/config/index.ts',
     '^@container$': '<rootDir>/container/index.ts',
     '^@domain$': '<rootDir>/domain/index.ts',

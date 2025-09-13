@@ -23,6 +23,8 @@
     "paths": {
       "@/*": ["src/*"],
       "@application": ["src/application/index.ts"],
+      "@domain": ["src/domain/index.ts"],
+      "@infrastructure": ["src/infrastructure/index.ts"],
       "@config": ["src/config/index.ts"],
       "@container": ["src/container/index.ts"],
       "@domain": ["src/domain/index.ts"],
