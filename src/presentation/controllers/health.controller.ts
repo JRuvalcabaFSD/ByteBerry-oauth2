@@ -1,6 +1,6 @@
 import { Clock, Logger } from '@/interfaces';
 
-export class healthController {
+export class HealthController {
   constructor(
     private readonly clock: Clock,
     private readonly logger: Logger,

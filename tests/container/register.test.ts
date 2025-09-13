@@ -1,5 +1,5 @@
 import { buildContainer, TOKENS } from '@/container';
-import { healthController } from '@/presentation';
+import { HealthController } from '@/presentation';
 
 const ORIGINAL_ENV = process.env;
 
@@ -13,7 +13,7 @@ describe('buildContainer()', () => {
   });
   it('should solve HealthController and a minimum payload delivery', () => {
     const container = buildContainer();
-    const controller = container.resolve<healthController>(TOKENS.HealthController);
+    const controller = container.resolve<HealthController>(TOKENS.HealthController);
     const result = controller.status();
 
     expect(result.service).toBe('oauth2');
