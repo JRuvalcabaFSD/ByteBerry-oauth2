@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
-import { loadConfig } from '@/config';
+import { buildContainer, TOKENS } from '@/container';
+import { healthController } from '@/presentation';
 
 (() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -10,12 +11,9 @@ import { loadConfig } from '@/config';
 })();
 
 async function main() {
-  const cfg = loadConfig();
-  console.log({
-    msg: 'Config loaded',
-    nodeEnv: cfg.nodeEnv,
-    port: cfg.port,
-    logLevel: cfg.logLevel,
-  });
+  const container = buildContainer();
+  const health = container.resolve<healthController>(TOKENS.HealthController);
+  console.log(JSON.stringify(health.status()));
+
   process.exit(0);
 }
