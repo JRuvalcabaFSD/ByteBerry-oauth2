@@ -45,7 +45,7 @@ describe('bootstrapContainer', () => {
     it('should register all required F0 tokens', () => {
       const registerTokens = container.getRegisteredTokens();
 
-      expect(registerTokens).toHaveLength(3);
+      expect(registerTokens).toHaveLength(4);
       expect(container.isRegistered(TOKENS.Config)).toBeTruthy();
       expect(container.isRegistered(TOKENS.Clock)).toBeTruthy();
       expect(container.isRegistered(TOKENS.Uuid)).toBeTruthy();

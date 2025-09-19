@@ -1,8 +1,8 @@
 import { TOKENS } from '@/container/tokens';
 import { Container } from './container';
-import { IContainer } from '@/interfaces';
+import { IContainer, IEnvConfig, IUuid } from '@/interfaces';
 import { EnvConfig } from '@/config';
-import { ClockService, UuidService } from '@/infrastructure';
+import { ClockService, HttpServer, UuidService } from '@/infrastructure';
 import { DependencyCreationError } from '@/shared';
 
 export function bootstrapContainer(): IContainer {
@@ -13,7 +13,10 @@ export function bootstrapContainer(): IContainer {
     container.registerSingleton(TOKENS.Clock, () => new ClockService());
     container.registerSingleton(TOKENS.Uuid, () => new UuidService());
     //TODO register Logger
-    //TODO register httpServer
+    container.registerSingleton(
+      TOKENS.HttpServer,
+      c => new HttpServer(c.resolve<IEnvConfig>(TOKENS.Config), c.resolve<IUuid>(TOKENS.Uuid))
+    );
     //TODO register HealthController
 
     return container;
