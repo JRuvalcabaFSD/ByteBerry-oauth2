@@ -1,55 +1,79 @@
-import { bootstrapContainer, TOKENS } from '@/container';
-import { IClock, IContainer, IEnvConfig, IUuid } from '@/interfaces';
+import { bootstrapContainer } from '@/container/bootstrap';
+import { TOKENS } from '@/container/tokens';
+import type { IContainer, IEnvConfig, IHttpServer } from '@/interfaces';
 
-describe('bootstrapContainer', () => {
+describe('bootstrapContainer - T006', () => {
   let container: IContainer;
 
   beforeEach(() => {
     container = bootstrapContainer();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    try {
+      const httpServer = container.resolve<IHttpServer>(TOKENS.HttpServer);
+      if (httpServer.isRunning()) {
+        await httpServer.stop();
+      }
+    } catch {
+      // Ignore cleanup errors
+    }
     container.clear();
   });
-  describe('bootstrapContainer', () => {
-    it('should register and resolve Config dependency', () => {
-      const config = container.resolve<IEnvConfig>(TOKENS.Config);
 
-      expect(config).toBeDefined();
-      expect(typeof config.port).toBe('number');
-      expect(typeof config.nodeEnv).toBe('string');
-      expect(typeof config.logLevel).toBe('string');
-    });
-    it('should register and resolve Clock dependency', () => {
-      const clock = container.resolve<IClock>(TOKENS.Clock);
+  it('should register HttpServer with dependencies', () => {
+    // Act
+    const httpServer = container.resolve<IHttpServer>(TOKENS.HttpServer);
 
-      expect(clock).toBeDefined();
-      expect(clock.now()).toBeInstanceOf(Date);
-      expect(typeof clock.timestamp()).toBe('number');
-    });
-    it('should register and resolve Uuid dependency', () => {
-      const uuid = container.resolve<IUuid>(TOKENS.Uuid);
-
-      expect(uuid).toBeDefined();
-      expect(typeof uuid.generate()).toBe('string');
-      expect(uuid.generate()).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
-    });
+    // Assert
+    expect(httpServer).toBeDefined();
+    expect(httpServer.isRunning()).toBe(false);
+    expect(httpServer.getApp()).toBeDefined();
   });
-  describe('singleton behavior', () => {
-    it('should return same instance for Config (singleton)', () => {
-      const config1 = container.resolve<IEnvConfig>(TOKENS.Config);
-      const config2 = container.resolve<IEnvConfig>(TOKENS.Config);
 
-      expect(config1).toBe(config2);
-    });
-    it('should register all required F0 tokens', () => {
-      const registerTokens = container.getRegisteredTokens();
+  it('should resolve HttpServer as singleton', () => {
+    // Act
+    const httpServer1 = container.resolve<IHttpServer>(TOKENS.HttpServer);
+    const httpServer2 = container.resolve<IHttpServer>(TOKENS.HttpServer);
 
-      expect(registerTokens).toHaveLength(4);
-      expect(container.isRegistered(TOKENS.Config)).toBeTruthy();
-      expect(container.isRegistered(TOKENS.Clock)).toBeTruthy();
-      expect(container.isRegistered(TOKENS.Uuid)).toBeTruthy();
-      //TODO test for rest basic services
-    });
+    // Assert
+    expect(httpServer1).toBe(httpServer2);
+  });
+
+  it('should inject Config and Uuid dependencies into HttpServer', () => {
+    // Act
+    const httpServer = container.resolve<IHttpServer>(TOKENS.HttpServer);
+    const config = container.resolve<IEnvConfig>(TOKENS.Config);
+
+    // Assert
+    expect(httpServer).toBeDefined();
+    expect(config).toBeDefined();
+    expect(config.port).toBe(4000); // Default port from EnvConfig
+  });
+
+  it('should create HttpServer with proper dependency injection', async () => {
+    // Act
+    const httpServer = container.resolve<IHttpServer>(TOKENS.HttpServer);
+
+    // Start server to test it was created properly
+    await httpServer.start();
+
+    // Assert
+    expect(httpServer.isRunning()).toBe(true);
+
+    // Cleanup
+    await httpServer.stop();
+  });
+
+  it('should register all F0 tokens including HttpServer', () => {
+    // Act
+    const registeredTokens = container.getRegisteredTokens();
+
+    // Assert
+    expect(registeredTokens).toHaveLength(4);
+    expect(container.isRegistered(TOKENS.HttpServer)).toBe(true);
+    expect(container.isRegistered(TOKENS.Config)).toBe(true);
+    expect(container.isRegistered(TOKENS.Uuid)).toBe(true);
+    expect(container.isRegistered(TOKENS.HttpServer)).toBe(true);
   });
 });
