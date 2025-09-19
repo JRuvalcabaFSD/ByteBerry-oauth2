@@ -1,4 +1,14 @@
 import type { Config } from 'jest';
+import { pathsToModuleNameMapper } from 'ts-jest';
+import { createRequire } from 'module';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+const require = createRequire(import.meta.url);
+
+// Read tsconfig.json manually to avoid import attribute issue
+const tsconfig = JSON.parse(readFileSync(join(process.cwd(), 'tsconfig.json'), 'utf8'));
+const { compilerOptions } = tsconfig;
 
 const config: Config = {
   // Preset for TypeScript
@@ -66,17 +76,10 @@ const config: Config = {
   moduleFileExtensions: ['ts', 'js', 'json'],
 
   // Module name mapping for path aliases
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-    '^@application$': '<rootDir>/src/application/index.ts',
-    '^@config$': '<rootDir>/src/config/index.ts',
-    '^@container$': '<rootDir>/src/container/index.ts',
-    '^@domain$': '<rootDir>/src/domain/index.ts',
-    '^@infrastructure$': '<rootDir>/src/infrastructure/index.ts',
-    '^@interfaces$': '<rootDir>/src/interfaces/index.ts',
-    '^@presentation$': '<rootDir>/src/presentation/index.ts',
-    '^@shared$': '<rootDir>/src/shared/index.ts',
-  },
+  moduleNameMapper:
+    pathsToModuleNameMapper(compilerOptions.paths, {
+      prefix: '<rootDir>/',
+    }) || {},
 
   // Setup files after environment
   setupFilesAfterEnv: [],
