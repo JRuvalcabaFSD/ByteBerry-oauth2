@@ -88,7 +88,12 @@ export class Container implements IContainer {
 
       return instance;
     } catch (error) {
-      if (error instanceof Error) throw new DependencyCreationError(token, error);
+      if (error instanceof CircularDependencyError) {
+        throw error;
+      }
+      if (error instanceof Error) {
+        throw new DependencyCreationError(token, error);
+      }
       throw error;
     } finally {
       this.resolutionStack.delete(token);
