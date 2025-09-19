@@ -1,5 +1,5 @@
 import { bootstrapContainer, TOKENS } from '@/container';
-import { IClock, IEnvConfig, IHttpServer, IUuid } from '@/interfaces';
+import { IClock, IEnvConfig, IHttpServer, ILogger, IUuid } from '@/interfaces';
 
 /* eslint-disable no-console */
 (async () => {
@@ -16,31 +16,43 @@ import { IClock, IEnvConfig, IHttpServer, IUuid } from '@/interfaces';
 
 async function main(): Promise<void> {
   let httpServer: IHttpServer | null = null;
+  let logger: ILogger | null = null;
   try {
     const container = bootstrapContainer();
 
     const config = container.resolve<IEnvConfig>(TOKENS.Config);
     const clock = container.resolve<IClock>(TOKENS.Clock);
     const uuid = container.resolve<IUuid>(TOKENS.Uuid);
+    logger = container.resolve<ILogger>(TOKENS.Logger);
     httpServer = container.resolve<IHttpServer>(TOKENS.HttpServer);
 
-    console.log(`🚀 Starting OAuth2 Service on port ${config.port}`);
-    console.log(`📝 Environment: ${config.nodeEnv}`);
-    console.log(`🔍 Log Level: ${config.logLevel}`);
-    console.log(`📦 DI Container initialized with ${container.getRegisteredTokens().length} dependencies`);
-    console.log(`⏰ Current time: ${clock.now().toISOString()}`);
-    console.log(`🆔 Sample UUID: ${uuid.generate()}`);
+    logger.info('Starting OAuth2 Service', {
+      port: config.port,
+      environment: config.nodeEnv,
+      logLevel: config.logLevel,
+      dependencies: container.getRegisteredTokens().length,
+      sampleUuid: uuid.generate(),
+      startTime: clock.now().toISOString(),
+    });
 
     await httpServer.start();
-    console.log('✅ OAuth2 Service bootstrap completed');
+    logger.info('OAuth2 Service bootstrap completed successfully');
   } catch (error) {
-    console.error('❌ Bootstrap failed:', error);
+    if (logger) {
+      logger.error('Bootstrap failed', error as Error);
+    } else {
+      console.error('❌ Bootstrap failed:', error);
+    }
 
     if (httpServer) {
       try {
         await httpServer.stop();
       } catch (shutdownError) {
-        console.error('❌ Failed to stop HTTP server:', shutdownError);
+        if (logger) {
+          logger.error('Failed to stop HTTP server during cleanup', shutdownError as Error);
+        } else {
+          console.error('❌ Failed to stop HTTP server:', shutdownError);
+        }
       }
     }
 
@@ -49,14 +61,26 @@ async function main(): Promise<void> {
 
   // Graceful shutdown handlers
   const gracefulShutdown = async (signal: string) => {
-    console.log(`🛑 ${signal} received, shutting down gracefully`);
+    if (logger) {
+      logger.info('Graceful shutdown initiated', { signal });
+    } else {
+      console.log(`🛑 ${signal} received, shutting down gracefully`);
+    }
 
     if (httpServer) {
       try {
         await httpServer.stop();
-        console.log('✅ Graceful shutdown completed');
+        if (logger) {
+          logger.info('Graceful shutdown completed successfully');
+        } else {
+          console.log('✅ Graceful shutdown completed');
+        }
       } catch (error) {
-        console.error('❌ Error during shutdown:', error);
+        if (logger) {
+          logger.error('Error during graceful shutdown', error as Error);
+        } else {
+          console.error('❌ Error during shutdown:', error);
+        }
       }
     }
 

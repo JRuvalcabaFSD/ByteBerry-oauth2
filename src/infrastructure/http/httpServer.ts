@@ -2,11 +2,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import express from 'express';
 
-import { IEnvConfig, IHttpServer, IUuid } from '@/interfaces';
+import { IEnvConfig, IHttpServer, ILogger, IUuid } from '@/interfaces';
 import { Application } from 'express';
 import { createRequestIdMiddleware } from '@/infrastructure/http/middleware/requestId.middleware';
 import { securityHeadersMiddleware } from '@/infrastructure/http/middleware/security.middleware';
 import { errorHandlerMiddleware } from '@/infrastructure/http/middleware/erroHandler.middleware';
+import { createLoggingMiddleware } from '@/infrastructure/http/middleware/logging.middleware';
 
 /**
  * HTTP Server implementation using Express.js
@@ -19,6 +20,7 @@ export class HttpServer implements IHttpServer {
   private server: any;
   private readonly config: IEnvConfig;
   private readonly uuid: IUuid;
+  private readonly logger: ILogger;
   private isServerRunning = false;
 
   /**
@@ -27,9 +29,10 @@ export class HttpServer implements IHttpServer {
    * @param {IUuid} uuid
    * @memberof HttpServer
    */
-  constructor(config: IEnvConfig, uuid: IUuid) {
+  constructor(config: IEnvConfig, uuid: IUuid, logger: ILogger) {
     this.config = config;
     this.uuid = uuid;
+    this.logger = logger;
     this.app = express();
     this.setupMiddleware();
   }
@@ -41,6 +44,7 @@ export class HttpServer implements IHttpServer {
    */
   private setupMiddleware(): void {
     this.app.use(createRequestIdMiddleware(this.uuid));
+    this.app.use(createLoggingMiddleware(this.logger));
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(securityHeadersMiddleware());
