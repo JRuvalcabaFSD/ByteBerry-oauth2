@@ -26,7 +26,6 @@ describe('EnvConfig', () => {
       const { EnvConfig } = await import('@config');
 
       const config = new EnvConfig();
-      console.log(config);
 
       expect(config.port).toBe(3000);
       expect(config.nodeEnv).toBe('production');

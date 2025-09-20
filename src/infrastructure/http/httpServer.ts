@@ -61,17 +61,21 @@ export class HttpServer implements IHttpServer {
       try {
         this.server = this.app.listen(this.config.port, () => {
           this.isServerRunning = true;
-          console.log(`🚀 HTTP Server started on port ${this.config.port}`);
-          console.log(`📝 Environment: ${this.config.nodeEnv}`);
+          this.logger.info('HTTP Server started', {
+            port: this.config.port,
+            environment: this.config.nodeEnv,
+          });
           resolve();
         });
 
         this.server.on('error', (error: Error) => {
           this.isServerRunning = false;
+          this.logger.error('HTTP Server start failed', error);
           reject(error);
         });
       } catch (error) {
         this.isServerRunning = false;
+        this.logger.error('HTTP Server initialization failed', error as Error);
         reject(error);
       }
     });
@@ -92,9 +96,10 @@ export class HttpServer implements IHttpServer {
       this.server.close((error?: Error) => {
         this.isServerRunning = false;
         if (error) {
+          this.logger.error('HTTP Server stop failed', error);
           reject(error);
         } else {
-          console.log('🛑 HTTP Server stopped gracefully');
+          this.logger.info('HTTP Server stopped gracefully');
           resolve();
         }
       });

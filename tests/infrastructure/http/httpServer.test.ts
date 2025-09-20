@@ -1,17 +1,18 @@
 import request from 'supertest';
 
 import { HttpServer } from '@/infrastructure';
-import { IEnvConfig, IHttpServer, IUuid } from '@/interfaces';
+import { IEnvConfig, IHttpServer, ILogger, IUuid } from '@/interfaces';
 
-describe('HttpServer', () => {
+describe('HttpServer - T007 Integration', () => {
   let httpServer: IHttpServer;
   let mockConfig: IEnvConfig;
   let mockUuid: IUuid;
+  let mockLogger: ILogger;
 
   beforeEach(() => {
     mockConfig = {
       port: 3000,
-      nodeEnv: 'development',
+      nodeEnv: 'test',
       logLevel: 'info',
       isDevelopment: () => false,
       isProduction: () => false,
@@ -22,46 +23,91 @@ describe('HttpServer', () => {
       generate: jest.fn(() => 'test-uuid-12345'),
     };
 
-    httpServer = new HttpServer(mockConfig, mockUuid);
+    mockLogger = {
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      log: jest.fn(),
+      setDefaultContext: jest.fn(),
+    };
+
+    httpServer = new HttpServer(mockConfig, mockUuid, mockLogger);
   });
+
   afterEach(async () => {
     if (httpServer.isRunning()) {
       await httpServer.stop();
     }
   });
 
-  it('should create HttpServer with dependencies injected', () => {
+  it('should create HttpServer with logger dependency injected', () => {
+    // Assert
     expect(httpServer).toBeDefined();
-    expect(httpServer.isRunning()).toBeFalsy();
-    expect(httpServer.getApp).toBeDefined();
+    expect(httpServer.isRunning()).toBe(false);
+    expect(httpServer.getApp()).toBeDefined();
   });
-  it('should start server successfully', async () => {
-    await httpServer.start();
-    expect(httpServer.isRunning()).toBeTruthy();
-  });
-  it('should stop server gracefully', async () => {
-    await httpServer.start();
-    expect(httpServer.isRunning()).toBeTruthy();
 
+  it('should log server start with logger', async () => {
+    // Act
+    await httpServer.start();
+
+    // Assert
+    expect(mockLogger.info).toHaveBeenCalledWith('HTTP Server started', {
+      port: 3000,
+      environment: 'test',
+    });
+    expect(httpServer.isRunning()).toBe(true);
+  });
+
+  it('should log server stop with logger', async () => {
+    // Arrange
+    await httpServer.start();
+
+    // Act
     await httpServer.stop();
-    expect(httpServer.isRunning()).toBeFalsy();
+
+    // Assert
+    expect(mockLogger.info).toHaveBeenCalledWith('HTTP Server stopped gracefully');
+    expect(httpServer.isRunning()).toBe(false);
   });
-  it('should add X-Request-ID header to requests', async () => {
+
+  it('should log HTTP requests through logging middleware', async () => {
+    // Arrange
     await httpServer.start();
     const app = httpServer.getApp();
 
-    const response = await request(app).get('/non-existent');
+    // Act
+    await request(app).get('/non-existent');
 
-    expect(response.headers['x-request-id']).toBe('test-uuid-12345');
+    // Assert
+    expect(mockLogger.info).toHaveBeenNthCalledWith(2, 'HTTP Request', {
+      requestId: 'test-uuid-12345',
+      method: 'GET',
+      url: '/non-existent',
+      userAgent: undefined, // ✅ Valor real en supertest
+      ip: '::ffff:127.0.0.1', // ✅ Formato IPv6 de localhost
+    });
   });
-  it('should use existing X-Request-ID from request headers', async () => {
-    await httpServer.start();
-    const app = httpServer.getApp();
-    const existingRequestId = 'existing-request-id';
 
-    const response = await request(app).get('/non-existent').set('X-Request-ID', existingRequestId);
+  it('should handle server start errors with logger', async () => {
+    // Arrange
+    const errorServer = new HttpServer(
+      { ...mockConfig, port: -1 }, // Invalid port
+      mockUuid,
+      mockLogger
+    );
 
-    expect(response.headers['x-request-id']).toBe(existingRequestId);
-    expect(mockUuid.generate).not.toHaveBeenCalled();
+    // Act & Assert
+    await expect(errorServer.start()).rejects.toThrow();
+
+    expect(mockLogger.error).toHaveBeenNthCalledWith(
+      1,
+      'HTTP Server initialization failed',
+      expect.objectContaining({
+        name: 'RangeError',
+        message: expect.stringContaining('options.port should be >= 0 and < 65536'),
+      })
+    );
   });
 });

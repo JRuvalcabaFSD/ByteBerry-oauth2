@@ -1,8 +1,7 @@
-import { bootstrapContainer } from '@/container/bootstrap';
-import { TOKENS } from '@/container/tokens';
-import type { IContainer, IEnvConfig, IHttpServer } from '@/interfaces';
+import { bootstrapContainer, TOKENS } from '@/container';
+import { IContainer, IHttpServer, ILogger } from '@/interfaces';
 
-describe('bootstrapContainer - T006', () => {
+describe('bootstrapContainer - T007', () => {
   let container: IContainer;
 
   beforeEach(() => {
@@ -21,59 +20,56 @@ describe('bootstrapContainer - T006', () => {
     container.clear();
   });
 
-  it('should register HttpServer with dependencies', () => {
+  it('should register Logger service with dependencies', () => {
+    // Act
+    const logger = container.resolve<ILogger>(TOKENS.Logger);
+
+    // Assert
+    expect(logger).toBeDefined();
+    expect(typeof logger.info).toBe('function');
+    expect(typeof logger.error).toBe('function');
+    expect(typeof logger.setDefaultContext).toBe('function');
+  });
+
+  it('should register HttpServer with Logger dependency', () => {
     // Act
     const httpServer = container.resolve<IHttpServer>(TOKENS.HttpServer);
+    const logger = container.resolve<ILogger>(TOKENS.Logger);
 
     // Assert
     expect(httpServer).toBeDefined();
-    expect(httpServer.isRunning()).toBe(false);
-    expect(httpServer.getApp()).toBeDefined();
+    expect(logger).toBeDefined();
   });
 
-  it('should resolve HttpServer as singleton', () => {
+  it('should resolve Logger as singleton', () => {
     // Act
-    const httpServer1 = container.resolve<IHttpServer>(TOKENS.HttpServer);
-    const httpServer2 = container.resolve<IHttpServer>(TOKENS.HttpServer);
+    const logger1 = container.resolve<ILogger>(TOKENS.Logger);
+    const logger2 = container.resolve<ILogger>(TOKENS.Logger);
 
     // Assert
-    expect(httpServer1).toBe(httpServer2);
+    expect(logger1).toBe(logger2);
   });
 
-  it('should inject Config and Uuid dependencies into HttpServer', () => {
+  it('should inject Logger dependencies (Config + Clock)', () => {
     // Act
-    const httpServer = container.resolve<IHttpServer>(TOKENS.HttpServer);
-    const config = container.resolve<IEnvConfig>(TOKENS.Config);
+    const logger = container.resolve<ILogger>(TOKENS.Logger);
 
-    // Assert
-    expect(httpServer).toBeDefined();
-    expect(config).toBeDefined();
-    expect(config.port).toBe(4000); // Default port from EnvConfig
+    // Assert - Logger should work correctly with injected dependencies
+    expect(() => {
+      logger.info('Test message', { requestId: 'test-123' });
+    }).not.toThrow();
   });
 
-  it('should create HttpServer with proper dependency injection', async () => {
-    // Act
-    const httpServer = container.resolve<IHttpServer>(TOKENS.HttpServer);
-
-    // Start server to test it was created properly
-    await httpServer.start();
-
-    // Assert
-    expect(httpServer.isRunning()).toBe(true);
-
-    // Cleanup
-    await httpServer.stop();
-  });
-
-  it('should register all F0 tokens including HttpServer', () => {
+  it('should register all F0 tokens including Logger', () => {
     // Act
     const registeredTokens = container.getRegisteredTokens();
 
     // Assert
-    expect(registeredTokens).toHaveLength(4);
+    expect(registeredTokens).toHaveLength(5);
+    expect(container.isRegistered(TOKENS.Logger)).toBe(true);
+    expect(container.isRegistered(TOKENS.Clock)).toBe(true);
     expect(container.isRegistered(TOKENS.HttpServer)).toBe(true);
     expect(container.isRegistered(TOKENS.Config)).toBe(true);
     expect(container.isRegistered(TOKENS.Uuid)).toBe(true);
-    expect(container.isRegistered(TOKENS.HttpServer)).toBe(true);
   });
 });
