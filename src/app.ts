@@ -1,4 +1,5 @@
-import { createConfig } from '@/config';
+import { bootstrapContainer, TOKENS } from '@/container';
+import { IClock, IConfig, IUuid } from '@/interfaces';
 
 /* eslint-disable no-console */
 (async () => {
@@ -9,7 +10,15 @@ import { createConfig } from '@/config';
 })();
 
 async function main(): Promise<void> {
-  const config = createConfig();
+  const container = bootstrapContainer();
 
-  console.log('Service init', { ...config });
+  const config = container.resolve<IConfig>(TOKENS.Config);
+  const clock = container.resolve<IClock>(TOKENS.Clock);
+  const uuid = container.resolve<IUuid>(TOKENS.Uuid);
+
+  console.log('Service running', {
+    config,
+    timestamp: clock.timestamp(),
+    uuidExample: uuid.generate(),
+  });
 }
