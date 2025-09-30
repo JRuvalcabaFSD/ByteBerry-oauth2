@@ -119,7 +119,8 @@ export class Container implements IContainer {
         throw error;
       }
 
-      throw new ContainerError(`Failed to resolve service '${token.description}': ${(error as Error).message}`, token);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new ContainerError(`Failed to resolve service '${token.description}': ${errorMessage}`, token);
     } finally {
       this.resolutionStack.pop();
     }

@@ -21,6 +21,7 @@ import { ContainerCreationError } from '@/shared';
  * const config = container.resolve(TOKENS.Config);
  * ```
  */
+
 export function bootstrapContainer(): IContainer {
   const container = new Container();
 

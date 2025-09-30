@@ -22,7 +22,7 @@ describe('Config', () => {
   });
 
   describe('Constructor and Initialization', () => {
-    it('should_LoadDefaultValues_When_NoEnvVariablesProvided', async () => {
+    it('should load default values when no env variables provided', async () => {
       const { Config } = await import('@config');
       const config = Config.getConfig();
 
@@ -34,11 +34,11 @@ describe('Config', () => {
       expect(config.serviceName).toBe('byteberry-oauth2');
     });
   });
-  it('should_LoadCustomValues_When_EnvVariablesProvided', async () => {
+  it('should load custom values when env variables provided', async () => {
     process.env.PORT = '5000';
     process.env.NODE_ENV = 'production';
     process.env.LOG_LEVEL = 'error';
-    process.env.SERVICE_NAME = 'custom-service';
+    process.env.SERVICE_NAME = 'custom service';
 
     const { Config } = await import('@config');
     const config = Config.getConfig();
@@ -49,12 +49,12 @@ describe('Config', () => {
     expect(config.port).toBe(5000);
     expect(config.nodeEnv).toBe('production');
     expect(config.logLevel).toBe('error');
-    expect(config.serviceName).toBe('custom-service');
+    expect(config.serviceName).toBe('custom service');
     expect(config.isProduction()).toBeTruthy();
     expect(config.isDevelopment()).toBeFalsy();
     expect(config.isTest()).toBeFalsy();
   });
-  it('should_CallDotenvConfig_When_Instantiated', async () => {
+  it('should call dotenv config when instantiated', async () => {
     const dotenv = await import('dotenv');
 
     const { Config } = await import('@config');
@@ -62,35 +62,35 @@ describe('Config', () => {
 
     expect(dotenv.config).toHaveBeenCalledWith({ override: false });
   });
-  it('should_UsePackageVersion_When_Available', async () => {
+  it('should use package version when available', async () => {
     const { Config } = await import('@config');
     const config = Config.getConfig();
 
     expect(config.version).toBe('1.2.3');
   });
-  it('should_ThrowConfigError_When_InvalidPortProvided', async () => {
-    process.env.PORT = 'invalid-port';
+  it('should throw config error when invalid port provided', async () => {
+    process.env.PORT = 'invalid port';
 
     const { Config } = await import('@config');
 
     expect(() => Config.getConfig()).toThrow(/PORT/);
   });
-  it('should_ThrowConfigError_When_InvalidNodeEnvProvided', async () => {
-    process.env.NODE_ENV = 'invalid-port';
+  it('should throw config error when invalid node env provided', async () => {
+    process.env.NODE_ENV = 'invalid port';
 
     const { Config } = await import('@config');
 
     expect(() => Config.getConfig()).toThrow(/NODE_ENV/);
   });
-  it('should_ThrowConfigError_When_InvalidLogLevelProvided', async () => {
-    process.env.LOG_LEVEL = 'invalid-port';
+  it('should throw config error when invalid log level provided', async () => {
+    process.env.LOG_LEVEL = 'invalid port';
 
     const { Config } = await import('@config');
 
     expect(() => Config.getConfig()).toThrow(/LOG_LEVEL/);
   });
-  it('should_IncludeContextInError_When_ValidationFails', async () => {
-    process.env.PORT = 'invalid-port';
+  it('should include context in error when validation fails', async () => {
+    process.env.PORT = 'invalid port';
     const { ConfigError } = await import('@shared');
 
     // When & Then
@@ -100,11 +100,11 @@ describe('Config', () => {
       fail('Should have thrown ConfigError');
     } catch (error) {
       expect(error).toBeInstanceOf(ConfigError);
-      expect((error as InstanceType<typeof ConfigError>).context).toHaveProperty('providedPort', 'invalid-port');
+      expect((error as InstanceType<typeof ConfigError>).context).toHaveProperty('providedPort', 'invalid port');
       expect((error as InstanceType<typeof ConfigError>).context).toHaveProperty('originalError');
     }
   });
-  it('should_CreateNewInstance_When_ResetInstanceCalled', async () => {
+  it('should create new instance when reset instance called', async () => {
     const { Config } = await import('@config');
 
     const instance1 = Config.getConfig();
@@ -119,7 +119,7 @@ describe('Config', () => {
     expect(instance2.port).toBe(5001);
   });
   describe('getSummary', () => {
-    it('should_ReturnCompleteConfigSummary_When_Called', async () => {
+    it('should return complete config summary when called', async () => {
       // Given
       process.env.PORT = '5000';
       process.env.NODE_ENV = 'production';
@@ -141,7 +141,7 @@ describe('Config', () => {
       });
     });
 
-    it('should_ReturnSerializableObject_When_Called', async () => {
+    it('should return serializable object when called', async () => {
       // When
       const { Config } = await import('@config');
       const config = Config.getConfig();
@@ -153,7 +153,7 @@ describe('Config', () => {
   });
 
   describe('createConfig Factory', () => {
-    it('should_ReturnConfigInstance_When_Called', async () => {
+    it('should return config instance when called', async () => {
       // When
       const { createConfig, Config } = await import('@config');
       const config = createConfig();
@@ -162,7 +162,7 @@ describe('Config', () => {
       expect(config).toBeInstanceOf(Config);
     });
 
-    it('should_ReturnSameSingletonInstance_When_CalledMultipleTimes', async () => {
+    it('should return same singleton instance when called multiple times', async () => {
       // When
       const { createConfig } = await import('@config');
       const config1 = createConfig();
@@ -173,7 +173,7 @@ describe('Config', () => {
     });
   });
   describe('Version Fallback', () => {
-    it('should_UseFallbackVersion_When_BothNpmPackageVersionAndPkgVersionUndefined', async () => {
+    it('should use fallback version when both npm package version and pkg version undefined', async () => {
       // Given
       // Mock package.json para retornar version undefined
       jest.mock('../../../package.json', () => ({}), { virtual: true });
@@ -193,7 +193,7 @@ describe('Config', () => {
       expect(config.version).toBe('0.0.0');
     });
 
-    it('should_UseNpmPackageVersion_When_Available', async () => {
+    it('should use npm package version when available', async () => {
       // Given
       process.env.npm_package_version = '2.3.4';
       const { Config } = await import('@config');
@@ -206,7 +206,7 @@ describe('Config', () => {
       expect(config.version).toBe('2.3.4');
     });
 
-    it('should_PreferNpmPackageVersion_When_BothAvailable', async () => {
+    it('should prefer npm package version when both available', async () => {
       // Given
       process.env.npm_package_version = '2.3.4';
       // pkg.version ya está mockeado como '1.2.3' en el beforeAll
@@ -220,15 +220,15 @@ describe('Config', () => {
       expect(config.version).toBe('2.3.4');
     });
   });
-  describe('Error Handling - Non-Error Objects', () => {
-    it('should_HandleNonErrorObject_When_EnvVarThrowsNonStandardError', async () => {
+  describe('Error Handling   Non Error Objects', () => {
+    it('should handle non error object when env var throws non standard error', async () => {
       // Given
       const mockGet = jest.fn().mockImplementation(() => {
-        // Simular que env-var lanza un objeto que no es Error
+        // Simular que env var lanza un objeto que no es Error
         throw { code: 'CUSTOM_ERROR', details: 'Something went wrong' };
       });
 
-      // Mock del módulo env-var
+      // Mock del módulo env var
       jest.doMock('env-var', () => ({
         get: mockGet,
       }));
