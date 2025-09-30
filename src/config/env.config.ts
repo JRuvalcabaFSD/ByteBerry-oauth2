@@ -79,15 +79,15 @@ export class Config implements IConfig {
       this.port = get('PORT').default(4000).asPortNumber();
       this.nodeEnv = get('NODE_ENV').default('development').asEnum(['development', 'production', 'test']) as NodeEnv;
       this.logLevel = get('LOG_LEVEL').default('info').asEnum(['debug', 'info', 'warn', 'error']) as LogLevel;
-      this.serviceName = get('SERVICE_NAME').default('byteberry-oauth2').asString();
-      this.version = pkg.version || '0.0.0';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      throw new ConfigError(`Failed to validate environment variables: ${error.message}`, {
+      this.serviceName = get('SERVICE_NAME').default('byteberry-oauth2').required().asString();
+      this.version = process.env.npm_package_version || pkg.version || '0.0.0';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new ConfigError(`Failed to validate environment variables: ${errorMessage}`, {
         providedPort: process.env.PORT,
         providedNodeEnv: process.env.NODE_ENV,
         providedLogLevel: process.env.LOG_LEVEL,
-        originalError: error.message,
+        originalError: errorMessage,
       });
     }
   }
