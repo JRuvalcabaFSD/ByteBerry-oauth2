@@ -1,7 +1,7 @@
 import { createConfig } from '@/config';
 import { Container } from '@/container/container';
 import { criticalServices, TOKENS } from '@/container/tokens';
-import { createClockService, createUuidService } from '@/infrastructure';
+import { createClockService, createUuidService, createWinstonLoggerService } from '@/infrastructure';
 import { IContainer } from '@/interfaces';
 import { ContainerCreationError } from '@/shared';
 
@@ -28,7 +28,7 @@ export function bootstrapContainer(): IContainer {
   container.register(TOKENS.Config, createConfig);
   container.register(TOKENS.Clock, createClockService);
   container.register(TOKENS.Uuid, createUuidService);
-  //TODO Logger
+  container.register(TOKENS.Logger, createWinstonLoggerService);
   //TODO HealthController
   //TODO HttpServer
 

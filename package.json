@@ -70,6 +70,8 @@
   },
   "dependencies": {
     "dotenv": "^16.6.1",
-    "env-var": "^7.5.0"
+    "env-var": "^7.5.0",
+    "winston": "^3.18.3",
+    "winston-daily-rotate-file": "^5.0.0"
   }
 }
