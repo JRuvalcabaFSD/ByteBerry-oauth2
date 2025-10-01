@@ -1,3 +1,4 @@
 //Errors
 export * from './errors/config.errors';
 export * from './errors/container.errors';
+export * from './errors/bootstrap.errors';

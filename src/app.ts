@@ -1,28 +1,33 @@
-import { bootstrapContainer, TOKENS } from '@/container';
-import { IClock, IConfig, IHttpServer, ILogger, IUuid } from '@/interfaces';
+import { bootstrap } from '@/bootstrap/bootstrap';
+import { TOKENS } from '@/container';
+import { IConfig, ILogger } from '@/interfaces';
 
 /* eslint-disable no-console */
 (async () => {
   await main().catch(error => {
-    console.error(error.message);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Application failed to start:', errorMessage);
     process.exit(1);
   });
 })();
 
 async function main(): Promise<void> {
-  const container = bootstrapContainer();
+  const { container } = await bootstrap();
 
   const config = container.resolve<IConfig>(TOKENS.Config);
-  const clock = container.resolve<IClock>(TOKENS.Clock);
-  const uuid = container.resolve<IUuid>(TOKENS.Uuid);
   const logger = container.resolve<ILogger>(TOKENS.Logger);
-  const httpServer = container.resolve<IHttpServer>(TOKENS.HttpServer);
 
-  logger.info('Service running', {
-    config,
-    timestamp: clock.timestamp(),
-    uuidExample: uuid.generate(),
+  logger.info(`${config.serviceName} Service initialized successfully`, {
+    service: config.serviceName,
+    version: config.version,
+    environment: config.nodeEnv,
+    port: config.port,
+    phase: 'F0',
+    features: {
+      healthEndpoints: false,
+      logging: true,
+      gracefulShutdown: true,
+      containerDI: true,
+    },
   });
-
-  httpServer.start();
 }
