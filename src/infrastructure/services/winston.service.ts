@@ -65,7 +65,6 @@ import { IClock, IConfig, ILogContext, ILogEntry, ILogger, LogLevel } from '@/in
 
 export class WinstonLoggerService implements ILogger {
   private readonly winston: WinstonLogger;
-  // private readonly serviceName: string;
   private readonly defaultContext: ILogContext;
 
   /**
@@ -177,8 +176,12 @@ export class WinstonLoggerService implements ILogger {
       logEntry.requestId = mergesContext.requestId;
     }
 
-    if (Object.keys(mergesContext).filter(k => k !== 'service').length > 0) {
-      logEntry.context = mergesContext;
+    const contextWithoutService = Object.entries(mergesContext)
+      .filter(([key]) => key !== 'service')
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+    if (Object.keys(contextWithoutService).length > 0) {
+      logEntry.context = contextWithoutService;
     }
 
     this.winston.log(level, logEntry as ILogEntry);
@@ -266,7 +269,7 @@ export class WinstonLoggerService implements ILogger {
       transports.push(
         new DailyRotateFile({
           filename: 'logs/error-%DATE%.log',
-          datePattern: 'YYYY-MMM-DD',
+          datePattern: 'YYYY-MM-DD',
           level: 'error',
           handleExceptions: false,
           maxSize: '20m',
@@ -278,7 +281,7 @@ export class WinstonLoggerService implements ILogger {
       transports.push(
         new DailyRotateFile({
           filename: 'logs/combined-%DATE%.log',
-          datePattern: 'YYY-MMM-DD',
+          datePattern: 'YYYY-MM-DD',
           handleExceptions: false,
           maxSize: '20m',
           maxFiles: '14d',
