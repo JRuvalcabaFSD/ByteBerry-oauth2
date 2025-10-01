@@ -14,7 +14,7 @@ import cors, { CorsOptions } from 'cors';
  * - Common headers (Content-Type, Authorization, X-Request-ID)
  * - Success status 200 for OPTIONS requests
  */
-export function createCoorsMiddleware(config: IConfig) {
+export function createCORSMiddleware(config: IConfig) {
   const corsOptions: CorsOptions = {
     origin: config.corsOrigins,
     credentials: true,

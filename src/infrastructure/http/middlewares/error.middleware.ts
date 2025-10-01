@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import { ILogger } from '@/interfaces';
+import { IConfig, ILogger } from '@/interfaces';
 
 /**
  * Creates an Express error handling middleware that logs errors and returns standardized error responses.
  *
  * @param logger - The logger instance used to log error details
+ * @param config - The configuration instance to determine the environment (development or production)
  * @returns An Express error middleware function that handles unhandled errors
  *
  * @remarks
@@ -18,7 +19,7 @@ import { ILogger } from '@/interfaces';
  * app.use(errorMiddleware);
  * ```
  */
-export function createErrorMiddleware(logger: ILogger) {
+export function createErrorMiddleware(logger: ILogger, config: IConfig) {
   return (error: Error, req: Request, res: Response, _next: NextFunction): void => {
     const requestId = req.requestId || 'unknown';
 
@@ -30,11 +31,9 @@ export function createErrorMiddleware(logger: ILogger) {
       url: req.originalUrl || req.url,
     });
 
-    const isDevelopment = process.env.NODE_ENV === 'development';
-
     res.status(500).json({
       error: 'Internal Server Error',
-      message: isDevelopment ? error.message : 'Something went wrong',
+      message: config.isDevelopment() ? error.message : 'Something went wrong',
       requestId,
       timestamp: new Date().toISOString(),
     });

@@ -3,7 +3,7 @@ import express, { Application } from 'express';
 
 import { IClock, IConfig, IHttpServer, ILogger, IUuid, ServerInfo } from '@/interfaces';
 import {
-  createCoorsMiddleware,
+  createCORSMiddleware,
   createErrorMiddleware,
   createLoggerMiddleware,
   createRequestIdMiddleware,
@@ -83,7 +83,7 @@ export class HttpServer implements IHttpServer {
         });
 
         this.server.on('error', (error: Error) => {
-          this.logger.error('Http Server filed to start', {
+          this.logger.error('Http Server failed to start', {
             error: error.message,
             port: this.config.port,
           });
@@ -188,7 +188,7 @@ export class HttpServer implements IHttpServer {
     this.app.set('trust proxy', true);
     this.app.disable('x-powered-by');
     this.app.use(createSecurityMiddleware());
-    this.app.use(createCoorsMiddleware(this.config));
+    this.app.use(createCORSMiddleware(this.config));
     this.app.use(createRequestIdMiddleware(this.uuid));
     this.app.use(createLoggerMiddleware(this.logger, this.clock));
     this.app.use(express.json({ limit: '10mb' }));
@@ -212,8 +212,8 @@ export class HttpServer implements IHttpServer {
     //TODO implement health route
     this.app.get('/', (req, res) => {
       res.json({
-        service: 'bff',
-        version: '0.0.0',
+        service: this.config.serviceName,
+        version: this.config.version,
         status: 'running',
         timestamp: this.clock.isoString(),
         requestId: req.requestId,
@@ -247,6 +247,6 @@ export class HttpServer implements IHttpServer {
    */
 
   private setupErrorHandlers() {
-    this.app.use(createErrorMiddleware(this.logger));
+    this.app.use(createErrorMiddleware(this.logger, this.config));
   }
 }

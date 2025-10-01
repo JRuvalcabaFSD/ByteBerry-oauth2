@@ -33,7 +33,9 @@ export function createLoggerMiddleware(logger: ILogger, clock: IClock) {
   return (req: Request, res: Response, next: NextFunction): void => {
     const startTime = clock.timestamp();
 
-    if (!req.requestId) throw new Error('Request ID middleware must be applied before logging middleware');
+    if (!req.requestId) {
+      return next(new Error('Request ID middleware must be applied before logging middleware'));
+    }
 
     req.logger = logger.child({
       requestId: req.requestId,
@@ -53,7 +55,7 @@ export function createLoggerMiddleware(logger: ILogger, clock: IClock) {
     });
 
     const originalEnd = res.end;
-    res.end = function (chuck?: any, encoding?: any, cb?: any): Response {
+    res.end = function (chunk?: any, encoding?: any, cb?: any): Response {
       const duration = clock.timestamp() - startTime;
 
       const context = {
@@ -70,7 +72,7 @@ export function createLoggerMiddleware(logger: ILogger, clock: IClock) {
         req.logger?.info('Request completed', context);
       }
 
-      return originalEnd.call(res, chuck, encoding, cb);
+      return originalEnd.call(res, chunk, encoding, cb);
     } as typeof originalEnd;
 
     next();
