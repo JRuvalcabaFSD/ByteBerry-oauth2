@@ -1,2 +1,2 @@
-import * from "./bootstrap"
-import * from "./bootstrap.shutdown"
+export * from './bootstrap';
+export * from './bootstrap.shutdown';

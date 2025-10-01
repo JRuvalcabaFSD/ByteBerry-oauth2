@@ -1,4 +1,4 @@
-import { bootstrap } from '@/bootstrap/bootstrap';
+import { bootstrap } from '@/bootstrap';
 import { TOKENS } from '@/container';
 import { IConfig, ILogger } from '@/interfaces';
 

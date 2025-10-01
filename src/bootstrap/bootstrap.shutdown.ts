@@ -101,16 +101,16 @@ export class GracefulShutdown {
    * @param {CleanupFunction} cleanup - The cleanup function to register
    * @memberof GracefulShutdown
    */
-  public registerCleanup = (cleanup: CleanupFunction): void => {
+  public registerCleanup(cleanup: CleanupFunction): void {
     this.cleanupFunctions.push(cleanup);
-  };
+  }
 
   /**
    * Initiate the shutdown process
    * @return {*}  {Promise<void>}
    * @memberof GracefulShutdown
    */
-  public shutdown = async (): Promise<void> => {
+  public async shutdown(): Promise<void> {
     if (this.isShuttingDown) {
       return this.shutdownPromise || Promise.resolve();
     }
@@ -118,7 +118,7 @@ export class GracefulShutdown {
     this.isShuttingDown = true;
     this.shutdownPromise = this.performShutdown();
     return this.shutdownPromise;
-  };
+  }
 
   /**
    * Perform the registered cleanup functions
@@ -126,7 +126,7 @@ export class GracefulShutdown {
    * @return {*}  {Promise<void>}
    * @memberof GracefulShutdown
    */
-  private performShutdown = async (): Promise<void> => {
+  private async performShutdown(): Promise<void> {
     this.logger.info('Starting cleanup process...', {
       cleanupFunctions: this.cleanupFunctions.length,
     });
@@ -146,7 +146,7 @@ export class GracefulShutdown {
 
     await Promise.allSettled(cleanupPromises);
     this.logger.info('Cleanup process completed');
-  };
+  }
 
   /**
    * Setup signal handlers for graceful shutdown

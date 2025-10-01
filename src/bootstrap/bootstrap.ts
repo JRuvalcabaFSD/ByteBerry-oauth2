@@ -1,6 +1,6 @@
-import { GracefulShutdown } from '@/bootstrap/bootstrap.shutdown';
+import { GracefulShutdown } from '@/bootstrap';
 import { bootstrapContainer, criticalServices, TOKENS } from '@/container';
-import { IClock, IContainer, IHttpServer, ILogger } from '@/interfaces';
+import { IContainer, IHttpServer, ILogger } from '@/interfaces';
 import { BootstrapError } from '@/shared';
 
 /**
@@ -43,7 +43,7 @@ export interface BootstrapResult {
  */
 export async function bootstrap(): Promise<BootstrapResult> {
   let container: IContainer;
-  let logger: ILogger | null = null;
+  let logger: ILogger | undefined;
   let httpServer: IHttpServer;
 
   try {
@@ -56,8 +56,9 @@ export async function bootstrap(): Promise<BootstrapResult> {
     logger.info('Application bootstrap started');
     const shutdown = new GracefulShutdown(logger);
 
+    const loggerInstance = logger;
     shutdown.registerCleanup(async () => {
-      logger!.info('Stopping HTTP server...');
+      loggerInstance.info('Stopping HTTP server...');
       await httpServer.stop();
     });
 
@@ -69,10 +70,15 @@ export async function bootstrap(): Promise<BootstrapResult> {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     if (logger) {
-      logger.error('Application bootstrap failed', {
-        error: errorMessage,
-        stack: error instanceof Error ? error.stack : undefined,
-      });
+      try {
+        logger.error('Application bootstrap failed', {
+          error: errorMessage,
+          stack: error instanceof Error ? error.stack : undefined,
+        });
+      } catch {
+        // eslint-disable-next-line no-console
+        console.error('Logger failed:', errorMessage);
+      }
     } else {
       // eslint-disable-next-line no-console
       console.error('Bootstrap failed before logger was available:', errorMessage);
