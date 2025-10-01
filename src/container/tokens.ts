@@ -60,8 +60,8 @@ export const TOKENS = {
 export const criticalServices = [
   { token: TOKENS.Clock, name: 'Clock' },
   { token: TOKENS.Config, name: 'Config' },
-  // TODO { token: TOKENS.HealthController, name: 'HealthController' },
-  // TODO { token: TOKENS.HttpServer, name: 'HttpServer' },
-  // TODO { token: TOKENS.Logger, name: 'Logger' },
   { token: TOKENS.Uuid, name: 'Uuid' },
+  { token: TOKENS.HttpServer, name: 'HttpServer' },
+  { token: TOKENS.Logger, name: 'Logger' },
+  // TODO { token: TOKENS.HealthController, name: 'HealthController' },
 ];

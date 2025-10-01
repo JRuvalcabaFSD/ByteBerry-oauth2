@@ -13,7 +13,7 @@ describe('Config', () => {
 
   beforeEach(() => {
     jest.resetModules();
-    process.env = {};
+    process.env = { CORS_ORIGINS: '*' };
   });
 
   afterEach(() => {

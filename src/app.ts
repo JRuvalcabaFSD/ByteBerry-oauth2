@@ -1,5 +1,5 @@
 import { bootstrapContainer, TOKENS } from '@/container';
-import { IClock, IConfig, ILogger, IUuid } from '@/interfaces';
+import { IClock, IConfig, IHttpServer, ILogger, IUuid } from '@/interfaces';
 
 /* eslint-disable no-console */
 (async () => {
@@ -16,10 +16,13 @@ async function main(): Promise<void> {
   const clock = container.resolve<IClock>(TOKENS.Clock);
   const uuid = container.resolve<IUuid>(TOKENS.Uuid);
   const logger = container.resolve<ILogger>(TOKENS.Logger);
+  const httpServer = container.resolve<IHttpServer>(TOKENS.HttpServer);
 
   logger.info('Service running', {
     config,
     timestamp: clock.timestamp(),
     uuidExample: uuid.generate(),
   });
+
+  httpServer.start();
 }

@@ -1,5 +1,5 @@
 import { TOKENS } from '@/container';
-import { WinstonLoggerService } from '@/infrastructure';
+import { HttpServer, WinstonLoggerService } from '@/infrastructure';
 import { IContainer } from '@/interfaces';
 
 /**
@@ -15,4 +15,14 @@ import { IContainer } from '@/interfaces';
 
 export function createWinstonLoggerService(c: IContainer): WinstonLoggerService {
   return new WinstonLoggerService(c.resolve(TOKENS.Config), c.resolve(TOKENS.Clock));
+}
+
+/**
+ * Factory function that creates and configures an HttpServer instance.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies
+ * @returns A new HttpServer instance with resolved dependencies for Config, Logger, Uuid, and Clock
+ */
+export function createHttpServer(c: IContainer): HttpServer {
+  return new HttpServer(c.resolve(TOKENS.Config), c.resolve(TOKENS.Logger), c.resolve(TOKENS.Uuid), c.resolve(TOKENS.Clock));
 }
