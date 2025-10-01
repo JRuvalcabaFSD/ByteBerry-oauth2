@@ -1,9 +1,10 @@
-import { createConfig } from '@/config';
-import { Container } from '@/container/container';
+import { createClockService, createUuidService } from '@/infrastructure';
 import { criticalServices, TOKENS } from '@/container/tokens';
-import { createClockService, createUuidService, createWinstonLoggerService } from '@/infrastructure';
-import { IContainer } from '@/interfaces';
+import { createWinstonLoggerService } from '@/container';
+import { Container } from '@/container/container';
 import { ContainerCreationError } from '@/shared';
+import { IContainer } from '@/interfaces';
+import { createConfig } from '@/config';
 
 /**
  * Creates and configures a dependency injection container with all required services.

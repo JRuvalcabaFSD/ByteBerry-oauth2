@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import winston, { Logger as WinstonLogger } from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
-import { IClock, IConfig, IContainer, ILogContext, ILogEntry, ILogger, LogLevel } from '@/interfaces';
-import { TOKENS } from '@/container';
+import { IClock, IConfig, ILogContext, ILogEntry, ILogger, LogLevel } from '@/interfaces';
 
 /**
  * Provides a thin, opinionated wrapper around Winston for structured, contextual,
@@ -179,7 +177,7 @@ export class WinstonLoggerService implements ILogger {
       logEntry.requestId = mergesContext.requestId;
     }
 
-    if (Object.keys(mergesContext).length > 0) {
+    if (Object.keys(mergesContext).filter(k => k !== 'service').length > 0) {
       logEntry.context = mergesContext;
     }
 
@@ -251,14 +249,14 @@ export class WinstonLoggerService implements ILogger {
   }
 
   /**
-   * Creates the array of Winston transports based on the environment (console always, files in production).
+   * Creates the array of Winston transports based on the environment (console always, plus files in production).
    *
    * @private
-   * @return {*}  {winston.transport[]} - The array of Winston transports.
+   * @return {*}  {winston.transport[]} - The array of configured Winston transports.
    * @memberof WinstonLoggerService
    */
 
-  private createTransports(): any {
+  private createTransports(): winston.transport[] {
     const transports: winston.transport[] = [];
     const { combine, timestamp, errors, json } = winston.format;
 
@@ -268,7 +266,7 @@ export class WinstonLoggerService implements ILogger {
       transports.push(
         new DailyRotateFile({
           filename: 'logs/error-%DATE%.log',
-          datePattern: 'YYY-MMM-DD',
+          datePattern: 'YYYY-MMM-DD',
           level: 'error',
           handleExceptions: false,
           maxSize: '20m',
@@ -291,19 +289,4 @@ export class WinstonLoggerService implements ILogger {
 
     return transports;
   }
-}
-
-/**
- * Creates a WinstonLoggerService using dependencies resolved from the provided container.
- *
- * @param c - The inversion-of-control container used to resolve the configuration and clock dependencies.
- * @returns A configured WinstonLoggerService instance.
- *
- * @remarks
- * Internally resolves TOKENS.Config and TOKENS.Clock from the container and passes them to the
- * WinstonLoggerService constructor.
- */
-
-export function createWinstonLoggerService(c: IContainer): WinstonLoggerService {
-  return new WinstonLoggerService(c.resolve(TOKENS.Config), c.resolve(TOKENS.Clock));
 }
