@@ -33,8 +33,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  validate:
-    name: 🔍 Pre-Release Validation
+  setup-and-validate:
+    name: 📦 Setup & Validation
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -53,7 +53,6 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
-          run_install: false
 
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
@@ -63,6 +62,12 @@ jobs:
 
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: 💾 Cache node_modules
+        uses: actions/cache/save@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: 🔍 Run full validation        
         run: |
@@ -74,6 +79,13 @@ jobs:
           pnpm audit
           pnpm build
           pnpm test:coverage
+
+      - name: 📦 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-release
+          path: dist/
+          retention-days: 1
 
       - name: 📋 Get current version
         id: version
@@ -102,9 +114,9 @@ jobs:
   release:
     name: 📦 Semantic Release
     runs-on: ubuntu-latest
-    needs: validate
-    if: needs.validate.outputs.should-release == 'true'
-    timeout-minutes: 20
+    needs: setup-and-validate
+    if: needs.setup-and-validate.outputs.should-release == 'true'
+    timeout-minutes: 10
 
     outputs:
       released: ${{ steps.release.outputs.released }}
@@ -124,19 +136,23 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
-          run_install: false
 
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
 
-      - name: 📥 Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: 💾 Restore node_modules
+        uses: actions/cache/restore@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - name: 🏗️ Build application
-        run: pnpm build
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-release
+          path: dist/
 
       - name: 🏷️ Run semantic release
         id: release
@@ -182,8 +198,8 @@ jobs:
   docker:
     name: 🐳 Docker Multi-arch
     runs-on: ubuntu-latest
-    needs: [validate, release]
-    if: needs.validate.outputs.should-release == 'true' && needs.release.result == 'success'
+    needs: [setup-and-validate, release]
+    if: needs.setup-and-validate.outputs.should-release == 'true' && needs.release.result == 'success'
     timeout-minutes: 30
 
     steps:
@@ -284,25 +300,15 @@ jobs:
   sync-develop:
     name: 🔄 Sync develop branch
     runs-on: ubuntu-latest
-    needs: [validate, release, docker]
+    needs: [setup-and-validate, release, docker]
     if: |
       always() &&
-      needs.validate.outputs.should-release == 'true' &&
+      needs.setup-and-validate.outputs.should-release == 'true' &&
       needs.release.result == 'success' &&
       (needs.docker.result == 'success' || needs.docker.result == 'skipped')
     timeout-minutes: 10
 
     steps:
-      - name: 📊 Debug information
-        run: |
-          echo "🔍 Debugging sync-develop execution..."
-          echo "should-release: ${{ needs.validate.outputs.should-release }}"
-          echo "release.result: ${{ needs.release.result }}"
-          echo "release.outputs.released: ${{ needs.release.outputs.released }}"
-          echo "docker.result: ${{ needs.docker.result }}"
-          echo "Current ref: ${{ github.ref }}"
-          echo "Event name: ${{ github.event_name }}"
-
       - name: 📥 Checkout main branch (post-release)
         uses: actions/checkout@v4
         with:
@@ -321,62 +327,39 @@ jobs:
       - name: 🔍 Check sync status
         id: check
         run: |
-          echo "🔍 Checking branch synchronization after release..."
-
           MAIN_COMMIT=$(git rev-parse origin/main)
           DEVELOP_COMMIT=$(git rev-parse origin/develop)
-
-          echo "Main commit (post-release):    $MAIN_COMMIT"
-          echo "Develop commit (pre-release):   $DEVELOP_COMMIT"
 
           if [ "$MAIN_COMMIT" != "$DEVELOP_COMMIT" ]; then
             if git merge-base --is-ancestor origin/develop origin/main; then
               echo "sync-needed=true" >> $GITHUB_OUTPUT
-
               COMMITS_AHEAD=$(git rev-list --count origin/develop..origin/main)
               echo "commits-ahead=$COMMITS_AHEAD" >> $GITHUB_OUTPUT
-              echo "📊 Main is $COMMITS_AHEAD commits ahead after release"
             else
               echo "sync-needed=false" >> $GITHUB_OUTPUT
-              echo "⚠️ Branches have diverged - cannot auto-sync"
             fi
           else
             echo "sync-needed=false" >> $GITHUB_OUTPUT
-            echo "✅ Branches already in sync"
           fi
-
-          echo "📋 Last 3 commits in main:"
-          git log --oneline -3 origin/main
-          echo "📋 Last 3 commits in develop:"
-          git log --oneline -3 origin/develop
 
       - name: 🔄 Sync develop with release changes
         if: steps.check.outputs.sync-needed == 'true'
         run: |
-          echo "🔄 Syncing develop with release changes..."
-
           RELEASE_VERSION="${{ needs.release.outputs.version }}"
           if [ -z "$RELEASE_VERSION" ]; then
             RELEASE_VERSION=$(node -p "require('./package.json').version")
           fi
-          echo "📦 Syncing version: $RELEASE_VERSION"
 
           git checkout develop
           git pull origin develop || echo "Develop fetched"
 
-          echo "📋 Release changes to merge:"
-          git log --oneline --max-count=5 origin/develop..origin/main
-
           if git merge-base --is-ancestor origin/develop origin/main; then
-            echo "✅ Fast-forward merge possible"
             git merge --ff-only origin/main
           else
-            echo "⚠️ Creating merge commit for release changes"
             git merge --no-ff origin/main -m "chore: sync develop with release v${RELEASE_VERSION}
 
           Auto-sync after successful Release-CI completion.
-          Merging semantic-release changes including version bump and CHANGELOG.
-
+          
           Release info:
           - Version: ${RELEASE_VERSION}
           - Docker: jruvalcabafsd/byteberry-oauth2:${RELEASE_VERSION}
@@ -385,17 +368,6 @@ jobs:
 
           git push origin develop
           echo "✅ Develop synced with release v${RELEASE_VERSION}"
-
-          NEW_DEVELOP_COMMIT=$(git rev-parse HEAD)
-          MAIN_COMMIT=$(git rev-parse origin/main)
-
-          if [ "$NEW_DEVELOP_COMMIT" = "$MAIN_COMMIT" ]; then
-            echo "✅ Sync verified - develop now at v${RELEASE_VERSION}"
-          else
-            echo "⚠️ Sync verification: commits differ but merge completed"
-            echo "Main:    $MAIN_COMMIT"
-            echo "Develop: $NEW_DEVELOP_COMMIT"
-          fi
 
       - name: 📊 Sync summary
         run: |
@@ -413,11 +385,6 @@ jobs:
             echo "| 🔄 Commits Synced | ${{ steps.check.outputs.commits-ahead }} |" >> $GITHUB_STEP_SUMMARY
             echo "| 🎯 Target Branch | develop |" >> $GITHUB_STEP_SUMMARY
             echo "| ✅ Status | Synchronized |" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 📋 Sync Details:" >> $GITHUB_STEP_SUMMARY
-            echo "- Merged release changes from main to develop" >> $GITHUB_STEP_SUMMARY
-            echo "- Updated package.json version" >> $GITHUB_STEP_SUMMARY
-            echo "- Synchronized CHANGELOG.md" >> $GITHUB_STEP_SUMMARY
           else
             echo "## ✅ No Sync Required" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
@@ -427,7 +394,7 @@ jobs:
   post-release:
     name: 📋 Post-Release
     runs-on: ubuntu-latest
-    needs: [validate, release, docker, sync-develop]
+    needs: [setup-and-validate, release, docker, sync-develop]
     if: needs.release.outputs.released == 'true' && needs.docker.result == 'success'
     timeout-minutes: 10
 
@@ -467,8 +434,8 @@ jobs:
   on-failure:
     name: ❌ Release Failed
     runs-on: ubuntu-latest
-    needs: [validate, release, docker, sync-develop]
-    if: always() && (needs.validate.result == 'failure' || needs.release.result == 'failure' || needs.docker.result == 'failure' || needs.sync-develop.result == 'failure')
+    needs: [setup-and-validate, release, docker, sync-develop]
+    if: always() && (needs.setup-and-validate.result == 'failure' || needs.release.result == 'failure' || needs.docker.result == 'failure' || needs.sync-develop.result == 'failure')
 
     steps:
       - name: 📊 Failure summary
@@ -477,7 +444,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Validation | ${{ needs.validate.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Validation | ${{ needs.setup-and-validate.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Release | ${{ needs.release.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Docker | ${{ needs.docker.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Sync Develop | ${{ needs.sync-develop.result }} |" >> $GITHUB_STEP_SUMMARY
@@ -487,7 +454,7 @@ jobs:
       - name: ❌ Notify failure
         run: |
           echo "❌ Release pipeline failed"
-          echo "Validation: ${{ needs.validate.result }}"
+          echo "Validation: ${{ needs.setup-and-validate.result }}"
           echo "Release: ${{ needs.release.result }}"
           echo "Docker: ${{ needs.docker.result }}"
           echo "Sync Develop: ${{ needs.sync-develop.result }}"
