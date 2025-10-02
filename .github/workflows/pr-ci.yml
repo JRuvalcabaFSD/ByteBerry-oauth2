@@ -149,7 +149,7 @@ jobs:
         env:
           NODE_ENV: test
           CI: true
-          CORS_ORIGINS: http://localhost:5173,http://localhost:4002,http://localhost:4003
+          CORS_ORIGINS: =${{ secrets.CORS_ORIGINS_CI }}
 
       - name: 📊 Display coverage summary
         run: |
@@ -280,7 +280,7 @@ jobs:
             -e NODE_ENV=test \
             -e PORT=4000 \
             -e LOG_LEVEL=info \
-            -e CORS_ORIGINS=http://localhost:5173,http://localhost:4002,http://localhost:4003 \
+            -e CORS_ORIGINS==${{ secrets.CORS_ORIGINS_CI }} \
             byteberry-oauth2:pr-${{ github.event.pull_request.number }}
 
           echo "⏳ Waiting for service to start..."
