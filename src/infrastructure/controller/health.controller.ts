@@ -115,7 +115,7 @@ export class HealthController implements IHealthController {
       const requestId = req.requestId || this.uuid.generate();
 
       this.logger.error('Health check failed', { error: (error as Error).message, requestId });
-      res.sendStatus(503).json({
+      res.status(503).json({
         status: 'unhealthy',
         timestamp: new Date().toISOString(), // Usar fallback en lugar del clock que falló
         service: this.config.serviceName,
@@ -148,8 +148,8 @@ export class HealthController implements IHealthController {
       const startTime = this.clock.timestamp();
 
       const dependencies = await this.checkDependencies();
-      const systemInfo = await this.getSystemInfo();
-      const overallStatus = await this.determineOverallStatus(dependencies);
+      const systemInfo = this.getSystemInfo();
+      const overallStatus = this.determineOverallStatus(dependencies);
 
       const deepHealthResponse: IDeepHealthResponse = {
         status: overallStatus,
@@ -206,22 +206,31 @@ export class HealthController implements IHealthController {
       const startTime = this.clock.timestamp();
 
       try {
-        if (this.container.isRegistered(service.token)) {
-          const resolveService = this.container.resolve(service.token);
-          if (resolveService) {
-            dependencies[service.name] = {
-              status: 'healthy',
-              message: `${service.name} service is available and operational`,
-              responseTime: this.clock.timestamp() - startTime,
-            };
-          }
-        } else {
+        if (!this.container.isRegistered(service.token)) {
           dependencies[service.name] = {
             status: 'unhealthy',
-            message: `${service.name} service is not registered`,
+            message: `${service.name} service is not registered in container`,
             responseTime: this.clock.timestamp() - startTime,
           };
+          continue;
         }
+
+        const resolvedService = this.container.resolve(service.token);
+
+        if (!resolvedService) {
+          dependencies[service.name] = {
+            status: 'unhealthy',
+            message: `${service.name} service resolved to null/undefined`,
+            responseTime: this.clock.timestamp() - startTime,
+          };
+          continue;
+        }
+
+        dependencies[service.name] = {
+          status: 'healthy',
+          message: `${service.name} service is available and operational`,
+          responseTime: this.clock.timestamp() - startTime,
+        };
       } catch (error) {
         dependencies[service.name] = {
           status: 'unhealthy',
@@ -278,11 +287,11 @@ export class HealthController implements IHealthController {
    */
 
   private determineOverallStatus(dependencies: Record<string, DependencyResponse>): 'healthy' | 'unhealthy' | 'degraded' {
-    const statues = Object.values(dependencies).map(dep => dep.status);
+    const statuses = Object.values(dependencies).map(dep => dep.status);
 
-    if (statues.every(status => status === 'healthy')) {
+    if (statuses.every(status => status === 'healthy')) {
       return 'healthy';
-    } else if (statues.some(status => status === 'unhealthy')) {
+    } else if (statuses.some(status => status === 'unhealthy')) {
       return 'unhealthy';
     } else {
       return 'degraded';
