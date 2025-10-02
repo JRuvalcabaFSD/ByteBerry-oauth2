@@ -16,7 +16,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=4000
-      - CORS_ORIGINS=http://localhost:5173,http://localhost:4002,http://localhost:4003
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173,http://localhost:4002,http://localhost:4003}
       - LOG_LEVEL=info
 
     # Port mapping
