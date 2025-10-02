@@ -21,7 +21,10 @@
     "test:verbose": "jest --verbose",
     "test:watch": "jest --watch",
     "test": "jest --silent",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "docker:build": "docker build -t byteberry-oauth2:dev .",
+    "docker:run": "docker run --rm -p 4000:4000 -e NODE_ENV=development byteberry-oauth2:dev",
+    "docker:test": "./scripts/docker-test.sh test"
   },
   "engines": {
     "node": ">=22.18.0",
