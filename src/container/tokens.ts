@@ -56,7 +56,7 @@ export const criticalServices = [
   { token: TOKENS.Clock, name: 'Clock' },
   { token: TOKENS.Config, name: 'Config' },
   { token: TOKENS.Uuid, name: 'Uuid' },
-  { token: TOKENS.HttpServer, name: 'HttpServer' },
+  // { token: TOKENS.HttpServer, name: 'HttpServer' },
   { token: TOKENS.Logger, name: 'Logger' },
-  { token: TOKENS.HealthController, name: 'HealthController' },
+  // { token: TOKENS.HealthController, name: 'HealthController' },
 ];
