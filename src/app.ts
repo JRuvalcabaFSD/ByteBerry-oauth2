@@ -24,7 +24,7 @@ async function main(): Promise<void> {
     port: config.port,
     phase: 'F0',
     features: {
-      healthEndpoints: false,
+      healthEndpoints: true,
       logging: true,
       gracefulShutdown: true,
       containerDI: true,

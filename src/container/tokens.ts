@@ -31,30 +31,25 @@ export const TOKENS = {
 } as const;
 
 /**
- * Collection of dependency-injection tokens that are considered essential for application startup,
- * liveness, and readiness checks.
+ * Declares the set of core application services that must be available for startup and runtime.
  *
- * Each item maps a DI token to a human-readable service name:
- * - token: A unique identifier from {@link TOKENS} used by the container to resolve the service.
- * - name: A short, descriptive label used for logs and diagnostics.
- *
- * The application can iterate this list to assert that all critical services are registered and
- * resolvable before accepting traffic. Updating this list changes which services are monitored as
- * part of health checks and bootstrap validation.
+ * Each entry associates a dependency-injection token with a human-readable name, enabling
+ * validation, diagnostics, and health checks for essential infrastructure (clock, config,
+ * UUID generation, HTTP server, logging, and health controller).
  *
  * @remarks
- * - Order is not significant.
- * - Ensure each token resolves synchronously or handle async readiness appropriately.
- * - Keep names concise; they appear in logs and health endpoints.
+ * Use this list to assert DI registrations during bootstrap and to surface clear error
+ * messages when a critical dependency is missing.
  *
  * @example
- * // Validate that all critical services can be resolved at startup
- * for (const { token, name } of criticalServices) {
- *   container.resolve(token);
- *   logger.info(`Critical service ready: ${name}`);
- * }
+ * ```ts
+ * criticalServices.forEach(({ token, name }) => {
+ *   if (!container.isRegistered(token)) {
+ *     throw new Error(`Missing critical service: ${name}`);
+ *   }
+ * });
+ * ```
  *
- * @see {@link TOKENS}
  * @public
  */
 export const criticalServices = [
@@ -63,5 +58,5 @@ export const criticalServices = [
   { token: TOKENS.Uuid, name: 'Uuid' },
   { token: TOKENS.HttpServer, name: 'HttpServer' },
   { token: TOKENS.Logger, name: 'Logger' },
-  // TODO { token: TOKENS.HealthController, name: 'HealthController' },
+  { token: TOKENS.HealthController, name: 'HealthController' },
 ];

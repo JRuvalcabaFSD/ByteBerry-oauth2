@@ -1,10 +1,11 @@
 import { Server } from 'http';
 import express, { Application } from 'express';
 
-import { IClock, IConfig, IHttpServer, ILogger, IUuid, ServerInfo } from '@/interfaces';
+import { IClock, IConfig, IHealthController, IHttpServer, ILogger, IUuid, ServerInfo } from '@/interfaces';
 import {
   createCORSMiddleware,
   createErrorMiddleware,
+  createHealthRoutes,
   createLoggerMiddleware,
   createRequestIdMiddleware,
   createSecurityMiddleware,
@@ -46,7 +47,8 @@ export class HttpServer implements IHttpServer {
     private readonly config: IConfig,
     private readonly logger: ILogger,
     private readonly uuid: IUuid,
-    private readonly clock: IClock
+    private readonly clock: IClock,
+    private readonly healthController: IHealthController
   ) {
     this.app = express();
     this.setupMiddlewares();
@@ -209,7 +211,7 @@ export class HttpServer implements IHttpServer {
    */
 
   private setupRoutes() {
-    //TODO implement health route
+    this.app.use('/', createHealthRoutes(this.healthController));
     this.app.get('/', (req, res) => {
       res.json({
         service: this.config.serviceName,
