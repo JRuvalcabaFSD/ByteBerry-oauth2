@@ -1,14 +1,18 @@
 import request from 'supertest';
 
 import { Config } from '@/config';
-import { ClockService, HttpServer, UuidService, WinstonLoggerService } from '@/infrastructure';
+import { HttpServer } from '@/infrastructure';
+import { IClock, IConfig, IContainer, IHealthController, ILogger, IUuid } from '@/interfaces';
+import { bootstrapContainer, TOKENS } from '@/container';
 
 describe('HttpServer', () => {
+  let container: IContainer;
   let httpServer: HttpServer;
-  let config: Config;
-  let logger: WinstonLoggerService;
-  let clock: ClockService;
-  let uuid: UuidService;
+  let config: IConfig;
+  let logger: ILogger;
+  let clock: IClock;
+  let uuid: IUuid;
+  let healthController: IHealthController;
 
   beforeEach(() => {
     // Configurar variables de entorno para test
@@ -18,12 +22,14 @@ describe('HttpServer', () => {
     process.env.CORS_ORIGINS = 'http://localhost:3000';
 
     Config.resetInstance();
-    config = Config.getConfig();
-    clock = new ClockService();
-    logger = new WinstonLoggerService(config, clock);
-    uuid = new UuidService();
+    container = bootstrapContainer();
+    config = container.resolve<IConfig>(TOKENS.Config);
+    clock = container.resolve<IClock>(TOKENS.Clock);
+    logger = container.resolve<ILogger>(TOKENS.Logger);
+    uuid = container.resolve<IUuid>(TOKENS.Uuid);
+    healthController = container.resolve<IHealthController>(TOKENS.HealthController);
 
-    httpServer = new HttpServer(config, logger, uuid, clock);
+    httpServer = new HttpServer(config, logger, uuid, clock, healthController);
   });
 
   afterEach(async () => {
@@ -139,7 +145,7 @@ describe('HttpServer', () => {
   describe('Catch Block - Lines 93-97', () => {
     it('should_CatchSynchronousError_When_ListenThrows', async () => {
       // Given - Mock app.listen para lanzar error síncrono
-      const errorServer = new HttpServer(config, logger, uuid, clock);
+      const errorServer = new HttpServer(config, logger, uuid, clock, healthController);
       const app = errorServer.getApp();
 
       // Forzar error síncrono
