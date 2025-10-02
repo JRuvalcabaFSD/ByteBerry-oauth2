@@ -65,6 +65,7 @@ export class Config implements IConfig {
   public readonly logLevel: LogLevel;
   public readonly serviceName: string;
   public readonly version: string;
+  public readonly corsOrigins: string[];
   private static instance: Config | null = null;
 
   /**
@@ -80,6 +81,7 @@ export class Config implements IConfig {
       this.nodeEnv = get('NODE_ENV').default('development').asEnum(['development', 'production', 'test']) as NodeEnv;
       this.logLevel = get('LOG_LEVEL').default('info').asEnum(['debug', 'info', 'warn', 'error']) as LogLevel;
       this.serviceName = get('SERVICE_NAME').default('byteberry-oauth2').required().asString();
+      this.corsOrigins = get('CORS_ORIGINS').required().asArray();
       this.version = process.env.npm_package_version || pkg.version || '0.0.0';
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);

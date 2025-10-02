@@ -1,0 +1,376 @@
+name: 🔍 PR-CI - ByteBerry oauth2 API
+
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'tsconfig*.json'
+      - 'jest.config.ts'
+      - 'eslint.config.mts'
+      - 'Dockerfile'
+      - '.github/workflows/**'
+
+concurrency:
+  group: pr-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22.18.0'
+  PNPM_VERSION: '10.17.1'
+
+jobs:
+  quality:
+    name: 📝 Code Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 Run ESLint (includes Prettier)
+        run: pnpm lint
+
+      - name: 📏 Check TypeScript types
+        run: pnpm type-check
+
+      - name: 📊 Generate lint report
+        if: always()
+        run: |
+          echo "📊 ESLint Summary:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          pnpm lint --format=unix 2>&1 | head -20 >> $GITHUB_STEP_SUMMARY || true
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  build:
+    name: 🏗️ Build
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ Build TypeScript
+        run: pnpm build
+
+      - name: 📊 Verify build output
+        run: |
+          echo "🔍 Checking build artifacts..."
+          ls -la dist/
+          echo ""
+          echo "📦 Build size:"
+          du -sh dist/
+          echo ""
+          echo "📄 Entry point check:"
+          [ -f "dist/app.js" ] && echo "✅ app.js exists" || exit 1
+          echo ""
+          echo "🗺️ Source maps:"
+          ls -la dist/*.map 2>/dev/null && echo "✅ Source maps generated" || echo "ℹ️  No source maps found"
+
+      - name: 📦 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+
+  test:
+    name: 🧪 Tests
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: dist/
+
+      - name: 🧪 Run tests with coverage
+        run: pnpm test:coverage
+        env:
+          NODE_ENV: test
+          CI: true
+          CORS_ORIGINS: http://localhost:5173,http://localhost:4002,http://localhost:4003
+
+      - name: 📊 Display coverage summary
+        run: |
+          echo "📊 Test Coverage Report:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          if [ -f "coverage/coverage-summary.json" ]; then
+            cat coverage/coverage-summary.json | jq -r '
+              .total |
+              "Lines: " + (.lines.pct|tostring) + "%\n" +
+              "Functions: " + (.functions.pct|tostring) + "%\n" +
+              "Branches: " + (.branches.pct|tostring) + "%\n" +
+              "Statements: " + (.statements.pct|tostring) + "%"
+            ' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Coverage summary not available" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: 📈 Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: oauth2-service
+          fail_ci_if_error: false
+
+      - name: 📊 Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.sha }}
+          path: |
+            coverage/
+          retention-days: 7
+
+  security:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 Run security audit
+        run: |
+          echo "🔍 Running pnpm audit..."
+          pnpm audit --audit-level moderate --json > audit-results.json || AUDIT_EXIT_CODE=$?
+
+          echo "📊 Security Audit Results:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+
+          if [ -s audit-results.json ]; then
+            echo "Audit completed. Checking results..." >> $GITHUB_STEP_SUMMARY
+
+            VULN_COUNT=$(cat audit-results.json | jq -r '.metadata.vulnerabilities.total // 0' 2>/dev/null || echo "0")
+            echo "Total vulnerabilities found: $VULN_COUNT" >> $GITHUB_STEP_SUMMARY
+
+            if [ "$VULN_COUNT" != "0" ] && [ "$VULN_COUNT" != "null" ]; then
+              echo "⚠️ Vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+              cat audit-results.json | jq '.metadata.vulnerabilities' 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "Details not available" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ No vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "✅ No audit issues detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${AUDIT_EXIT_CODE:-0}" -ne 0 ]; then
+            echo "❌ Audit failed with critical vulnerabilities"
+            exit $AUDIT_EXIT_CODE
+          fi
+
+      - name: 📊 Upload audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-${{ github.sha }}
+          path: |
+            audit-results.json
+          retention-days: 30
+
+  docker:
+    name: 🐳 Docker Build
+    runs-on: ubuntu-latest
+    needs: [build, test]
+    timeout-minutes: 15
+    if: ${{ !github.event.pull_request.draft }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🏗️ Build Docker image
+        run: |
+          echo "🏗️ Building Docker image for PR verification..."
+          docker build -t byteberry-oauth2:pr-${{ github.event.pull_request.number }} .
+
+      - name: 🧪 Test Docker image functionality
+        run: |
+          echo "🧪 Testing Docker image health endpoints..."
+
+          docker run -d --name test-oauth2-pr \
+            -p 4000:4000 \
+            -e NODE_ENV=test \
+            -e PORT=4000 \
+            -e LOG_LEVEL=info \
+            -e CORS_ORIGINS=http://localhost:5173,http://localhost:4002,http://localhost:4003 \
+            byteberry-oauth2:pr-${{ github.event.pull_request.number }}
+
+          echo "⏳ Waiting for service to start..."
+          sleep 15
+
+          echo "📋 Container logs (last 10 lines):"
+          docker logs --tail 10 test-oauth2-pr
+
+          echo "🔍 Testing /health endpoint..."
+          HEALTH_RESPONSE=$(curl -s -w "%{http_code}" http://localhost:4000/health)
+          echo "Health response: $HEALTH_RESPONSE"
+
+          if [[ "$HEALTH_RESPONSE" == *"200" ]]; then
+            echo "✅ /health endpoint working"
+          else
+            echo "❌ /health endpoint failed"
+            docker logs test-oauth2-pr
+            exit 1
+          fi
+
+          echo "🔍 Testing /health/deep endpoint..."
+          DEEP_HEALTH_RESPONSE=$(curl -s -w "%{http_code}" http://localhost:4000/health/deep)
+          echo "Deep health response: $DEEP_HEALTH_RESPONSE"
+
+          if [[ "$DEEP_HEALTH_RESPONSE" == *"200" ]]; then
+            echo "✅ /health/deep endpoint working"
+          else
+            echo "❌ /health/deep endpoint failed"
+            docker logs test-oauth2-pr
+            exit 1
+          fi
+
+          echo "🔍 Checking Docker health status..."
+          HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' test-oauth2-pr 2>/dev/null || echo "unavailable")
+          echo "Docker health status: $HEALTH_STATUS"
+
+          docker stop test-oauth2-pr
+          docker rm test-oauth2-pr
+
+          echo "✅ All Docker tests passed"
+
+      - name: 🗑️ Clean up Docker images
+        if: always()
+        run: |
+          docker rmi byteberry-oauth2:pr-${{ github.event.pull_request.number }} || true
+          docker system prune -f || true
+
+  summary:
+    name: 📋 PR Summary
+    runs-on: ubuntu-latest
+    needs: [quality, build, test, security, docker]
+    if: always()
+
+    steps:
+      - name: 📊 Generate PR summary
+        run: |
+          echo "# 🔍 PR-CI Pipeline Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 📝 Code Quality | ${{ needs.quality.result == 'success' && '✅' || '❌' }} | ${{ needs.quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏗️ Build | ${{ needs.build.result == 'success' && '✅' || '❌' }} | ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Tests | ${{ needs.test.result == 'success' && '✅' || '❌' }} | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔒 Security | ${{ needs.security.result == 'success' && '✅' || '❌' }} | ${{ needs.security.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🐳 Docker | ${{ needs.docker.result == 'success' && '✅' || needs.docker.result == 'skipped' && '⏭️' || '❌' }} | ${{ needs.docker.result }} |" >> $GITHUB_STEP_SUMMARY
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📋 Ready for merge?" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ needs.quality.result }}" == "success" && "${{ needs.build.result }}" == "success" && "${{ needs.test.result }}" == "success" && "${{ needs.security.result }}" == "success" ]]; then
+            echo "🎉 **All critical checks passed!** This PR is ready for review and merge." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Some checks failed.** Please fix the issues before merging:" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            [[ "${{ needs.quality.result }}" != "success" ]] && echo "- ❌ Code quality issues need to be resolved" >> $GITHUB_STEP_SUMMARY
+            [[ "${{ needs.build.result }}" != "success" ]] && echo "- ❌ Build is failing" >> $GITHUB_STEP_SUMMARY
+            [[ "${{ needs.test.result }}" != "success" ]] && echo "- ❌ Tests are failing" >> $GITHUB_STEP_SUMMARY
+            [[ "${{ needs.security.result }}" != "success" ]] && echo "- ❌ Security vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: ✅ All checks passed
+        if: needs.quality.result == 'success' && needs.build.result == 'success' && needs.test.result == 'success' && needs.security.result == 'success'
+        run: echo "🎉 All critical checks passed! PR ready for merge."
+
+      - name: ❌ Some checks failed
+        if: needs.quality.result == 'failure' || needs.build.result == 'failure' || needs.test.result == 'failure' || needs.security.result == 'failure'
+        run: |
+          echo "❌ Critical checks failed:"
+          echo "  Quality: ${{ needs.quality.result }}"
+          echo "  Build: ${{ needs.build.result }}"
+          echo "  Test: ${{ needs.test.result }}"
+          echo "  Security: ${{ needs.security.result }}"
+          exit 1

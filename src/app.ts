@@ -1,15 +1,33 @@
-import { createConfig } from '@/config';
+import { bootstrap } from '@/bootstrap';
+import { TOKENS } from '@/container';
+import { IConfig, ILogger } from '@/interfaces';
 
 /* eslint-disable no-console */
 (async () => {
   await main().catch(error => {
-    console.error(error.message);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Application failed to start:', errorMessage);
     process.exit(1);
   });
 })();
 
 async function main(): Promise<void> {
-  const config = createConfig();
+  const { container } = await bootstrap();
 
-  console.log('Service init', { ...config });
+  const config = container.resolve<IConfig>(TOKENS.Config);
+  const logger = container.resolve<ILogger>(TOKENS.Logger);
+
+  logger.info(`${config.serviceName} Service initialized successfully`, {
+    service: config.serviceName,
+    version: config.version,
+    environment: config.nodeEnv,
+    port: config.port,
+    phase: 'F0',
+    features: {
+      healthEndpoints: true,
+      logging: true,
+      gracefulShutdown: true,
+      containerDI: true,
+    },
+  });
 }

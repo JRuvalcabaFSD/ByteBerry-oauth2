@@ -79,6 +79,7 @@ export interface IConfig {
   readonly logLevel: LogLevel;
   readonly serviceName: string;
   readonly version: string;
+  readonly corsOrigins: string[];
   isDevelopment(): boolean;
   isProduction(): boolean;
   isTest(): boolean;
