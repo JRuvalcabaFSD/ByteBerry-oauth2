@@ -1,3 +1,13 @@
+## [1.0.1](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.0.0...v1.0.1) (2025-10-02)
+
+
+### Bug Fixes
+
+* **ci:** correct CORS_ORIGINS syntax and enhance test steps ([fb05517](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/fb05517907c76984f2b1a2aa7089c2ad78f4c4dc))
+* **ci:** improve environment variable handling in workflows ([ebf2ea9](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/ebf2ea989d1c0d07f06b9f5e3399131c19f79648))
+* **ci:** streamline test steps and update coverage command ([ba9517b](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/ba9517bd04a619eba3076c8d10edb2d042bc60b0))
+* **ci:** update CORS_ORIGINS to use secrets ([cada933](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/cada93373bfa8bfedef87f0b9a9a58a548938bd0))
+
 # 1.0.0 (2025-10-02)
 
 
