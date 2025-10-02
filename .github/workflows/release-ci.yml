@@ -22,7 +22,7 @@ concurrency:
 
 env:
   NODE_VERSION: '22.18.0'
-  PNPM_VERSION: '10.17.0'
+  PNPM_VERSION: '10.17.1'
   REGISTRY: docker.io
   IMAGE_NAME: jruvalcabafsd/byteberry-oauth2
 
