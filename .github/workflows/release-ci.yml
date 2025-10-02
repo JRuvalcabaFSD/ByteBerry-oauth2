@@ -69,8 +69,6 @@ jobs:
         env:
           NODE_ENV: test
           CI: true
-          PORT: 4000
-          LOG_LEVEL: info
           CORS_ORIGINS: http://localhost:5173,http://localhost:4002,http://localhost:4003
 									
       - name: 📋 Get current version
