@@ -145,11 +145,16 @@ jobs:
           path: dist/
 
       - name: 🧪 Run tests with coverage
-        run: pnpm test:coverage
         env:
           NODE_ENV: test
           CI: true
-          CORS_ORIGINS: =${{ secrets.CORS_ORIGINS_CI }}
+          CORS_ORIGINS: ${{ secrets.CORS_ORIGINS_CI }}
+        run: |
+           pnpm type-check
+           pnpm lint
+           pnpm audit
+           pnpm build
+           pnpm test:coverage
 
       - name: 📊 Display coverage summary
         run: |
@@ -280,7 +285,7 @@ jobs:
             -e NODE_ENV=test \
             -e PORT=4000 \
             -e LOG_LEVEL=info \
-            -e CORS_ORIGINS==${{ secrets.CORS_ORIGINS_CI }} \
+            -e CORS_ORIGINS=${{ secrets.CORS_ORIGINS_CI }} \
             byteberry-oauth2:pr-${{ github.event.pull_request.number }}
 
           echo "⏳ Waiting for service to start..."
