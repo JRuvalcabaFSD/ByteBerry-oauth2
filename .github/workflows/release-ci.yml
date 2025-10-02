@@ -64,12 +64,16 @@ jobs:
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: 🔍 Run full validation
-        run: pnpm ci:all
-        env:
-          NODE_ENV: test
-          CI: true
-          CORS_ORIGINS: ${{ secrets.CORS_ORIGINS_CI }}
+      - name: 🔍 Run full validation        
+        run: |
+          export NODE_ENV=test
+          export CI=true
+          export CORS_ORIGINS="${{ secrets.CORS_ORIGINS_CI }}"
+          pnpm type-check
+          pnpm lint
+          pnpm audit
+          pnpm build
+          pnpm test:coverage
 
       - name: 📋 Get current version
         id: version
