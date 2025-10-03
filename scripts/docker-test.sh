@@ -206,7 +206,7 @@ test_api_endpoints() {
     # Test root endpoint
     local root_response
     if root_response=$(curl -s -f http://localhost:${TEST_PORT}/); then
-        if echo "${root_response}" | grep -q '"service":"oauth2-service"'; then
+        if echo "${root_response}" | grep -q '"service":"byteberry-oauth2"'; then
             print_success "✅ Root endpoint responding correctly"
         else
             print_warning "⚠️ Root endpoint response unexpected"
