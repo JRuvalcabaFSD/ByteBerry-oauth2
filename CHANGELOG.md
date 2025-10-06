@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.2.0...v1.3.0) (2025-10-06)
+
+
+### Features
+
+* **ci:** update package.json version during build ([549cee6](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/549cee61febd517e23c59950200b1a7017eb97ad))
+
 # [1.2.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.1.0...v1.2.0) (2025-10-06)
 
 
