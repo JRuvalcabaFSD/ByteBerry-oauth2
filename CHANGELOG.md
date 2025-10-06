@@ -1,3 +1,12 @@
+## [1.3.1](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.3.0...v1.3.1) (2025-10-06)
+
+
+### Bug Fixes
+
+* **dockerfile:** copy package.json and pnpm lock files ([0df5534](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/0df553409c7560317f7253d846cdcb94987cc84c))
+* **dockerfile:** reorganize build stages and improve clarity ([47f1462](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/47f14620271375fb1985e2bf7f8af49281e529c7))
+* **types:** update express-serve-static-core to 5.1.0 ([8961ab5](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/8961ab59eeb7073faf80dcfbdc33535fd8ed7c6b))
+
 # [1.3.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.2.0...v1.3.0) (2025-10-06)
 
 
