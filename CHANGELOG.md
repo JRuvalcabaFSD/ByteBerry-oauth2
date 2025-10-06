@@ -1,3 +1,22 @@
+# [1.1.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.0.1...v1.1.0) (2025-10-06)
+
+
+### Features
+
+* **ci:** add pnpm setup and install step ([c5b9c09](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/c5b9c09f7e13e21bf0dbba08019cd84511a2b8c2))
+* **ci:** add semantic release version planning step ([1b8e621](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/1b8e62161017fe783b752cbc9f4020d63b0b6386))
+* **ci:** change registry from ghcr.io to docker.io ([ab097e1](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/ab097e11790498d31e61d10f6a740be529f542ef))
+* **ci:** clean up job conditions in release workflow ([e0652f2](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/e0652f20e21adad8940fb137af2d0123e1be77eb))
+* **ci:** enhance Docker workflow with multi-arch support ([314c6b7](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/314c6b7cbc90d6e9178d7b7e34905eb6c5a79e50))
+* **ci:** enhance validation and improve release checks ([9a51949](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/9a51949bcf1d73c47dcfef2a3002e0d80989da09))
+* **ci:** force create image ([2fb1008](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/2fb10089aa399ecea00803edbda45ebc559df29b))
+* **ci:** remove PNPM_VERSION from CI workflows ([339eed2](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/339eed28b4442b6b4ecb8573f96bd9c84727c2e3))
+* **ci:** simplify release workflow and improve validation ([e338855](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/e338855662149f396fbf6dab8857b4bbe4798a69))
+* **ci:** update image name configuration in CI workflow ([b0af465](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/b0af465347ec0a2665b6f5136ede0ad185013abb))
+* **ci:** update image name in release CI workflow ([17a36a7](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/17a36a7df039d08e64eadec909abcd03e9f35313))
+* **pnpm:** remove pnpm-workspace.yaml file and its configuration for built dependencies ([dbac0f0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/dbac0f00815342beb0056a9d87a5a92953b7bc21))
+* **release:** add JRM signature at the end of the file ([ff6d145](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/ff6d1458b49fedef6acb98b5c07c39b1c37407ac))
+
 ## [1.0.1](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.0.0...v1.0.1) (2025-10-02)
 
 
