@@ -11,7 +11,8 @@ permissions:
 
 env:
   NODE_VERSION: "22.18.0"
-  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/byteberry-oauth2
+  REGISTRY: ghcr.io
+  IMAGE_NAME: byteberry-oauth2
 
 jobs:
   setup-and-validate:
