@@ -219,7 +219,7 @@ jobs:
   docker:
     name: 🐳 Docker Multi-arch
     runs-on: ubuntu-latest
-    needs: [setup-and-validate, release]
+    needs: [setup-and-validate]
     if: needs.setup-and-validate.outputs.should-release == 'true' && needs.release.result == 'success'
     timeout-minutes: 30
 
