@@ -660,3 +660,4 @@ Este proyecto es parte del sistema ByteBerry de gestión de gastos, desarrollado
 **Hecho con ❤️ por JRuvalcabaFSD**
 
 ⭐ Si este proyecto te resulta útil, considera darle una estrella en GitHub
+JRM
