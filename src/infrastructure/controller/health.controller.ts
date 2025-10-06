@@ -50,8 +50,6 @@ import {
  */
 
 export class HealthController implements IHealthController {
-  private readonly startTime: Date;
-
   /**
    * Creates a HealthController.
    *
@@ -71,9 +69,7 @@ export class HealthController implements IHealthController {
     private readonly logger: ILogger,
     private readonly uuid: IUuid,
     private readonly clock: IClock
-  ) {
-    this.startTime = this.clock.now();
-  }
+  ) {}
 
   /**
    * Handles the basic health (liveness) check.
@@ -97,7 +93,7 @@ export class HealthController implements IHealthController {
   public getHealth = async (req: Request, res: Response): Promise<void> => {
     try {
       const requestId = req.requestId || this.uuid.generate();
-      const uptime = this.clock.timestamp() - this.startTime.getTime();
+      const uptime = Math.floor(process.uptime() * 1000);
 
       const response: IHealthResponse = {
         status: 'healthy',
@@ -156,7 +152,7 @@ export class HealthController implements IHealthController {
         timestamp: this.clock.isoString(),
         service: this.config.serviceName,
         version: this.config.version,
-        uptime: this.clock.timestamp() - this.startTime.getTime(),
+        uptime: Math.floor(process.uptime() * 1000),
         requestId,
         environment: this.config.nodeEnv,
         dependencies,
@@ -331,7 +327,7 @@ export class HealthController implements IHealthController {
         timestamp: this.clock.isoString(),
         service: this.config.serviceName,
         version: this.config.version,
-        uptime: this.clock.timestamp() - this.startTime.getTime(),
+        uptime: Math.floor(process.uptime() * 1000),
         requestId,
       };
 
