@@ -1,115 +1,59 @@
-name: 🚀 Release-CI - ByteBerry OAuth2 - Service
+name: 🚀 Release CI - OAUTH2
 
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
-    inputs:
-      release_type:
-        description: 'Type of release'
-        required: false
-        default: 'auto'
-        type: choice
-        options:
-          - auto
-          - patch
-          - minor
-          - major
-
-concurrency:
-  group: release-ci
-  cancel-in-progress: false
-
-env:
-  NODE_VERSION: '22.18.0'
-  PNPM_VERSION: '10.17.1'
-  REGISTRY: docker.io
-  IMAGE_NAME: jruvalcabafsd/byteberry-oauth2
+    branches: [ main ]
+  workflow_dispatch: {}
 
 permissions:
   contents: write
   packages: write
-  issues: write
-  pull-requests: write
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "9"
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/byteberry-oauth2
 
 jobs:
   setup-and-validate:
-    name: 📦 Setup & Validation
+    name: ✅ Setup & Validate
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
     outputs:
       should-release: ${{ steps.check.outputs.should-release }}
-      current-version: ${{ steps.version.outputs.current-version }}
       next-version: ${{ steps.plan.outputs.next-version }}
-
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: 🔧 Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
 
-      - name: 📥 Install dependencies
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      - name: 💾 Cache node_modules
-        uses: actions/cache/save@v3
-        with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: 🔍 Run full validation        
-        run: |
-          export NODE_ENV=test
-          export CI=true
-          export CORS_ORIGINS="${{ secrets.CORS_ORIGINS_CI }}"
-          pnpm type-check
-          pnpm lint
-          pnpm audit
-          pnpm build
-          pnpm test:coverage
-
-      - name: 📦 Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts-release
-          path: dist/
-          retention-days: 1
-
-      - name: 📋 Get current version
-        id: version
-        run: |
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          echo "current-version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          echo "Current version: $CURRENT_VERSION"
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Build
+        run: pnpm build
+      - name: Test (coverage)
+        run: pnpm test:coverage
 
       - name: 🔍 Check if should release
         id: check
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
             echo "should-release=true" >> $GITHUB_OUTPUT
-            echo "Manual release triggered"
           else
-            COMMITS=$(git log --format="%s" HEAD~1..HEAD)
-            if echo "$COMMITS" | grep -E "^(feat|fix|BREAKING CHANGE)"; then
-              echo "should-release=true" >> $GITHUB_OUTPUT
-              echo "Found releasable commits"
-            else
-              echo "should-release=false" >> $GITHUB_OUTPUT
-              echo "No releasable commits found"
-            fi
+            echo "should-release=false" >> $GITHUB_OUTPUT
           fi
 
       - name: 🧮 Plan next version (semantic-release dry-run)
@@ -119,372 +63,95 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pnpm dlx semantic-release --dry-run --no-ci > sr-dry-run.log 2>&1 || true
-          NEXT=$(grep -Eo "next release version is [0-9]+\.[0-9]+\.[0-9]+" sr-dry-run.log | awk '{print $NF}' | tail -n1)
+          NEXT=$(grep -Eo "next release version is [0-9]+\.[0-9]+\.[0-9]+" sr-dry-run.log | awk '{{print $NF}}' | tail -n1)
           echo "next-version=$NEXT" >> $GITHUB_OUTPUT
-          echo "Planned next version: ${NEXT:-<none>}"
-          echo "📋 Dry-run log:"
-          tail -n 200 sr-dry-run.log
-
-  release:
-    name: 📦 Semantic Release
-    runs-on: ubuntu-latest
-  needs: [setup-and-validate, docker]
-  if: needs.setup-and-validate.outputs.should-release == 'true' && needs.docker.result == 'success' && needs.docker.outputs.image-pushed == 'true'
-    timeout-minutes: 10
-
-    outputs:
-      released: ${{ steps.release.outputs.released }}
-      version: ${{ steps.release.outputs.version }}
-      major: ${{ steps.release.outputs.major }}
-      minor: ${{ steps.release.outputs.minor }}
-      patch: ${{ steps.release.outputs.patch }}
-
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: 🔧 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: 💾 Restore node_modules
-        uses: actions/cache/restore@v3
-        with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: 📥 Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts-release
-          path: dist/
-
-      - name: 🏷️ Run semantic release
-        id: release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          pnpm release --debug > release-output.log 2>&1 || RELEASE_EXIT_CODE=$?
-
-          if grep -q "Published release" release-output.log; then
-            echo "released=true" >> $GITHUB_OUTPUT
-
-            NEW_VERSION=$(node -p "require('./package.json').version")
-            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-
-            IFS='.' read -r major minor patch <<< "$NEW_VERSION"
-            echo "major=$major" >> $GITHUB_OUTPUT
-            echo "minor=$minor" >> $GITHUB_OUTPUT
-            echo "patch=$patch" >> $GITHUB_OUTPUT
-
-            echo "✅ Release created: v$NEW_VERSION"
-          else
-            echo "released=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ No release was created"
-
-            CURRENT_VERSION=$(node -p "require('./package.json').version")
-            echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          fi
-
-          echo "📋 Release Log:"
-          cat release-output.log
-
-      - name: 🔎 Assert release version matches planned
-        if: steps.release.outputs.released == 'true' && needs.setup-and-validate.outputs.next-version != ''
-        run: |
-          echo "Expected: ${{ needs.setup-and-validate.outputs.next-version }}"
-          echo "Actual:   ${{ steps.release.outputs.version }}"
-          test "${{ steps.release.outputs.version }}" = "${{ needs.setup-and-validate.outputs.next-version }}" || (echo "Version mismatch!" && exit 1)
-
-      - name: 📊 Upload release artifacts
-        if: steps.release.outputs.released == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-artifacts-${{ steps.release.outputs.version }}
-          path: |
-            dist/
-            package.json
-            CHANGELOG.md
-          retention-days: 90
+          echo "Planned next version: $NEXT"
 
   docker:
-    name: 🐳 Docker Multi-arch
+    name: 🐳 Build & Push Docker
     runs-on: ubuntu-latest
-  needs: [setup-and-validate]
-  if: needs.setup-and-validate.outputs.next-version != ''
-    timeout-minutes: 30
-
+    needs: [ setup-and-validate ]
+    if: needs.setup-and-validate.outputs.next-version != ''
     outputs:
       image-pushed: ${{ steps.pushcheck.outputs.ok }}
       version: ${{ steps.vars.outputs.version }}
-
+      image-tag: ${{ steps.vars.outputs.image-tag }}
+      image-latest: ${{ steps.vars.outputs.image-latest }}
     steps:
-      - name: 📥 Checkout code AFTER semantic-release
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🏷️ Set version variables
+      - name: Compute version & tags
         id: vars
         run: |
           VERSION="${{ needs.setup-and-validate.outputs.next-version }}"
           if [ -z "$VERSION" ]; then
             VERSION=$(node -p "require('./package.json').version")
           fi
-          echo "Using version: $VERSION"
-
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "image-tag=${{ env.IMAGE_NAME }}:$VERSION" >> $GITHUB_OUTPUT
           echo "image-latest=${{ env.IMAGE_NAME }}:latest" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - name: 🐳 Set up Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          platforms: linux/amd64,linux/arm64
 
-      - name: 🔐 Login to Docker Hub
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 📋 Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
+      - name: Build & push (multi-arch)
+        uses: docker/build-push-action@v6
         with:
-          images: ${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=semver,pattern={{version}},value=${{ steps.vars.outputs.version }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.vars.outputs.version }}
-            type=semver,pattern={{major}},value=${{ steps.vars.outputs.version }}
-            type=raw,value=latest,enable={{is_default_branch}}
-          labels: |
-            org.opencontainers.image.description=ByteBerry oauth2 API
-            org.opencontainers.image.vendor=JRuvalcabaFSD
-            org.opencontainers.image.version=${{ steps.vars.outputs.version }}
-            org.opencontainers.image.revision=${{ github.sha }}
-
-      - name: 🏗️ Build and push multi-arch image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            VERSION=${{ steps.vars.outputs.version }}
-            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
-            COMMIT_SHA=${{ github.sha }}
-
-      - name: 🧪 Test multi-arch images
-        run: |
-          echo "🧪 Testing published images..."
-
-          echo "Testing AMD64 image..."
-          docker run --rm --platform linux/amd64 \
-            ${{ steps.vars.outputs.image-tag }} \
-            node -e "console.log('AMD64 image working - version ${{ steps.vars.outputs.version }}')"
-
-          echo "Testing ARM64 image availability..."
-          docker manifest inspect ${{ steps.vars.outputs.image-tag }} | grep "arm64" && echo "✅ ARM64 image available"
-
-      - name: 📊 Image summary
-        run: |
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ steps.vars.outputs.image-tag }}
+            ${{ steps.vars.outputs.image-latest }}
 
       - name: ✅ Verify push
         id: pushcheck
-        run: echo \"ok=true\" >> $GITHUB_OUTPUT
-          echo "## 🐳 Docker Images Published" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Tag | Platforms | Size |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|-----------|------|" >> $GITHUB_STEP_SUMMARY
-          echo "| \`${{ steps.vars.outputs.version }}\` | linux/amd64, linux/arm64 | Multi-arch |" >> $GITHUB_STEP_SUMMARY
-          echo "| \`latest\` | linux/amd64, linux/arm64 | Multi-arch |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 Pull Commands:" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "# Latest version" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ steps.vars.outputs.image-tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "# Always latest" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ steps.vars.outputs.image-latest }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "# Raspberry Pi 5 (ARM64)" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull --platform linux/arm64 ${{ steps.vars.outputs.image-tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        run: |
+          echo "ok=true" >> $GITHUB_OUTPUT
 
-  sync-develop:
-    name: 🔄 Sync develop branch
+  release:
+    name: 🏷️ Publish Release
     runs-on: ubuntu-latest
-    needs: [setup-and-validate, release, docker]
-      always() &&
-      needs.setup-and-validate.outputs.should-release == 'true' &&
-      needs.release.result == 'success' &&
-      (needs.docker.result == 'success' || needs.docker.result == 'skipped')
-    timeout-minutes: 10
-
+    needs: [ setup-and-validate, docker ]
+    if: needs.setup-and-validate.outputs.should-release == 'true' &&
+        needs.docker.result == 'success' &&
+        needs.docker.outputs.image-pushed == 'true'
     steps:
-      - name: 📥 Checkout main branch (post-release)
+      - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
-          ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
+          node-version: ${{ env.NODE_VERSION }}
 
-      - name: 🔧 Config git user
+      - name: Run semantic-release
+        id: sr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm dlx semantic-release --no-ci
+
+      - name: 🔎 Assert planned vs actual version
+        if: needs.setup-and-validate.outputs.next-version != ''
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: 📡 Fetch all branches
-        run: git fetch origin --prune
-
-      - name: 🔍 Check sync status
-        id: check
-        run: |
-          MAIN_COMMIT=$(git rev-parse origin/main)
-          DEVELOP_COMMIT=$(git rev-parse origin/develop)
-
-          if [ "$MAIN_COMMIT" != "$DEVELOP_COMMIT" ]; then
-            if git merge-base --is-ancestor origin/develop origin/main; then
-              echo "sync-needed=true" >> $GITHUB_OUTPUT
-              COMMITS_AHEAD=$(git rev-list --count origin/develop..origin/main)
-              echo "commits-ahead=$COMMITS_AHEAD" >> $GITHUB_OUTPUT
-            else
-              echo "sync-needed=false" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "sync-needed=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: 🔄 Sync develop with release changes
-        run: |
-          RELEASE_VERSION="${{ needs.release.outputs.version }}"
-          if [ -z "$RELEASE_VERSION" ]; then
-            RELEASE_VERSION=$(node -p "require('./package.json').version")
-          fi
-
-          git checkout develop
-          git pull origin develop || echo "Develop fetched"
-
-          if git merge-base --is-ancestor origin/develop origin/main; then
-            git merge --ff-only origin/main
-          else
-            git merge --no-ff origin/main -m "chore: sync develop with release v${RELEASE_VERSION}
-
-          Auto-sync after successful Release-CI completion.
-          
-          Release info:
-          - Version: ${RELEASE_VERSION}
-          - Docker: jruvalcabafsd/byteberry-oauth2:${RELEASE_VERSION}
-          - Trigger: ${{ github.event_name }}"
-          fi
-
-          git push origin develop
-          echo "✅ Develop synced with release v${RELEASE_VERSION}"
-
-      - name: 📊 Sync summary
-        run: |
-          if [ "${{ steps.check.outputs.sync-needed }}" == "true" ]; then
-            RELEASE_VERSION="${{ needs.release.outputs.version }}"
-            if [ -z "$RELEASE_VERSION" ]; then
-              RELEASE_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "unknown")
-            fi
-
-            echo "## 🔄 Post-Release Sync Completed" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
-            echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
-            echo "| 📦 Release Version | \`${RELEASE_VERSION}\` |" >> $GITHUB_STEP_SUMMARY
-            echo "| 🔄 Commits Synced | ${{ steps.check.outputs.commits-ahead }} |" >> $GITHUB_STEP_SUMMARY
-            echo "| 🎯 Target Branch | develop |" >> $GITHUB_STEP_SUMMARY
-            echo "| ✅ Status | Synchronized |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "## ✅ No Sync Required" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Branches are already synchronized or sync not possible." >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "Expected: ${{ needs.setup-and-validate.outputs.next-version }}"
+          echo "Actual:   ${{ steps.sr.outputs.version }}"
+          test "${{ steps.sr.outputs.version }}" = "${{ needs.setup-and-validate.outputs.next-version }}"
 
   post-release:
-    name: 📋 Post-Release
+    name: 📣 Post Release
     runs-on: ubuntu-latest
-    needs: [setup-and-validate, release, docker, sync-develop]
-    timeout-minutes: 10
-
+    needs: [ release ]
+    if: needs.release.result == 'success'
     steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 📊 Release summary
-        run: |
-          echo "# 🚀 Release Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 📦 Version | \`v${{ needs.release.outputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🏷️ Git Tag | [\`v${{ needs.release.outputs.version }}\`](https://github.com/${{ github.repository }}/releases/tag/v${{ needs.release.outputs.version }}) |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🐳 Docker | [\`${{ env.IMAGE_NAME }}:${{ needs.release.outputs.version }}\`](https://hub.docker.com/r/jruvalcabafsd/byteberry-oauth2) |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🏗️ Platforms | linux/amd64, linux/arm64 |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔄 Branch Sync | ✅ develop synchronized |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📄 Changelog | [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🎯 Next Steps:" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Docker images are available for pull" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ GitHub release created with changelog" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Raspberry Pi 5 (ARM64) support ready" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Develop branch synchronized with release" >> $GITHUB_STEP_SUMMARY
-
-      - name: 🎉 Success notification
-        run: |
-          echo "🎉 Release v${{ needs.release.outputs.version }} completed successfully!"
-          echo "📦 Docker: ${{ env.IMAGE_NAME }}:${{ needs.release.outputs.version }}"
-          echo "🏷️ GitHub: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.release.outputs.version }}"
-          echo "🔄 Branches: main and develop synchronized at v${{ needs.release.outputs.version }}"
-
-  on-failure:
-    name: ❌ Release Failed
-    runs-on: ubuntu-latest
-    needs: [setup-and-validate, release, docker, sync-develop]
-
-    steps:
-      - name: 📊 Failure summary
-        run: |
-          echo "# ❌ Release Failed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Validation | ${{ needs.setup-and-validate.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Release | ${{ needs.release.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Docker | ${{ needs.docker.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Sync Develop | ${{ needs.sync-develop.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🔍 Check the failed job logs for details." >> $GITHUB_STEP_SUMMARY
-
-      - name: ❌ Notify failure
-        run: |
-          echo "❌ Release pipeline failed"
-          echo "Validation: ${{ needs.setup-and-validate.result }}"
-          echo "Release: ${{ needs.release.result }}"
-          echo "Docker: ${{ needs.docker.result }}"
-          echo "Sync Develop: ${{ needs.sync-develop.result }}"
-          exit 1
+      - run: echo "Add post-release tasks here"
