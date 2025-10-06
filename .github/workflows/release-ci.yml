@@ -11,7 +11,6 @@ permissions:
 
 env:
   NODE_VERSION: "22.18.0"
-  PNPM_VERSION: "10.18.1"
   IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/byteberry-oauth2
 
 jobs:
@@ -30,8 +29,6 @@ jobs:
 
       - name: 📦 Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
