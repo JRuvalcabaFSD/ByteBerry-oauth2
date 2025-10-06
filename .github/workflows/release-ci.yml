@@ -22,38 +22,65 @@ jobs:
       should-release: ${{ steps.check.outputs.should-release }}
       next-version: ${{ steps.plan.outputs.next-version }}
     steps:
-      - name: Checkout
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: Install deps
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm lint
-      - name: Typecheck
-        run: pnpm typecheck
-      - name: Build
-        run: pnpm build
-      - name: Test (coverage)
-        run: pnpm test:coverage
+      - name: 💾 Cache node_modules
+        uses: actions/cache/save@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: 🔍 Run full validation        
+        run: |
+          export NODE_ENV=test
+          export CI=true
+          export CORS_ORIGINS="${{ secrets.CORS_ORIGINS_CI }}"
+          pnpm type-check
+          pnpm lint
+          pnpm audit
+          pnpm build
+          pnpm test:coverage
+
+      - name: 📦 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-release
+          path: dist/
+          retention-days: 1
 
       - name: 🔍 Check if should release
         id: check
         run: |
-          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "should-release=true" >> $GITHUB_OUTPUT
+            echo "Manual release triggered"
           else
-            echo "should-release=false" >> $GITHUB_OUTPUT
+            COMMITS=$(git log --format="%s" HEAD~1..HEAD)
+            if echo "$COMMITS" | grep -E "^(feat|fix|BREAKING CHANGE)"; then
+              echo "should-release=true" >> $GITHUB_OUTPUT
+              echo "Found releasable commits"
+            else
+              echo "should-release=false" >> $GITHUB_OUTPUT
+              echo "No releasable commits found"
+            fi
           fi
 
       - name: 🧮 Plan next version (semantic-release dry-run)
@@ -66,6 +93,11 @@ jobs:
           NEXT=$(grep -Eo "next release version is [0-9]+\.[0-9]+\.[0-9]+" sr-dry-run.log | awk '{{print $NF}}' | tail -n1)
           echo "next-version=$NEXT" >> $GITHUB_OUTPUT
           echo "Planned next version: $NEXT"
+
+      - name: ✅ Set should-release from plan
+        if: steps.plan.outputs.next-version != ''
+        run: echo "should-release=true" >> $GITHUB_OUTPUT
+        shell: bash
 
   docker:
     name: 🐳 Build & Push Docker
@@ -114,9 +146,11 @@ jobs:
             ${{ steps.vars.outputs.image-tag }}
             ${{ steps.vars.outputs.image-latest }}
 
-      - name: ✅ Verify push
+      - name: ✅ Verify push (manifest)
         id: pushcheck
         run: |
+          docker buildx imagetools inspect "${{ steps.vars.outputs.image-tag }}"
+          docker buildx imagetools inspect "${{ steps.vars.outputs.image-latest }}"
           echo "ok=true" >> $GITHUB_OUTPUT
 
   release:
