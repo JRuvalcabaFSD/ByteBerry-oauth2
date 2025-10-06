@@ -12,7 +12,7 @@ permissions:
 env:
   NODE_VERSION: "22.18.0"
   REGISTRY: docker.io
-  IMAGE_NAME: byteberry-oauth2
+  IMAGE_NAME: jruvalcabafsd/byteberry-oauth2
 
 jobs:
   setup-and-validate:
