@@ -3,9 +3,9 @@
 # Optimized for Raspberry Pi 5 (ARM64) and AMD64
 
 #==============================================================================
-# Build Stage - Dependencies and TypeScript compilation
+# Dependencies Stage - Install deps without source code
 #==============================================================================
-FROM node:lts-slim AS builder
+FROM node:lts-slim AS deps
 
 # Install build dependencies for native modules
 RUN apt-get update && apt-get install -y \
@@ -14,24 +14,40 @@ RUN apt-get update && apt-get install -y \
 	g++ \
 	&& rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /app
-
 # Configure pnpm
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable pnpm
 RUN pnpm --version
 
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
+# Set working directory
+WORKDIR /app
+
+# Copy only lock file and install deps
+COPY pnpm-lock.yaml ./
+
+# Create minimal package.json for dependency installation
+RUN echo '{"name":"temp","version":"1.0.0"}' > package.json
 
 # Install dependencies
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 	pnpm install --frozen-lockfile --prefer-offline
 
-# Copy source code
+#==============================================================================
+# Build Stage - TypeScript compilation with updated package.json
+#==============================================================================
+FROM node:lts-slim AS builder
+
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
 COPY . .
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable pnpm
 
 # Build TypeScript
 RUN pnpm build
@@ -43,9 +59,6 @@ RUN pnpm prune --production
 # Runtime Stage - Minimal production image
 #==============================================================================
 FROM node:lts-slim AS runtime
-
-# Create app directory
-WORKDIR /app
 
 # Create non-root user and group
 RUN groupadd --system --gid 1001 oauth2 && \
