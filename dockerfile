@@ -23,11 +23,8 @@ RUN pnpm --version
 # Set working directory
 WORKDIR /app
 
-# Copy only lock file and install deps
-COPY pnpm-lock.yaml ./
-
-# Create minimal package.json for dependency installation
-RUN echo '{"name":"temp","version":"1.0.0"}' > package.json
+# Copy package and pnpm lock files
+COPY package.json pnpm-lock.yaml ./
 
 # Install dependencies
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
