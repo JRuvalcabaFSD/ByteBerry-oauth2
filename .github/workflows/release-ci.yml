@@ -108,10 +108,10 @@ jobs:
       image-tag: ${{ steps.vars.outputs.image-tag }}
       image-latest: ${{ steps.vars.outputs.image-latest }}
     steps:
-      - name: Checkout
+      - name: 📥 Checkout code AFTER semantic-release
         uses: actions/checkout@v4
 
-      - name: Compute version & tags
+      - name: 🏷️ Compute version & tags
         id: vars
         run: |
           VERSION="${{ needs.setup-and-validate.outputs.next-version }}"
@@ -125,17 +125,36 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Set up Docker Buildx
+      - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
 
-      - name: Login to GHCR
+      - name: 🔐 Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build & push (multi-arch)
+      - name: 📋 Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}},value=${{ steps.vars.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.vars.outputs.version }}
+            type=semver,pattern={{major}},value=${{ steps.vars.outputs.version }}
+            type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.description=ByteBerry oauth2 API
+            org.opencontainers.image.vendor=JRuvalcabaFSD
+            org.opencontainers.image.version=${{ steps.vars.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: 🏗️ Build & push (multi-arch)
         uses: docker/build-push-action@v6
         with:
           push: true
@@ -144,12 +163,45 @@ jobs:
             ${{ steps.vars.outputs.image-tag }}
             ${{ steps.vars.outputs.image-latest }}
 
+      - name: 🧪 Test multi-arch images
+        run: |
+          echo "🧪 Testing published images..."
+
+          echo "Testing AMD64 image..."
+          docker run --rm --platform linux/amd64 \
+            ${{ steps.vars.outputs.image-tag }} \
+            node -e "console.log('AMD64 image working - version ${{ steps.vars.outputs.version }}')"
+
+          echo "Testing ARM64 image availability..."
+          docker manifest inspect ${{ steps.vars.outputs.image-tag }} | grep "arm64" && echo "✅ ARM64 image available"
+
       - name: ✅ Verify push (manifest)
         id: pushcheck
         run: |
           docker buildx imagetools inspect "${{ steps.vars.outputs.image-tag }}"
           docker buildx imagetools inspect "${{ steps.vars.outputs.image-latest }}"
           echo "ok=true" >> $GITHUB_OUTPUT
+
+      - name: 📊 Image summary
+        run: |
+          echo "## 🐳 Docker Images Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | Platforms | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|-----------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| \`${{ steps.vars.outputs.version }}\` | linux/amd64, linux/arm64 | Multi-arch |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`latest\` | linux/amd64, linux/arm64 | Multi-arch |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Pull Commands:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "# Latest version" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ steps.vars.outputs.image-tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# Always latest" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ steps.vars.outputs.image-latest }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# Raspberry Pi 5 (ARM64)" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull --platform linux/arm64 ${{ steps.vars.outputs.image-tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
   release:
     name: 🏷️ Publish Release
