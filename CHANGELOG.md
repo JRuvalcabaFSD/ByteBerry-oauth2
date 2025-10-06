@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.1.0...v1.2.0) (2025-10-06)
+
+
+### Features
+
+* **ci:** add release type input and enhance logging ([acc6da1](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/acc6da11de6d9a276a9eb7455dbeeed12e42be63))
+
 # [1.1.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.0.1...v1.1.0) (2025-10-06)
 
 
