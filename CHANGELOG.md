@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.3.1...v1.3.2) (2025-10-07)
+
+
+### Bug Fixes
+
+* **docker:** inject version into package.json and Docker labels ([9645626](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/9645626880235fbcba7db95002ca910c2910569f))
+
 ## [1.3.1](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.3.0...v1.3.1) (2025-10-06)
 
 
