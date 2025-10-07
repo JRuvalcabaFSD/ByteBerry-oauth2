@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.3.2...v1.3.3) (2025-10-07)
+
+
+### Bug Fixes
+
+* **docker:** add script to update package.json version ([1f2163c](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/1f2163c6a6c6feb449890f86a81b7c3b90ed7f92))
+
 ## [1.3.2](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.3.1...v1.3.2) (2025-10-07)
 
 
