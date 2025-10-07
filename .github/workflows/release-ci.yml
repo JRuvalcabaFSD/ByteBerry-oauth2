@@ -124,26 +124,6 @@ jobs:
           echo "image-latest=${{ env.IMAGE_NAME }}:latest" >> $GITHUB_OUTPUT
           echo "🏷️ Will build version: $VERSION"
 
-      - name: 📝 Update package.json with correct version
-        run: |
-          VERSION="${{ steps.vars.outputs.version }}"
-          echo "📝 Updating package.json to version $VERSION for Docker build..."
-          
-          # Usar Node.js para actualizar el package.json de forma segura
-          node -e "
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            pkg.version = '$VERSION';
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-          "
-          
-          # Verificar el cambio
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          echo "✅ package.json updated to version: $CURRENT_VERSION"
-          
-          # IMPORTANTE: Este cambio es solo local para el build
-          # No se hace commit, semantic-release lo hará después
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -181,6 +161,8 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            VERSION=${{ steps.vars.outputs.version }}
           tags: |
             ${{ steps.vars.outputs.image-tag }}
             ${{ steps.vars.outputs.image-latest }}

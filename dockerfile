@@ -31,20 +31,41 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 	pnpm install --frozen-lockfile --prefer-offline
 
 #==============================================================================
-# Build Stage - TypeScript compilation with updated package.json
+# Build Stage - TypeScript compilation with version injection
 #==============================================================================
 FROM node:lts-slim AS builder
+
+# Accept version as build argument
+ARG VERSION
+ENV BUILD_VERSION=${VERSION}
 
 WORKDIR /app
 
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
+# Copy source code
 COPY . .
 
+# Configure pnpm
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable pnpm
+
+# Update package.json version if VERSION arg is provided
+RUN if [ -n "$BUILD_VERSION" ]; then \
+	echo "📝 Updating package.json to version: $BUILD_VERSION"; \
+	node -e " \
+	const fs = require('fs'); \
+	const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')); \
+	pkg.version = process.env.BUILD_VERSION; \
+	fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n'); \
+	"; \
+	CURRENT_VERSION=$(node -p "require('./package.json').version"); \
+	echo "✅ package.json updated to: $CURRENT_VERSION"; \
+	else \
+	echo "⚠️ No VERSION provided, keeping original version"; \
+	fi
 
 # Build TypeScript
 RUN pnpm build
@@ -57,6 +78,10 @@ RUN pnpm prune --production
 #==============================================================================
 FROM node:lts-slim AS runtime
 
+# Accept version for metadata
+ARG VERSION
+ENV APP_VERSION=${VERSION:-unknown}
+
 # Create non-root user and group
 RUN groupadd --system --gid 1001 oauth2 && \
 	useradd --system --uid 1001 --gid oauth2 --home /app --shell /bin/false oauth2
@@ -66,6 +91,8 @@ RUN apt-get update && apt-get install -y \
 	dumb-init \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& apt-get clean
+
+WORKDIR /app
 
 # Copy production dependencies
 COPY --from=builder --chown=oauth2:oauth2 /app/node_modules ./node_modules
@@ -102,13 +129,14 @@ ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 # Start application
 CMD ["node", "dist/app.js"]
 
-# Metadata labels
+# Metadata labels (version will be injected dynamically)
 LABEL maintainer="JRuvalcabaFSD <support@jrmdev.org>"
 LABEL description="ByteBerry OAuth2 Service - Microservice for OAuth2 authentication"
-LABEL version="0.1.0"
+LABEL version="${APP_VERSION}"
 LABEL org.opencontainers.image.title="ByteBerry OAuth2 Service"
 LABEL org.opencontainers.image.description="OAuth2 authentication microservice with Clean Architecture"
 LABEL org.opencontainers.image.vendor="JRuvalcabaFSD"
+LABEL org.opencontainers.image.version="${APP_VERSION}"
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.source="https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2"
 LABEL org.opencontainers.image.documentation="https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2#readme"

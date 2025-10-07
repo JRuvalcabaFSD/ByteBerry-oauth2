@@ -84,8 +84,11 @@ build_dev() {
 
     print_info "Building development image for ${platform}..."
 
+		VERSION="0.0.0.-dev"
+
     docker buildx build \
         --platform ${platform} \
+				--build-arg VERSION="${VERSION}" \
         --tag ${IMAGE_NAME}:dev \
         --load \
         .
@@ -97,10 +100,11 @@ build_dev() {
 # Build and push production (multi-platform)
 build_prod() {
     print_info "Building production images for: ${PLATFORMS}..."
-
+		
     # Build and push latest
     docker buildx build \
         --platform ${PLATFORMS} \
+				--build-arg VERSION="${VERSION}" \
         --tag ${DOCKER_HUB_REPO}:latest \
         --tag ${DOCKER_HUB_REPO}:${VERSION} \
         --push \

@@ -11,7 +11,7 @@
     "clean": "rm -rf dist coverage *.tsbuildinfo",
     "commit": "git-cz",
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/app.ts",
-    "docker:build": "docker build -t byteberry-oauth2:dev .",
+    "docker:build": "./scripts/docker-build.sh dev",
     "docker:run": "docker run --rm -p 4000:4000 -e NODE_ENV=development byteberry-oauth2:dev",
     "docker:test": "./scripts/docker-test.sh test",
     "lint:fix": "eslint . --fix",
