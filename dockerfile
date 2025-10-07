@@ -53,19 +53,8 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable pnpm
 
 # Update package.json version if VERSION arg is provided
-RUN if [ -n "$BUILD_VERSION" ]; then \
-	echo "📝 Updating package.json to version: $BUILD_VERSION"; \
-	node -e " \
-	const fs = require('fs'); \
-	const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')); \
-	pkg.version = process.env.BUILD_VERSION; \
-	fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n'); \
-	"; \
-	CURRENT_VERSION=$(node -p "require('./package.json').version"); \
-	echo "✅ package.json updated to: $CURRENT_VERSION"; \
-	else \
-	echo "⚠️ No VERSION provided, keeping original version"; \
-	fi
+COPY scripts/update-version.sh /tmp/update-version.sh
+RUN chmod +x /tmp/update-version.sh && /tmp/update-version.sh && rm /tmp/update-version.sh
 
 # Build TypeScript
 RUN pnpm build
