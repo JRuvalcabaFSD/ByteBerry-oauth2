@@ -1,5 +1,5 @@
 import { Server } from 'http';
-import express, { Application, Router } from 'express';
+import express, { Application } from 'express';
 
 import { IAuthController, IClock, IConfig, IHealthController, IHttpServer, ILogger, IUuid, ServerInfo } from '@/interfaces';
 import {

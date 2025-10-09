@@ -1,6 +1,6 @@
 // tests/unit/container/factories.test.ts
 import { createConfig } from '@/config';
-import { Container, createWinstonLoggerService, createHttpServer, TOKENS, createHealthController } from '@/container';
+import { Container, createWinstonLoggerService, createHttpServer, TOKENS, createHealthController, createAuthController } from '@/container';
 import { createClockService, createUuidService, WinstonLoggerService, HttpServer } from '@/infrastructure';
 
 describe('Factories', () => {
@@ -56,6 +56,7 @@ describe('Factories', () => {
       container.registerSingleton(TOKENS.Uuid, createUuidService);
       container.registerSingleton(TOKENS.Logger, createWinstonLoggerService);
       container.registerSingleton(TOKENS.HealthController, createHealthController);
+      container.registerSingleton(TOKENS.AuthController, createAuthController);
 
       // When
       const httpServer = createHttpServer(container);
@@ -72,7 +73,7 @@ describe('Factories', () => {
       container.registerSingleton(TOKENS.Uuid, createUuidService);
       container.registerSingleton(TOKENS.Logger, createWinstonLoggerService);
       container.registerSingleton(TOKENS.HealthController, createHealthController);
-
+      container.registerSingleton(TOKENS.AuthController, createAuthController);
       // When
       const httpServer = createHttpServer(container);
 
@@ -92,6 +93,7 @@ describe('Factories', () => {
       container.registerSingleton(TOKENS.Uuid, createUuidService);
       container.registerSingleton(TOKENS.Logger, createWinstonLoggerService);
       container.registerSingleton(TOKENS.HealthController, createHealthController);
+      container.registerSingleton(TOKENS.AuthController, createAuthController);
 
       // When
       const httpServer = createHttpServer(container);

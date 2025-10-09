@@ -132,7 +132,7 @@ export class AuthController implements IAuthController {
 
       const mockResponse: ITokenResponse = {
         access_token: 'mock_jwt_token_' + Date.now(),
-        toke_type: 'Bearer',
+        token_type: 'Bearer',
         expires_in: 900, // 15 minutes
       };
 

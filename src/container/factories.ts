@@ -1,4 +1,3 @@
-import { IHealthController } from './../interfaces/infrastructure/controllers/healthController.interface';
 import { TOKENS } from '@/container';
 import { HealthController, HttpServer, WinstonLoggerService } from '@/infrastructure';
 import { AuthController } from '@/infrastructure/controller/auth.controller';

@@ -2,7 +2,7 @@ import request from 'supertest';
 
 import { Config } from '@/config';
 import { HttpServer } from '@/infrastructure';
-import { IClock, IConfig, IContainer, IHealthController, ILogger, IUuid } from '@/interfaces';
+import { IAuthController, IClock, IConfig, IContainer, IHealthController, ILogger, IUuid } from '@/interfaces';
 import { bootstrapContainer, TOKENS } from '@/container';
 
 describe('HttpServer', () => {
@@ -13,6 +13,7 @@ describe('HttpServer', () => {
   let clock: IClock;
   let uuid: IUuid;
   let healthController: IHealthController;
+  let authController: IAuthController;
 
   beforeEach(() => {
     // Configurar variables de entorno para test
@@ -28,8 +29,9 @@ describe('HttpServer', () => {
     logger = container.resolve<ILogger>(TOKENS.Logger);
     uuid = container.resolve<IUuid>(TOKENS.Uuid);
     healthController = container.resolve<IHealthController>(TOKENS.HealthController);
+    authController = container.resolve<IAuthController>(TOKENS.AuthController);
 
-    httpServer = new HttpServer(config, logger, uuid, clock, healthController);
+    httpServer = new HttpServer(config, logger, uuid, clock, healthController, authController);
   });
 
   afterEach(async () => {
@@ -145,7 +147,7 @@ describe('HttpServer', () => {
   describe('Catch Block - Lines 93-97', () => {
     it('should_CatchSynchronousError_When_ListenThrows', async () => {
       // Given - Mock app.listen para lanzar error síncrono
-      const errorServer = new HttpServer(config, logger, uuid, clock, healthController);
+      const errorServer = new HttpServer(config, logger, uuid, clock, healthController, authController);
       const app = errorServer.getApp();
 
       // Forzar error síncrono

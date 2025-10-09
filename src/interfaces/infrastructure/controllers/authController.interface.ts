@@ -68,7 +68,7 @@ export interface IAuthorizeResponse {
 
 export interface ITokenResponse {
   access_token: string;
-  toke_type: string;
+  token_type: string;
   expires_in: number;
   refresh_token?: string;
   scope?: string;
