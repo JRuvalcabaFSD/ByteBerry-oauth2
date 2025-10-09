@@ -1,7 +1,7 @@
 import { Server } from 'http';
-import express, { Application } from 'express';
+import express, { Application, Router } from 'express';
 
-import { IClock, IConfig, IHealthController, IHttpServer, ILogger, IUuid, ServerInfo } from '@/interfaces';
+import { IAuthController, IClock, IConfig, IHealthController, IHttpServer, ILogger, IUuid, ServerInfo } from '@/interfaces';
 import {
   createCORSMiddleware,
   createErrorMiddleware,
@@ -10,6 +10,7 @@ import {
   createRequestIdMiddleware,
   createSecurityMiddleware,
 } from '@/infrastructure';
+import { createAuthRoutes } from '@/infrastructure/http/routes/auth.routes';
 
 /**
  * HTTP Server implementation that provides a complete Express.js server setup
@@ -40,6 +41,8 @@ export class HttpServer implements IHttpServer {
    * @param {ILogger} logger - Logger instance for logging
    * @param {IUuid} uuid - UUID generator instance
    * @param {IClock} clock - Clock instance for time-related functions
+   * @param {IHealthController} healthController - Health check controller instance
+   * @param {IAuthController} authController - Authentication controller instance
    * @memberof HttpServer
    */
 
@@ -48,7 +51,8 @@ export class HttpServer implements IHttpServer {
     private readonly logger: ILogger,
     private readonly uuid: IUuid,
     private readonly clock: IClock,
-    private readonly healthController: IHealthController
+    private readonly healthController: IHealthController,
+    private readonly authController: IAuthController
   ) {
     this.app = express();
     this.setupMiddlewares();
@@ -211,7 +215,11 @@ export class HttpServer implements IHttpServer {
    */
 
   private setupRoutes() {
-    this.app.use('/', createHealthRoutes(this.healthController));
+    const healthRoutes = createHealthRoutes(this.healthController);
+    const authRoutes = createAuthRoutes(this.authController);
+
+    this.app.use(healthRoutes);
+    this.app.use(authRoutes);
     this.app.get('/', (req, res) => {
       res.json({
         service: this.config.serviceName,
@@ -220,10 +228,7 @@ export class HttpServer implements IHttpServer {
         timestamp: this.clock.isoString(),
         requestId: req.requestId,
         environment: this.config.nodeEnv,
-        endpoints: {
-          health: '/health',
-          deepHealth: '/health/deep',
-        },
+        endpoints: this.getRoutesList('json'),
       });
     });
 
@@ -235,6 +240,11 @@ export class HttpServer implements IHttpServer {
         requestId: req.requestId,
         timestamp: this.clock.isoString(),
       });
+    });
+
+    this.logger.info('Routes configured', {
+      context: 'HttpServer.setupRoutes',
+      routes: this.getRoutesList('text'),
     });
   }
 
@@ -250,5 +260,29 @@ export class HttpServer implements IHttpServer {
 
   private setupErrorHandlers() {
     this.app.use(createErrorMiddleware(this.logger, this.config));
+  }
+
+  private getRoutesList(type: 'json' | 'text'): Record<string, unknown> | string[] {
+    const routes = [
+      { name: 'health', value: '/health', text: 'GET /health' },
+      { name: 'deepHealth', value: '/health/deep', text: 'GET /health/deep' },
+      { name: 'authorize', value: '/authorize', text: 'GET /authorize' },
+      { name: 'token', value: '/token', text: 'GET /token' },
+      { name: 'jwks', value: '/jwks.json', text: 'GET /jwks.json' },
+      { name: 'well-known', value: '/.well-known/jwks.json', text: 'GET /.well-known/jwks.json' },
+      { name: 'home', value: '/', text: 'GET /' },
+    ];
+
+    if (type === 'json') {
+      return routes.reduce(
+        (acc, { name, value }) => {
+          acc[name] = value;
+          return acc;
+        },
+        {} as Record<string, unknown>
+      );
+    } else {
+      return routes.map(item => item.text);
+    }
   }
 }

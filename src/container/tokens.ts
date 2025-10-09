@@ -20,14 +20,19 @@
  * @property `Logger` Identifier for the application logger.
  * @property `HttpServer` Identifier for the HTTP server instance or adapter.
  * @property `HealthController` Identifier for the health-check controller/handler.
+ * @property `AuthController` Identifier for the authentication controller/handler.
  */
 export const TOKENS = {
+  //Critical tokens
   Clock: Symbol.for('Clock'),
   Config: Symbol.for('Config'),
-  HealthController: Symbol.for('HealthController'),
-  HttpServer: Symbol.for('HttpServer'),
   Logger: Symbol.for('Logger'),
   Uuid: Symbol.for('Uuid'),
+
+  //Server token
+  HttpServer: Symbol.for('HttpServer'),
+  AuthController: Symbol.for('AuthController'),
+  HealthController: Symbol.for('HealthController'),
 } as const;
 
 /**

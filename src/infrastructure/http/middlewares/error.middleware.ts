@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { IConfig, ILogger } from '@/interfaces';
+import { HttpError } from '@/shared/errors/http.errors';
 
 /**
  * Creates an Express error handling middleware that logs errors and returns standardized error responses.
@@ -31,11 +32,20 @@ export function createErrorMiddleware(logger: ILogger, config: IConfig) {
       url: req.originalUrl || req.url,
     });
 
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: config.isDevelopment() ? error.message : 'Something went wrong',
-      requestId,
-      timestamp: new Date().toISOString(),
-    });
+    if (error instanceof HttpError) {
+      const { name, statusCode, message } = error;
+      res.status(statusCode).json({
+        error: name,
+        requestId,
+        message,
+      });
+    } else {
+      res.status(500).json({
+        error: 'Internal Server Error',
+        message: config.isDevelopment() ? error.message : 'Something went wrong',
+        requestId,
+        timestamp: new Date().toISOString(),
+      });
+    }
   };
 }

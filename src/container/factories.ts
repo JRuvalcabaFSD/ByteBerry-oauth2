@@ -1,5 +1,7 @@
+import { IHealthController } from './../interfaces/infrastructure/controllers/healthController.interface';
 import { TOKENS } from '@/container';
 import { HealthController, HttpServer, WinstonLoggerService } from '@/infrastructure';
+import { AuthController } from '@/infrastructure/controller/auth.controller';
 import { IContainer } from '@/interfaces';
 
 /**
@@ -18,10 +20,11 @@ export function createWinstonLoggerService(c: IContainer): WinstonLoggerService 
 }
 
 /**
- * Factory function that creates and configures an HttpServer instance.
+ * Creates and returns a new instance of the `HttpServer` class, resolving all required dependencies
+ * from the provided container.
  *
- * @param c - The dependency injection container used to resolve required dependencies
- * @returns A new HttpServer instance with resolved dependencies for Config, Logger, Uuid, and Clock
+ * @param c - The dependency injection container used to resolve required services and controllers.
+ * @returns A fully constructed `HttpServer` instance with all dependencies injected.
  */
 
 export function createHttpServer(c: IContainer): HttpServer {
@@ -30,7 +33,8 @@ export function createHttpServer(c: IContainer): HttpServer {
     c.resolve(TOKENS.Logger),
     c.resolve(TOKENS.Uuid),
     c.resolve(TOKENS.Clock),
-    c.resolve(TOKENS.HealthController)
+    c.resolve(TOKENS.HealthController),
+    c.resolve(TOKENS.AuthController)
   );
 }
 
@@ -51,4 +55,15 @@ export function createHttpServer(c: IContainer): HttpServer {
 
 export function createHealthController(c: IContainer): HealthController {
   return new HealthController(c, c.resolve(TOKENS.Config), c.resolve(TOKENS.Logger), c.resolve(TOKENS.Uuid), c.resolve(TOKENS.Clock));
+}
+
+/**
+ * Factory function to create an instance of `AuthController`.
+ *
+ * @param c - The dependency injection container used to resolve dependencies.
+ * @returns An instance of `AuthController` initialized with its required dependencies.
+ */
+
+export function createAuthController(c: IContainer): AuthController {
+  return new AuthController(c.resolve(TOKENS.Logger));
 }

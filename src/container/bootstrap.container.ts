@@ -1,6 +1,12 @@
 import { createClockService, createUuidService } from '@/infrastructure';
-import { criticalServices, TOKENS } from '@/container/tokens';
-import { createHealthController, createHttpServer, createWinstonLoggerService } from '@/container';
+import {
+  createAuthController,
+  createHealthController,
+  createHttpServer,
+  createWinstonLoggerService,
+  criticalServices,
+  TOKENS,
+} from '@/container';
 import { Container } from '@/container/container';
 import { ContainerCreationError } from '@/shared';
 import { IContainer } from '@/interfaces';
@@ -32,6 +38,7 @@ export function bootstrapContainer(): IContainer {
   container.register(TOKENS.Logger, createWinstonLoggerService);
   container.register(TOKENS.HttpServer, createHttpServer);
   container.register(TOKENS.HealthController, createHealthController);
+  container.register(TOKENS.AuthController, createAuthController);
 
   criticalServices.forEach(({ token }) => {
     if (!container.isRegistered(token)) throw new ContainerCreationError(token);

@@ -9,6 +9,7 @@ export * from './infrastructure/http/httpServer.interface';
 
 //Infrastructure - Controller
 export * from './infrastructure/controllers/healthController.interface';
+export * from './infrastructure/controllers/authController.interface';
 
 //Infrastructure - Services
 export * from './infrastructure/services/clock.interface';
