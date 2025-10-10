@@ -14,7 +14,11 @@ export * from './http/middlewares/security.middleware';
 //Http - routes
 export * from './http/routes/health.routes';
 
+//Repositories
+export * from './repositories/authorizationCode.repository.impl';
+
 //Services
 export * from './services/clock.service';
 export * from './services/uuid.service';
 export * from './services/winston.service';
+export * from './services/pkceValidator.service';

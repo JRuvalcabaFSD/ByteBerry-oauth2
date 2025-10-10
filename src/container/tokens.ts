@@ -23,16 +23,27 @@
  * @property `AuthController` Identifier for the authentication controller/handler.
  */
 export const TOKENS = {
-  //Critical tokens
+  //Core tokens
   Clock: Symbol.for('Clock'),
   Config: Symbol.for('Config'),
   Logger: Symbol.for('Logger'),
   Uuid: Symbol.for('Uuid'),
+  HttpServer: Symbol.for('HttpServer'),
 
   //Server token
-  HttpServer: Symbol.for('HttpServer'),
   AuthController: Symbol.for('AuthController'),
   HealthController: Symbol.for('HealthController'),
+
+  //OAuth2 services
+  PckValidator: Symbol.for('PckValidator'),
+
+  //OAuth2 repositories
+  AuthorizationCodeRepository: Symbol.for('AuthorizationCodeRepository'),
+
+  //Oauth2 Use Cases
+  GenerateAuthorizationCodeUseCase: Symbol.for('GenerateAuthorizationCodeUseCase'),
+  ExchangeAuthorizationUseCase: Symbol.for('ExchangeAuthorizationUseCase'),
+  ValidatePkceChallengeUseCase: Symbol.for('ValidatePkceChallengeUseCse'),
 } as const;
 
 /**

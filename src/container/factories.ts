@@ -1,5 +1,16 @@
+import {
+  ExchangeAuthorizationCodeUseCase,
+  GenerateAuthorizationCodeUseCase,
+  ValidatorPkceChallengeUseCase as ValidatePkceChallengeUseCase,
+} from '@/application';
 import { TOKENS } from '@/container';
-import { HealthController, HttpServer, WinstonLoggerService } from '@/infrastructure';
+import {
+  AuthorizationCodeRepositoryImpl,
+  HealthController,
+  HttpServer,
+  PkceValidatorService,
+  WinstonLoggerService,
+} from '@/infrastructure';
 import { AuthController } from '@/infrastructure/controller/auth.controller';
 import { IContainer } from '@/interfaces';
 
@@ -57,12 +68,76 @@ export function createHealthController(c: IContainer): HealthController {
 }
 
 /**
- * Factory function to create an instance of `AuthController`.
+ * Creates an instance of the PkceValidatorService.
+ *
+ * @param c - The container used to resolve dependencies.
+ * @returns An instance of PkceValidatorService.
+ */
+
+export function createPkceValidator(c: IContainer): PkceValidatorService {
+  return new PkceValidatorService(c.resolve(TOKENS.Logger));
+}
+
+/**
+ * Creates an instance of the AuthorizationCodeRepositoryImpl.
  *
  * @param c - The dependency injection container used to resolve dependencies.
- * @returns An instance of `AuthController` initialized with its required dependencies.
+ * @returns An instance of AuthorizationCodeRepositoryImpl.
+ */
+
+export function createAuthorizationCodeRepository(c: IContainer): AuthorizationCodeRepositoryImpl {
+  return new AuthorizationCodeRepositoryImpl(c.resolve(TOKENS.Logger));
+}
+
+/**
+ * Creates an instance of the GenerateAuthorizationCodeUseCase.
+ *
+ * @param c - The container used to resolve dependencies.
+ * @returns An instance of GenerateAuthorizationCodeUseCase.
+ */
+
+export function createGenerateAuthorizationCodeUseCase(c: IContainer): GenerateAuthorizationCodeUseCase {
+  return new GenerateAuthorizationCodeUseCase(
+    c.resolve(TOKENS.AuthorizationCodeRepository),
+    c.resolve(TOKENS.Uuid),
+    c.resolve(TOKENS.Logger)
+  );
+}
+
+/**
+ * Creates an instance of the ExchangeAuthorizationCodeUseCase.
+ *
+ * @param c - The container used to resolve dependencies.
+ * @returns An instance of ExchangeAuthorizationCodeUseCase.
+ */
+
+export function createExchangeAuthorizationCodeUseCase(c: IContainer): ExchangeAuthorizationCodeUseCase {
+  return new ExchangeAuthorizationCodeUseCase(c.resolve(TOKENS.AuthorizationCodeRepository), c.resolve(TOKENS.Logger));
+}
+
+/**
+ * Creates an instance of the ValidatePkceChallengeUseCase.
+ *
+ * @param c - The container instance used to resolve dependencies.
+ * @returns An instance of ValidatePkceChallengeUseCase.
+ */
+
+export function createValidatePkceChallengeUseCase(c: IContainer): ValidatePkceChallengeUseCase {
+  return new ValidatePkceChallengeUseCase(c.resolve(TOKENS.PckValidator), c.resolve(TOKENS.Logger));
+}
+
+/**
+ * Creates an instance of the AuthController.
+ *
+ * @param c - The dependency injection container used to resolve dependencies.
+ * @returns An instance of AuthController with the required dependencies injected.
  */
 
 export function createAuthController(c: IContainer): AuthController {
-  return new AuthController(c.resolve(TOKENS.Logger));
+  return new AuthController(
+    c.resolve(TOKENS.Logger),
+    c.resolve(TOKENS.GenerateAuthorizationCodeUseCase),
+    c.resolve(TOKENS.ExchangeAuthorizationUseCase),
+    c.resolve(TOKENS.ValidatePkceChallengeUseCase)
+  );
 }

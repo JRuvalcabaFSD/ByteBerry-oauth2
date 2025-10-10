@@ -1,8 +1,12 @@
 import { createClockService, createUuidService } from '@/infrastructure';
 import {
   createAuthController,
+  createAuthorizationCodeRepository,
+  createGenerateAuthorizationCodeUseCase,
   createHealthController,
   createHttpServer,
+  createPkceValidator,
+  createValidatePkceChallengeUseCase,
   createWinstonLoggerService,
   criticalServices,
   TOKENS,
@@ -33,12 +37,17 @@ export function bootstrapContainer(): IContainer {
   const container = new Container();
 
   container.register(TOKENS.Config, createConfig);
+  container.register(TOKENS.Logger, createWinstonLoggerService);
   container.register(TOKENS.Clock, createClockService);
   container.register(TOKENS.Uuid, createUuidService);
-  container.register(TOKENS.Logger, createWinstonLoggerService);
-  container.register(TOKENS.HttpServer, createHttpServer);
+  container.register(TOKENS.PckValidator, createPkceValidator);
+  container.register(TOKENS.AuthorizationCodeRepository, createAuthorizationCodeRepository);
+  container.register(TOKENS.GenerateAuthorizationCodeUseCase, createGenerateAuthorizationCodeUseCase);
+  container.register(TOKENS.ValidatePkceChallengeUseCase, createValidatePkceChallengeUseCase);
+
   container.register(TOKENS.HealthController, createHealthController);
   container.register(TOKENS.AuthController, createAuthController);
+  container.register(TOKENS.HttpServer, createHttpServer);
 
   criticalServices.forEach(({ token }) => {
     if (!container.isRegistered(token)) throw new ContainerCreationError(token);

@@ -20,10 +20,10 @@ export interface IAuthorizeRequest {
   response_type: string;
   client_id: string;
   redirect_uri: string;
-  state: string | undefined;
-  code_challenge: string | undefined;
-  code_challenge_method: string | undefined;
-  scope: string | undefined;
+  state?: string;
+  code_challenge?: string;
+  code_challenge_method?: string;
+  scope?: string;
 }
 
 /**
@@ -41,7 +41,7 @@ export interface ITokenRequest {
   code: string;
   redirect_uri: string;
   client_id: string;
-  code_verifier: string | undefined;
+  code_verifier?: string;
 }
 
 /**
@@ -52,8 +52,8 @@ export interface ITokenRequest {
  */
 
 export interface IAuthorizeResponse {
-  code: string | undefined;
-  state: string | undefined;
+  code?: string | undefined;
+  state?: string | undefined;
 }
 
 /**

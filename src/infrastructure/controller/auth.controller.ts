@@ -10,6 +10,7 @@ import {
   ITokenResponse,
 } from '@/interfaces';
 import { BadRequestError } from '@/shared/errors/http.errors';
+import { ExchangeAuthorizationCodeUseCase, GenerateAuthorizationCodeUseCase, ValidatorPkceChallengeUseCase } from '@/application';
 
 /**
  * OAuth2 Authorization Controller
@@ -49,12 +50,22 @@ import { BadRequestError } from '@/shared/errors/http.errors';
 
 export class AuthController implements IAuthController {
   /**
-   * Creates an instance of AuthController.
-   * @param {ILogger} logger
-   * @memberof AuthController
+   * Initializes a new instance of the AuthController.
+   *
+   * @param logger - The logger service used for logging controller events.
+   * @param generateAuthCode - Use case for generating authorization codes.
+   * @param exchangeAuthCode - Use case for exchanging authorization codes for tokens.
+   * @param validatePkce - Use case for validating PKCE challenges.
+   *
+   * Logs the initialization of the AuthController.
    */
 
-  constructor(private readonly logger: ILogger) {
+  constructor(
+    private readonly logger: ILogger,
+    private readonly generateAuthCode: GenerateAuthorizationCodeUseCase,
+    private readonly exchangeAuthCode: ExchangeAuthorizationCodeUseCase,
+    private readonly validatePkce: ValidatorPkceChallengeUseCase
+  ) {
     this.logger.info('AuthController initialized', { context: 'AuthController' });
   }
 
@@ -80,14 +91,30 @@ export class AuthController implements IAuthController {
    */
 
   public authorize = async (req: Request, res: Response): Promise<void> => {
-    const context = { context: 'AuthController.authorize', requestId: req.requestId };
+    const context = {
+      context: 'AuthController.authorize',
+      requestId: req.requestId ?? 'unknown',
+    };
 
-    this.logger.info('Authorization request received', { ...context, clientId: req.query?.clientId });
+    this.logger.info('Authorization request received', {
+      ...context,
+      responseType: req.query?.response_type,
+      clientId: req.query?.clientId,
+      hasPkce: !!req.query.code_challenge,
+    });
+
     try {
       const authorizeParams = this.validateAuthorizeRequest(req.query ?? {});
 
-      const mockResponse: IAuthorizeResponse = {
-        code: 'mock_authorization_code_' + Date.now(),
+      const code = await this.generateAuthCode.execute({
+        clientId: authorizeParams.client_id,
+        redirectUri: authorizeParams.redirect_uri,
+        codeChallenge: authorizeParams.code_challenge!,
+        scopes: authorizeParams.scope?.split(''),
+      });
+
+      const response: IAuthorizeResponse = {
+        code,
         state: authorizeParams.state,
       };
 
@@ -95,10 +122,9 @@ export class AuthController implements IAuthController {
         ...context,
         clientId: authorizeParams.client_id,
         hasState: !!authorizeParams.state,
-        hasPkce: !!authorizeParams.code_challenge,
       });
 
-      res.status(200).json(mockResponse);
+      res.status(200).json(response);
     } catch (error) {
       this.logger.error('Authorization request failed', {
         ...context,
@@ -125,11 +151,23 @@ export class AuthController implements IAuthController {
       ...context,
       grantType: req.body?.grant_type,
       clientId: req.body?.client_id,
+      hasCodeVerifier: !!req.body.code_verifier,
     });
 
     try {
       const tokenParams = this.validateTokenRequest(req.body ?? {});
 
+      const exchangeResult = await this.exchangeAuthCode.execute({
+        code: tokenParams.code,
+        clientId: tokenParams.client_id,
+        redirectUri: tokenParams.redirect_uri,
+        codeVerifier: tokenParams.code_verifier!,
+      });
+
+      await this.validatePkce.execute(tokenParams.code_verifier!, exchangeResult.codeChallenge);
+
+      // TODO: In T059, generate JWT access token with RS256
+      // For now, return mock response
       const mockResponse: ITokenResponse = {
         access_token: 'mock_jwt_token_' + Date.now(),
         token_type: 'Bearer',
@@ -208,19 +246,19 @@ export class AuthController implements IAuthController {
     if (query.response_type !== 'code') throw new BadRequestError('Invalid response_type. Must be "code"');
     if (!query.client_id) throw new BadRequestError('Missing required parameter: client_id');
     if (!query.redirect_uri) throw new BadRequestError('Missing required parameter: redirect_uri');
-    if (query.code_challenge && !query.code_challenge_method)
-      throw new BadRequestError('code_challenge_method is required when code_challenge is provided');
-    if (query.code_challenge_method && !['S256', 'plain'].includes(query.code_challenge_method))
-      throw new BadRequestError('Invalid code_challenge_method. Must be "S256" or "plain"');
+    // PKCE is now REQUIRED (enforcing best practice)
+    if (!query.code_challenge) throw new BadRequestError('Missing required parameter: code_challenge (PKCE is required)');
+    if (!query.code_challenge_method) throw new BadRequestError('Missing required parameter: code_challenge_method');
+    if (query.code_challenge_method !== 'S256') throw new BadRequestError('Invalid code_challenge_method. Only S256 is supported');
 
     return {
-      response_type: query.response_type as string,
-      client_id: query.client_id as string,
-      redirect_uri: query.redirect_uri as string,
-      state: query.state as string | undefined,
-      code_challenge: query.code_challenge as string | undefined,
-      code_challenge_method: query.code_challenge_method as string | undefined,
-      scope: query.scope as string | undefined,
+      response_type: query.response_type,
+      client_id: query.client_id,
+      redirect_uri: query.redirect_uri,
+      code_challenge: query.code_challenge,
+      code_challenge_method: query.code_challenge_method,
+      state: query.state,
+      scope: query.scope,
     };
   }
 
@@ -239,13 +277,15 @@ export class AuthController implements IAuthController {
     if (!body.code) throw new BadRequestError('Missing required parameter: code');
     if (!body.redirect_uri) throw new BadRequestError('Missing required parameter: redirect_uri');
     if (!body.client_id) throw new BadRequestError('Missing required parameter: client_id');
+    // PKCE verifier is now REQUIRED
+    if (!body.code_verifier) throw new BadRequestError('Missing required parameter: code_verifier (PKCE is required)');
 
     return {
-      grant_type: body.grant_type as string,
-      code: body.code as string,
-      redirect_uri: body.redirect_uri as string,
-      client_id: body.client_id as string,
-      code_verifier: body.code_verifier as string | undefined,
+      grant_type: body.grant_type,
+      code: body.code,
+      redirect_uri: body.redirect_uri,
+      client_id: body.client_id,
+      code_verifier: body.code_verifier,
     };
   }
 }
