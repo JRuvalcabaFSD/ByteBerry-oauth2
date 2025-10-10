@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 
 import { AuthController } from '@/infrastructure/controller/auth.controller';
-import { ILogger } from '@/interfaces';
+import { ILogger, IUuid } from '@/interfaces';
 import { BadRequestError } from '@/shared/errors/http.errors';
+import { GenerateAuthorizationCodeUseCase } from '@/application';
 
 describe('AuthController', () => {
   let authController: AuthController;
   let mockLogger: ILogger;
+  let generateCode: GenerateAuthorizationCodeUseCase;
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
 
@@ -19,6 +21,8 @@ describe('AuthController', () => {
       log: jest.fn(),
       warn: jest.fn(),
     };
+
+    generateCode = jest.fn();
 
     authController = new AuthController(mockLogger);
 

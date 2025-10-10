@@ -1,6 +1,18 @@
 // tests/unit/container/factories.test.ts
 import { createConfig } from '@/config';
-import { Container, createWinstonLoggerService, createHttpServer, TOKENS, createHealthController, createAuthController } from '@/container';
+import {
+  Container,
+  createWinstonLoggerService,
+  createHttpServer,
+  TOKENS,
+  createHealthController,
+  createAuthController,
+  createGenerateAuthorizationCodeUseCase,
+  createAuthorizationCodeRepository,
+  createExchangeAuthorizationCodeUseCase,
+  createValidatePkceChallengeUseCase,
+  createPkceValidator,
+} from '@/container';
 import { createClockService, createUuidService, WinstonLoggerService, HttpServer } from '@/infrastructure';
 
 describe('Factories', () => {
@@ -49,35 +61,42 @@ describe('Factories', () => {
 
   describe('createHttpServer', () => {
     it('should_CreateHttpServer_When_Called', () => {
-      // Given
       const container = new Container();
+
       container.registerSingleton(TOKENS.Config, createConfig);
+      container.registerSingleton(TOKENS.Logger, createWinstonLoggerService);
       container.registerSingleton(TOKENS.Clock, createClockService);
       container.registerSingleton(TOKENS.Uuid, createUuidService);
-      container.registerSingleton(TOKENS.Logger, createWinstonLoggerService);
-      container.registerSingleton(TOKENS.HealthController, createHealthController);
-      container.registerSingleton(TOKENS.AuthController, createAuthController);
+      container.registerSingleton(TOKENS.PckValidator, createPkceValidator);
+      container.registerSingleton(TOKENS.AuthorizationCodeRepository, createAuthorizationCodeRepository);
+      container.register(TOKENS.GenerateAuthorizationCodeUseCase, createGenerateAuthorizationCodeUseCase);
+      container.register(TOKENS.ValidatePkceChallengeUseCase, createValidatePkceChallengeUseCase);
+      container.register(TOKENS.ExchangeAuthorizationUseCase, createExchangeAuthorizationCodeUseCase);
+      container.register(TOKENS.HealthController, createHealthController);
+      container.register(TOKENS.AuthController, createAuthController);
 
-      // When
       const httpServer = createHttpServer(container);
 
-      // Then
       expect(httpServer).toBeInstanceOf(HttpServer);
     });
 
     it('should_ReturnFunctionalServer_When_Created', () => {
-      // Given
       const container = new Container();
+
       container.registerSingleton(TOKENS.Config, createConfig);
+      container.registerSingleton(TOKENS.Logger, createWinstonLoggerService);
       container.registerSingleton(TOKENS.Clock, createClockService);
       container.registerSingleton(TOKENS.Uuid, createUuidService);
-      container.registerSingleton(TOKENS.Logger, createWinstonLoggerService);
-      container.registerSingleton(TOKENS.HealthController, createHealthController);
-      container.registerSingleton(TOKENS.AuthController, createAuthController);
-      // When
+      container.registerSingleton(TOKENS.PckValidator, createPkceValidator);
+      container.registerSingleton(TOKENS.AuthorizationCodeRepository, createAuthorizationCodeRepository);
+      container.register(TOKENS.GenerateAuthorizationCodeUseCase, createGenerateAuthorizationCodeUseCase);
+      container.register(TOKENS.ValidatePkceChallengeUseCase, createValidatePkceChallengeUseCase);
+      container.register(TOKENS.ExchangeAuthorizationUseCase, createExchangeAuthorizationCodeUseCase);
+      container.register(TOKENS.HealthController, createHealthController);
+      container.register(TOKENS.AuthController, createAuthController);
+
       const httpServer = createHttpServer(container);
 
-      // Then
       expect(typeof httpServer.start).toBe('function');
       expect(typeof httpServer.stop).toBe('function');
       expect(typeof httpServer.getApp).toBe('function');
@@ -86,20 +105,23 @@ describe('Factories', () => {
     });
 
     it('should_CreateServerWithExpressApp_When_Called', () => {
-      // Given
       const container = new Container();
+
       container.registerSingleton(TOKENS.Config, createConfig);
+      container.registerSingleton(TOKENS.Logger, createWinstonLoggerService);
       container.registerSingleton(TOKENS.Clock, createClockService);
       container.registerSingleton(TOKENS.Uuid, createUuidService);
-      container.registerSingleton(TOKENS.Logger, createWinstonLoggerService);
-      container.registerSingleton(TOKENS.HealthController, createHealthController);
-      container.registerSingleton(TOKENS.AuthController, createAuthController);
+      container.registerSingleton(TOKENS.PckValidator, createPkceValidator);
+      container.registerSingleton(TOKENS.AuthorizationCodeRepository, createAuthorizationCodeRepository);
+      container.register(TOKENS.GenerateAuthorizationCodeUseCase, createGenerateAuthorizationCodeUseCase);
+      container.register(TOKENS.ValidatePkceChallengeUseCase, createValidatePkceChallengeUseCase);
+      container.register(TOKENS.ExchangeAuthorizationUseCase, createExchangeAuthorizationCodeUseCase);
+      container.register(TOKENS.HealthController, createHealthController);
+      container.register(TOKENS.AuthController, createAuthController);
 
-      // When
       const httpServer = createHttpServer(container);
       const app = httpServer.getApp();
 
-      // Then
       expect(app).toBeDefined();
       expect(typeof app.use).toBe('function');
       expect(typeof app.get).toBe('function');

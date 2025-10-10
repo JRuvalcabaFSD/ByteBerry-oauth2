@@ -1,6 +1,5 @@
 // tests/integration/bootstrap/graceful-shutdown.test.ts
-import { GracefulShutdown, CleanupFunction } from '@/bootstrap';
-import { WinstonLoggerService } from '@/infrastructure';
+import { CleanupFunction, GracefulShutdown, WinstonLoggerService } from '@/infrastructure';
 import { ClockService } from '@/infrastructure';
 import { Config } from '@/config/env.config';
 
