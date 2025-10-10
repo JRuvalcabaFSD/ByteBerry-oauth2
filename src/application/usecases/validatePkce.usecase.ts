@@ -109,7 +109,7 @@ export class ValidatorPkceChallengeUseCase {
     if (!codeChallenge || codeChallenge.length !== 43)
       throw new BadRequestError("Invalid code_challenge: must be 43 characters (base64url encoded SHA256)'");
 
-    const validPattern = /^[A-Za-z0-9/-_]+$/;
+    const validPattern = /^[A-Za-z0-9\-_]+$/;
     if (!validPattern.test(codeChallenge)) throw new BadRequestError('Invalid code_challenge: contains invalid characters');
   }
 }

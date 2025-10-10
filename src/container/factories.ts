@@ -6,6 +6,7 @@ import {
 import { TOKENS } from '@/container';
 import {
   AuthorizationCodeRepositoryImpl,
+  GracefulShutdown,
   HealthController,
   HttpServer,
   PkceValidatorService,
@@ -140,4 +141,15 @@ export function createAuthController(c: IContainer): AuthController {
     c.resolve(TOKENS.ExchangeAuthorizationUseCase),
     c.resolve(TOKENS.ValidatePkceChallengeUseCase)
   );
+}
+
+/**
+ * Creates a new instance of GracefulShutdown.
+ *
+ * @param c - The container instance used to resolve dependencies.
+ * @returns A new instance of GracefulShutdown initialized with the logger from the container.
+ */
+
+export function createGracefulShutdown(c: IContainer): GracefulShutdown {
+  return new GracefulShutdown(c.resolve(TOKENS.Logger));
 }

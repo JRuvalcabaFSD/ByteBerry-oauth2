@@ -17,17 +17,5 @@ async function main(): Promise<void> {
   const config = container.resolve<IConfig>(TOKENS.Config);
   const logger = container.resolve<ILogger>(TOKENS.Logger);
 
-  logger.info(`${config.serviceName} Service initialized successfully`, {
-    service: config.serviceName,
-    version: config.version,
-    environment: config.nodeEnv,
-    port: config.port,
-    phase: 'F0',
-    features: {
-      healthEndpoints: true,
-      logging: true,
-      gracefulShutdown: true,
-      containerDI: true,
-    },
-  });
+  logger.info(`${config.serviceName} [ver: ${config.version}] Service initialized successfully`);
 }

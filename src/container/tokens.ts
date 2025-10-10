@@ -33,6 +33,7 @@ export const TOKENS = {
   //Server token
   AuthController: Symbol.for('AuthController'),
   HealthController: Symbol.for('HealthController'),
+  GracefulShutdown: Symbol.for('GracefulShutdown'),
 
   //OAuth2 services
   PckValidator: Symbol.for('PckValidator'),

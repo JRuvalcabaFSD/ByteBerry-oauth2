@@ -2,7 +2,9 @@ import { createClockService, createUuidService } from '@/infrastructure';
 import {
   createAuthController,
   createAuthorizationCodeRepository,
+  createExchangeAuthorizationCodeUseCase,
   createGenerateAuthorizationCodeUseCase,
+  createGracefulShutdown,
   createHealthController,
   createHttpServer,
   createPkceValidator,
@@ -36,18 +38,38 @@ import { createConfig } from '@/config';
 export function bootstrapContainer(): IContainer {
   const container = new Container();
 
-  container.register(TOKENS.Config, createConfig);
-  container.register(TOKENS.Logger, createWinstonLoggerService);
-  container.register(TOKENS.Clock, createClockService);
-  container.register(TOKENS.Uuid, createUuidService);
-  container.register(TOKENS.PckValidator, createPkceValidator);
-  container.register(TOKENS.AuthorizationCodeRepository, createAuthorizationCodeRepository);
+  // ==========================================
+  // CORE SERVICES
+  // ==========================================
+  container.registerSingleton(TOKENS.Config, createConfig);
+  container.registerSingleton(TOKENS.Logger, createWinstonLoggerService);
+  container.registerSingleton(TOKENS.Clock, createClockService);
+  container.registerSingleton(TOKENS.Uuid, createUuidService);
+
+  // ==========================================
+  // OAUTH2 SERVICES
+  // ==========================================
+  container.registerSingleton(TOKENS.PckValidator, createPkceValidator);
+  container.registerSingleton(TOKENS.AuthorizationCodeRepository, createAuthorizationCodeRepository);
+
+  // ==========================================
+  // USE CASES
+  // ==========================================
   container.register(TOKENS.GenerateAuthorizationCodeUseCase, createGenerateAuthorizationCodeUseCase);
   container.register(TOKENS.ValidatePkceChallengeUseCase, createValidatePkceChallengeUseCase);
+  container.register(TOKENS.ExchangeAuthorizationUseCase, createExchangeAuthorizationCodeUseCase);
 
+  // ==========================================
+  // CONTROLLERS
+  // ==========================================
   container.register(TOKENS.HealthController, createHealthController);
   container.register(TOKENS.AuthController, createAuthController);
-  container.register(TOKENS.HttpServer, createHttpServer);
+
+  // ==========================================
+  // INFRASTRUCTURE
+  // ==========================================
+  container.registerSingleton(TOKENS.HttpServer, createHttpServer);
+  container.registerSingleton(TOKENS.GracefulShutdown, createGracefulShutdown);
 
   criticalServices.forEach(({ token }) => {
     if (!container.isRegistered(token)) throw new ContainerCreationError(token);

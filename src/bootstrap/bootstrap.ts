@@ -1,6 +1,6 @@
-import { GracefulShutdown } from '@/bootstrap';
 import { bootstrapContainer, criticalServices, TOKENS } from '@/container';
-import { IContainer, IHttpServer, ILogger } from '@/interfaces';
+import { configureShutdown, GracefulShutdown } from '@/infrastructure';
+import { IConfig, IContainer, IHttpServer, ILogger } from '@/interfaces';
 import { BootstrapError } from '@/shared';
 
 /**
@@ -42,36 +42,30 @@ export interface BootstrapResult {
  * @see ILogger
  */
 export async function bootstrap(): Promise<BootstrapResult> {
-  let container: IContainer;
   let logger: ILogger | undefined;
-  let httpServer: IHttpServer;
+  const context = 'main';
 
   try {
-    container = bootstrapContainer();
+    const container = bootstrapContainer();
+    const config = container.resolve<IConfig>(TOKENS.Config);
     logger = container.resolve<ILogger>(TOKENS.Logger);
-    httpServer = container.resolve<IHttpServer>(TOKENS.HttpServer);
 
+    logger.info('Application starting', { context, nodeEnv: config.nodeEnv, port: config.port });
+
+    const shutdown = configureShutdown(container);
+
+    const httpServer = container.resolve<IHttpServer>(TOKENS.HttpServer);
     await validateServices(container, logger);
-
-    logger.info('Application bootstrap started');
-    const shutdown = new GracefulShutdown(logger);
-
-    const loggerInstance = logger;
-    shutdown.registerCleanup(async () => {
-      loggerInstance.info('Stopping HTTP server...');
-      await httpServer.stop();
-    });
-
     await httpServer.start();
 
-    logger.info('Application bootstrap completed successfully');
+    logger.info('Application started successfully', { context, port: config.port });
 
     return { container, shutdown };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     if (logger) {
       try {
-        logger.error('Application bootstrap failed', {
+        logger.error('Application failed', {
           error: errorMessage,
           stack: error instanceof Error ? error.stack : undefined,
         });

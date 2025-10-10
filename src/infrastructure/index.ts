@@ -14,6 +14,10 @@ export * from './http/middlewares/security.middleware';
 //Http - routes
 export * from './http/routes/health.routes';
 
+//Lifecycle
+export * from './lifecycle/shutdownConfig';
+export * from './lifecycle/shutdown';
+
 //Repositories
 export * from './repositories/authorizationCode.repository.impl';
 
