@@ -1,4 +1,4 @@
-// tests/integration/bootstrap/graceful-shutdown.test.ts
+// tests/integration/bootstrap/graceful shutdown.test.ts
 import { CleanupFunction, GracefulShutdown, WinstonLoggerService } from '@/infrastructure';
 import { ClockService } from '@/infrastructure';
 import { Config } from '@/config/env.config';
@@ -20,18 +20,18 @@ describe('GracefulShutdown', () => {
   });
 
   describe('Cleanup Registration', () => {
-    it('should_RegisterCleanupFunction_When_Called', () => {
+    it('should register cleanup function when called', () => {
       // Given
       const cleanup: CleanupFunction = jest.fn();
 
       // When
       gracefulShutdown.registerCleanup(cleanup);
 
-      // Then - No error thrown
+      // Then   No error thrown
       expect(true).toBe(true);
     });
 
-    it('should_RegisterMultipleCleanupFunctions_When_CalledMultipleTimes', () => {
+    it('should register multiple cleanup functions when called multiple times', () => {
       // Given
       const cleanup1: CleanupFunction = jest.fn();
       const cleanup2: CleanupFunction = jest.fn();
@@ -42,13 +42,13 @@ describe('GracefulShutdown', () => {
       gracefulShutdown.registerCleanup(cleanup2);
       gracefulShutdown.registerCleanup(cleanup3);
 
-      // Then - No error thrown
+      // Then   No error thrown
       expect(true).toBe(true);
     });
   });
 
   describe('Shutdown Execution', () => {
-    it('should_ExecuteAllCleanupFunctions_When_ShutdownCalled', async () => {
+    it('should execute all cleanup functions when shutdown called', async () => {
       // Given
       const cleanup1 = jest.fn().mockResolvedValue(undefined);
       const cleanup2 = jest.fn().mockResolvedValue(undefined);
@@ -64,7 +64,7 @@ describe('GracefulShutdown', () => {
       expect(cleanup2).toHaveBeenCalled();
     });
 
-    it('should_ExecuteSyncCleanupFunctions_When_ShutdownCalled', async () => {
+    it('should execute sync cleanup functions when shutdown called', async () => {
       // Given
       let executed = false;
       const syncCleanup: CleanupFunction = () => {
@@ -80,7 +80,7 @@ describe('GracefulShutdown', () => {
       expect(executed).toBe(true);
     });
 
-    it('should_ContinueWithOtherCleanups_When_OneCleanupFails', async () => {
+    it('should continue with other cleanups when one cleanup fails', async () => {
       // Given
       const failingCleanup = jest.fn().mockRejectedValue(new Error('Cleanup failed'));
       const successCleanup = jest.fn().mockResolvedValue(undefined);
@@ -96,7 +96,7 @@ describe('GracefulShutdown', () => {
       expect(successCleanup).toHaveBeenCalled();
     });
 
-    it('should_ReturnSamePromise_When_ShutdownCalledMultipleTimes', async () => {
+    it('should return same promise when shutdown called multiple times', async () => {
       // Given
       const cleanup = jest.fn().mockResolvedValue(undefined);
       gracefulShutdown.registerCleanup(cleanup);
@@ -112,8 +112,8 @@ describe('GracefulShutdown', () => {
     });
   });
 
-  describe('Real-world Scenarios', () => {
-    it('should_CloseHttpServerGracefully_When_ShutdownCalled', async () => {
+  describe('Real world Scenarios', () => {
+    it('should close http server gracefully when shutdown called', async () => {
       // Given
       let serverClosed = false;
       const closeServer: CleanupFunction = async () => {
@@ -130,7 +130,7 @@ describe('GracefulShutdown', () => {
       expect(serverClosed).toBe(true);
     });
 
-    it('should_CleanupDatabaseConnections_When_ShutdownCalled', async () => {
+    it('should cleanup database connections when shutdown called', async () => {
       // Given
       let dbClosed = false;
       const closeDatabase: CleanupFunction = async () => {
@@ -147,7 +147,7 @@ describe('GracefulShutdown', () => {
       expect(dbClosed).toBe(true);
     });
 
-    it('should_ExecuteMultipleCleanupsConcurrently_When_ShutdownCalled', async () => {
+    it('should execute multiple cleanups concurrently when shutdown called', async () => {
       // Given
       const startTime = Date.now();
       const delay = 75;
@@ -167,7 +167,7 @@ describe('GracefulShutdown', () => {
       await gracefulShutdown.shutdown();
       const duration = Date.now() - startTime;
 
-      // Then - Should complete in ~50ms (concurrent) not ~100ms (sequential)
+      // Then   Should complete in ~50ms (concurrent) not ~100ms (sequential)
       expect(duration).toBeLessThan(delay * 1.5);
     });
   });

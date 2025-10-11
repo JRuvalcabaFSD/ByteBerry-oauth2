@@ -97,7 +97,7 @@ export class JwtService implements IJwtService {
     const context = this.mainContext + 'validateConfiguration';
     if (!this.privateKey || this.privateKey.length === 0) throw new JwtConfigurationError('JWT_PRIVATE_KEY is not configured');
     if (!this.publicKey || this.publicKey.length === 0) throw new JwtConfigurationError('JWT_PUBLIC_KEY is not configured');
-    if (!this.privateKey.includes('BEGIN') || this.privateKey.includes('BEGIN')) {
+    if (!this.privateKey.includes('BEGIN') || !this.publicKey.includes('BEGIN')) {
       throw new JwtConfigurationError('JWT keys must be in PEM format');
     }
     if (!this.issuer || !this.audience) throw new JwtConfigurationError('JWT issuer and audience must be configured');
@@ -176,11 +176,17 @@ export class JwtService implements IJwtService {
    * @remarks The token must be signed with RS256 and match the configured issuer and audience. Standard JWT checks
    *          (such as expiration) are enforced by the underlying verification.
    */
-
+  //TODO arreglar
   public async verifyToken(token: string): Promise<IJwtVerifyResult> {
     const context = this.mainContext + 'verifyToken';
     try {
-      const decoded = verify(token, this.publicKey, { algorithms: ['RS256'], issuer: this.issuer, audience: this.audience }) as IJwtPayload;
+      const nowSeconds = Math.floor(this.clock.now().getTime() / 1000);
+      const decoded = verify(token, this.publicKey, {
+        algorithms: ['RS256'],
+        issuer: this.issuer,
+        audience: this.audience,
+        clockTimestamp: nowSeconds,
+      }) as IJwtPayload;
 
       this.logger.debug('JWT token verified successfully', { context, subject: decoded.sub, clientId: decoded.client_id });
 

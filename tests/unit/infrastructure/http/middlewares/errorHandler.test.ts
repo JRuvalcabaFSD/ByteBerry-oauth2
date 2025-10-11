@@ -24,21 +24,21 @@ describe('Error Middleware', () => {
     app.use(createErrorMiddleware(logger, config));
   });
 
-  it('should_Return500_When_ErrorThrown', async () => {
+  it('should return500 when error thrown', async () => {
     const response = await request(app).get('/error');
 
     expect(response.status).toBe(500);
     expect(response.body).toHaveProperty('error', 'Internal Server Error');
   });
 
-  it('should_IncludeTimestamp_When_ErrorOccurs', async () => {
+  it('should include timestamp when error occurs', async () => {
     const response = await request(app).get('/error');
 
     expect(response.body).toHaveProperty('timestamp');
     expect(response.body.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 
-  it('should_ShowErrorMessage_When_InDevelopment', async () => {
+  it('should show error message when in development', async () => {
     process.env.NODE_ENV = 'development';
     Config.resetInstance();
     const devConfig = Config.getConfig();
@@ -55,7 +55,7 @@ describe('Error Middleware', () => {
     expect(response.body.message).toBe('Detailed error');
   });
 
-  it('should_HideErrorMessage_When_InProduction', async () => {
+  it('should hide error message when in production', async () => {
     process.env.NODE_ENV = 'production';
     Config.resetInstance();
     const prodConfig = Config.getConfig();

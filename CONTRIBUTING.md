@@ -259,7 +259,7 @@ Presentation:     >70% coverage
 ```typescript
 // Domain entities y services
 describe('User Entity', () => {
-  it('should_CreateUser_When_ValidEmailProvided', () => {
+  it('should create user when valid email provided', () => {
     // Given
     const email = new Email('test@example.com');
     

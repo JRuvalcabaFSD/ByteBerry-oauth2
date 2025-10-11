@@ -20,13 +20,13 @@ describe('CORS Middleware', () => {
     });
   });
 
-  it('should_AllowRequest_When_OriginInAllowedList', async () => {
+  it('should allow request when origin in allowed list', async () => {
     const response = await request(app).get('/test').set('Origin', 'http://localhost:3000');
 
     expect(response.headers['access-control-allow-origin']).toBe('http://localhost:3000');
   });
 
-  it('should_ReturnCredentials_When_Configured', async () => {
+  it('should return credentials when configured', async () => {
     const response = await request(app).options('/test').set('Origin', 'http://localhost:3000');
 
     expect(response.headers['access-control-allow-credentials']).toBe('true');

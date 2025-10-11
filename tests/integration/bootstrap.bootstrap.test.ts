@@ -24,7 +24,7 @@ describe('Bootstrap', () => {
   });
 
   describe('Successful Bootstrap', () => {
-    it('should_ReturnContainerAndShutdown_When_BootstrapSucceeds', async () => {
+    it('should return container and shutdown when bootstrap succeeds', async () => {
       // When
       bootstrapResult = await bootstrap();
 
@@ -34,7 +34,7 @@ describe('Bootstrap', () => {
       expect(bootstrapResult.shutdown).toBeDefined();
     });
 
-    it('should_StartHttpServer_When_BootstrapSucceeds', async () => {
+    it('should start http server when bootstrap succeeds', async () => {
       // When
       bootstrapResult = await bootstrap();
       const httpServer = bootstrapResult.container.resolve<IHttpServer>(Symbol.for('HttpServer'));
@@ -49,11 +49,11 @@ describe('Bootstrap', () => {
       expect(httpServer.isRunning()).toBe(true);
     });
 
-    it('should_ValidateAllCriticalServices_When_BootstrapSucceeds', async () => {
+    it('should validate all critical services when bootstrap succeeds', async () => {
       // When
       bootstrapResult = await bootstrap();
 
-      // Then - Resolver servicios críticos sin error
+      // Then   Resolver servicios críticos sin error
       expect(() => bootstrapResult.container.resolve(Symbol.for('Config'))).not.toThrow();
       expect(() => bootstrapResult.container.resolve(Symbol.for('Logger'))).not.toThrow();
       expect(() => bootstrapResult.container.resolve(Symbol.for('Clock'))).not.toThrow();
@@ -61,7 +61,7 @@ describe('Bootstrap', () => {
       expect(() => bootstrapResult.container.resolve(Symbol.for('HttpServer'))).not.toThrow();
     });
 
-    it('should_RegisterShutdownCleanup_When_BootstrapSucceeds', async () => {
+    it('should register shutdown cleanup when bootstrap succeeds', async () => {
       // Given
       bootstrapResult = await bootstrap();
       const httpServer = bootstrapResult.container.resolve<IHttpServer>(Symbol.for('HttpServer'));
@@ -75,7 +75,7 @@ describe('Bootstrap', () => {
   });
 
   describe('Bootstrap Failure Scenarios', () => {
-    it('should_ThrowBootstrapError_When_InvalidPortProvided', async () => {
+    it('should throw bootstrap error when invalid port provided', async () => {
       // Given
       process.env.PORT = 'invalid-port';
       Config.resetInstance();
@@ -84,7 +84,7 @@ describe('Bootstrap', () => {
       await expect(bootstrap()).rejects.toThrow();
     });
 
-    it('should_ThrowBootstrapError_When_RequiredEnvVarMissing', async () => {
+    it('should throw bootstrap error when required env var missing', async () => {
       // Given - First mock dotenv to prevent any .env file loading
       jest.doMock('dotenv', () => ({
         config: jest.fn(() => ({ parsed: {} })), // Return empty parsed object
@@ -117,7 +117,7 @@ describe('Bootstrap', () => {
   });
 
   describe('Multiple Bootstrap Calls', () => {
-    it('should_AllowMultipleBootstraps_When_PreviousShutdownCompletes', async () => {
+    it('should allow multiple bootstraps when previous shutdown completes', async () => {
       // Given
       const first = await bootstrap();
       await first.shutdown.shutdown();

@@ -41,20 +41,20 @@ describe('HttpServer', () => {
   });
 
   describe('Lifecycle', () => {
-    it('should_StartServer_When_StartCalled', async () => {
+    it('should start server when start called', async () => {
       await httpServer.start();
 
       expect(httpServer.isRunning()).toBeTruthy();
     });
-    it('should_StopServer_When_StopCalled', async () => {
+    it('should stop server when stop called', async () => {
       await httpServer.start();
       await httpServer.stop();
       expect(httpServer.isRunning()).toBeFalsy();
     });
-    it('should_NotThrow_When_StopCalledWithoutStart', async () => {
+    it('should not throw when stop called without start', async () => {
       await expect(httpServer.stop()).resolves.not.toThrow();
     });
-    it('debería lanzar un error si intento parar el servidor si no esta corriendo', async () => {
+    it('should throw an error if I try to stop the server if not running', async () => {
       try {
         await httpServer.stop();
       } catch (error) {
@@ -63,7 +63,7 @@ describe('HttpServer', () => {
     });
   });
   describe('Server Info', () => {
-    it('should_ReturnServerInfo_When_NotRunning', () => {
+    it('should return server info when not running', () => {
       const info = httpServer.getServerInfo();
 
       expect(info).toHaveProperty('port');
@@ -71,7 +71,7 @@ describe('HttpServer', () => {
       expect(info.isRunning).toBe(false);
     });
 
-    it('should_IncludeStartTime_When_ServerStarted', async () => {
+    it('should include start time when server started', async () => {
       await httpServer.start();
       const info = httpServer.getServerInfo();
 
@@ -81,7 +81,7 @@ describe('HttpServer', () => {
   });
 
   describe('Root Endpoint', () => {
-    it('should_ReturnServiceInfo_When_RootEndpointCalled', async () => {
+    it('should return service info when root endpoint called', async () => {
       await httpServer.start();
 
       const response = await request(httpServer.getApp()).get('/');
@@ -92,7 +92,7 @@ describe('HttpServer', () => {
       expect(response.body).toHaveProperty('status', 'running');
     });
 
-    it('should_IncludeRequestId_When_RootEndpointCalled', async () => {
+    it('should include request id when root endpoint called', async () => {
       await httpServer.start();
 
       const response = await request(httpServer.getApp()).get('/');
@@ -103,17 +103,17 @@ describe('HttpServer', () => {
   });
 
   describe('404 Handler', () => {
-    it('should_Return404_When_RouteNotFound', async () => {
+    it('should return404 when route not found', async () => {
       await httpServer.start();
 
-      const response = await request(httpServer.getApp()).get('/non-existent-route');
+      const response = await request(httpServer.getApp()).get('/non existent route');
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty('error', 'Not Found');
       expect(response.body).toHaveProperty('message');
     });
 
-    it('should_IncludeRequestId_When_404Returned', async () => {
+    it('should include request id when 404 returned', async () => {
       await httpServer.start();
 
       const response = await request(httpServer.getApp()).get('/invalid');
@@ -121,9 +121,9 @@ describe('HttpServer', () => {
       expect(response.body).toHaveProperty('requestId');
     });
   });
-  describe('Server Error Event - Lines 86-90', () => {
-    it('should_RejectPromise_When_ServerEmitsError', async () => {
-      // Given - Mock app.listen para que retorne un server que emita error
+  describe('Server Error Event   Lines 86 90', () => {
+    it('should reject promise when server emits error', async () => {
+      // Given   Mock app.listen para que retorne un server que emita error
       const mockServer = {
         on: jest.fn((event: string, callback: (error: Error) => void) => {
           if (event === 'error') {
@@ -139,14 +139,14 @@ describe('HttpServer', () => {
       // Mock app.listen para retornar nuestro mock server
       jest.spyOn(httpServer.getApp(), 'listen').mockImplementation(() => mockServer as any);
 
-      // When & Then - El error del servidor debe rechazar la promesa
+      // When & Then   El error del servidor debe rechazar la promesa
       await expect(httpServer.start()).rejects.toThrow('EADDRINUSE: address already in use');
     });
   });
 
-  describe('Catch Block - Lines 93-97', () => {
-    it('should_CatchSynchronousError_When_ListenThrows', async () => {
-      // Given - Mock app.listen para lanzar error síncrono
+  describe('Catch Block   Lines 93 97', () => {
+    it('should catch synchronous error when listen throws', async () => {
+      // Given   Mock app.listen para lanzar error síncrono
       const errorServer = new HttpServer(config, logger, uuid, clock, healthController, authController);
       const app = errorServer.getApp();
 
@@ -160,8 +160,8 @@ describe('HttpServer', () => {
     });
   });
 
-  describe('Stop Server - Lines 121-122', () => {
-    it('should_RejectPromise_When_ServerCloseErrors', async () => {
+  describe('Stop Server   Lines 121 122', () => {
+    it('should reject promise when server close errors', async () => {
       // Given
       await httpServer.start();
 
@@ -190,7 +190,7 @@ describe('HttpServer', () => {
       server.close = originalClose;
     });
 
-    it('should_LogError_When_ServerCloseErrors', async () => {
+    it('should log error when server close errors', async () => {
       // Given
       const loggerSpy = jest.spyOn(logger, 'error');
       await httpServer.start();
@@ -208,10 +208,10 @@ describe('HttpServer', () => {
       try {
         await httpServer.stop();
       } catch {
-        // Expected error - we just want to test the logging
+        // Expected error   we just want to test the logging
       }
 
-      // Then - Verificar el mensaje exacto que se registra
+      // Then   Verificar el mensaje exacto que se registra
       expect(loggerSpy).toHaveBeenCalledWith(
         'Error stopping Http Server',
         expect.objectContaining({

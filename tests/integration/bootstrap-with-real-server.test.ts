@@ -23,7 +23,7 @@ describe('Bootstrap - Real Server Integration', () => {
     }
   });
 
-  it('should_ServeRootEndpoint_When_ServerStarted', async () => {
+  it('should serve root endpoint when server started', async () => {
     // Given
     bootstrapResult = await bootstrap();
     const httpServer = bootstrapResult.container.resolve<IHttpServer>(Symbol.for('HttpServer'));
@@ -39,7 +39,7 @@ describe('Bootstrap - Real Server Integration', () => {
     expect(response.body).toHaveProperty('status', 'running');
   });
 
-  it('should_Return404_When_InvalidRouteAccessed', async () => {
+  it('should return404 when invalid route accessed', async () => {
     // Given
     bootstrapResult = await bootstrap();
     const httpServer = bootstrapResult.container.resolve<IHttpServer>(Symbol.for('HttpServer'));
@@ -53,7 +53,7 @@ describe('Bootstrap - Real Server Integration', () => {
     expect(response.body).toHaveProperty('error', 'Not Found');
   });
 
-  it('should_IncludeRequestId_When_RequestProcessed', async () => {
+  it('should include request id when request processed', async () => {
     // Given
     bootstrapResult = await bootstrap();
     const httpServer = bootstrapResult.container.resolve<IHttpServer>(Symbol.for('HttpServer'));

@@ -17,7 +17,7 @@ import { createClockService, createUuidService, WinstonLoggerService, HttpServer
 
 describe('Factories', () => {
   describe('createWinstonLoggerService', () => {
-    it('should_CreateWinstonLoggerService_When_Called', () => {
+    it('should create winston logger service when called', () => {
       // Given
       const container = new Container();
       container.registerSingleton(TOKENS.Config, createConfig);
@@ -30,7 +30,7 @@ describe('Factories', () => {
       expect(logger).toBeInstanceOf(WinstonLoggerService);
     });
 
-    it('should_ReturnFunctionalLogger_When_Created', () => {
+    it('should return functional logger when created', () => {
       // Given
       const container = new Container();
       container.registerSingleton(TOKENS.Config, createConfig);
@@ -47,7 +47,7 @@ describe('Factories', () => {
       expect(typeof logger.child).toBe('function');
     });
 
-    it('should_NotThrow_When_LoggingWithCreatedLogger', () => {
+    it('should not throw when logging with created logger', () => {
       // Given
       const container = new Container();
       container.registerSingleton(TOKENS.Config, createConfig);
@@ -60,7 +60,7 @@ describe('Factories', () => {
   });
 
   describe('createHttpServer', () => {
-    it('should_CreateHttpServer_When_Called', () => {
+    it('should create http server when called', () => {
       const container = new Container();
 
       container.registerSingleton(TOKENS.Config, createConfig);
@@ -80,7 +80,7 @@ describe('Factories', () => {
       expect(httpServer).toBeInstanceOf(HttpServer);
     });
 
-    it('should_ReturnFunctionalServer_When_Created', () => {
+    it('should return functional server when created', () => {
       const container = new Container();
 
       container.registerSingleton(TOKENS.Config, createConfig);
@@ -104,7 +104,7 @@ describe('Factories', () => {
       expect(typeof httpServer.getServerInfo).toBe('function');
     });
 
-    it('should_CreateServerWithExpressApp_When_Called', () => {
+    it('should create server with express app when called', () => {
       const container = new Container();
 
       container.registerSingleton(TOKENS.Config, createConfig);

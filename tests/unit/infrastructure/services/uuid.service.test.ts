@@ -9,7 +9,7 @@ describe('UuidService', () => {
   });
 
   describe('generate', () => {
-    it('should_ReturnString_When_Called', () => {
+    it('should return string when called', () => {
       // When
       const result = uuidService.generate();
 
@@ -17,7 +17,7 @@ describe('UuidService', () => {
       expect(typeof result).toBe('string');
     });
 
-    it('should_ReturnValidUUIDv4Format_When_Called', () => {
+    it('should return valid uui dv4 format when called', () => {
       // When
       const result = uuidService.generate();
 
@@ -26,7 +26,7 @@ describe('UuidService', () => {
       expect(result).toMatch(uuidRegex);
     });
 
-    it('should_GenerateUniqueUUIDs_When_CalledMultipleTimes', () => {
+    it('should generate unique uui ds when called multiple times', () => {
       // When
       const uuid1 = uuidService.generate();
       const uuid2 = uuidService.generate();
@@ -40,7 +40,7 @@ describe('UuidService', () => {
   });
 
   describe('isValid', () => {
-    it('should_ReturnTrue_When_ValidUUIDv4Provided', () => {
+    it('should return true when valid uui dv4 provided', () => {
       // Given
       const validUuid = uuidService.generate();
 
@@ -51,7 +51,7 @@ describe('UuidService', () => {
       expect(result).toBe(true);
     });
 
-    it('should_ReturnFalse_When_InvalidUUIDProvided', () => {
+    it('should return false when invalid uuid provided', () => {
       // Given
       const invalidUuids = [
         'invalid-uuid',
@@ -67,7 +67,7 @@ describe('UuidService', () => {
       });
     });
 
-    it('should_ReturnFalse_When_NonStringProvided', () => {
+    it('should return false when non string provided', () => {
       // When & Then
       expect(uuidService.isValid(null as any)).toBe(false);
       expect(uuidService.isValid(undefined as any)).toBe(false);
@@ -76,7 +76,7 @@ describe('UuidService', () => {
   });
 
   describe('createUuidService', () => {
-    it('should_ReturnUuidServiceInstance_When_Called', () => {
+    it('should return uuid service instance when called', () => {
       // When
       const service = createUuidService();
 

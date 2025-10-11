@@ -12,12 +12,12 @@ describe('Container', () => {
   });
 
   describe('register', () => {
-    it('should_RegisterTransientService_When_ValidFactoryProvided', () => {
+    it('should register transient service when valid factory provided', () => {
       container.register(token, factory);
 
       expect(container.isRegistered(token)).toBeTruthy();
     });
-    it('should_CreateNewInstanceEachTime_When_TransientServiceResolved', () => {
+    it('should create new instance each time when transient service resolved', () => {
       container.register(token, () => ({ id: Math.random() }));
 
       const instance1 = container.resolve<{ id: number }>(token);
@@ -26,12 +26,12 @@ describe('Container', () => {
       expect(instance1).not.toBe(instance2);
       expect(instance1.id).not.toBe(instance2);
     });
-    it('should_ThrowTokenAlreadyRegisteredError_When_TokenAlreadyRegistered', () => {
+    it('should throw token already registered error when token already registered', () => {
       container.register(token, () => ({}));
 
       expect(() => container.register(token, () => ({}))).toThrow(TokenAlreadyRegisteredError);
     });
-    it('should_AllowFactoryToUseDependencies_When_ContainerPassed', () => {
+    it('should allow factory to use dependencies when container passed', () => {
       const configToken = Symbol('Config');
       const serviceToken = Symbol('Service');
 
@@ -47,7 +47,7 @@ describe('Container', () => {
     });
   });
   describe('registerSingleton', () => {
-    it('should_RegisterSingletonService_When_ValidFactoryProvided', () => {
+    it('should register singleton service when valid factory provided', () => {
       // Given
       const token = Symbol('SingletonService');
       const factory = () => ({ value: 'singleton' });
@@ -59,7 +59,7 @@ describe('Container', () => {
       expect(container.isRegistered(token)).toBe(true);
     });
 
-    it('should_ReturnSameInstance_When_SingletonResolvedMultipleTimes', () => {
+    it('should return same instance when singleton resolved multiple times', () => {
       // Given
       const token = Symbol('SingletonService');
       container.registerSingleton(token, () => ({ id: Math.random() }));
@@ -73,7 +73,7 @@ describe('Container', () => {
       expect(instance1.id).toBe(instance2.id);
     });
 
-    it('should_ThrowTokenAlreadyRegisteredError_When_TokenAlreadyRegistered', () => {
+    it('should throw token already registered error when token already registered', () => {
       // Given
       const token = Symbol('DuplicateSingleton');
       container.registerSingleton(token, () => ({}));
@@ -82,7 +82,7 @@ describe('Container', () => {
       expect(() => container.registerSingleton(token, () => ({}))).toThrow(TokenAlreadyRegisteredError);
     });
 
-    it('should_CallFactoryOnlyOnce_When_SingletonResolvedMultipleTimes', () => {
+    it('should call factory only once when singleton resolved multiple times', () => {
       // Given
       const token = Symbol('SingletonService');
       const factory = jest.fn(() => ({ value: 'test' }));
@@ -98,7 +98,7 @@ describe('Container', () => {
     });
   });
   describe('registerInstance', () => {
-    it('should_RegisterExistingInstance_When_Called', () => {
+    it('should register existing instance when called', () => {
       // Given
       const token = Symbol('InstanceService');
       const instance = { value: 'existing' };
@@ -110,7 +110,7 @@ describe('Container', () => {
       expect(container.isRegistered(token)).toBe(true);
     });
 
-    it('should_ReturnSameInstance_When_Resolved', () => {
+    it('should return same instance when resolved', () => {
       // Given
       const token = Symbol('InstanceService');
       const instance = { id: 123 };
@@ -126,7 +126,7 @@ describe('Container', () => {
       expect(resolved1).toBe(resolved2);
     });
 
-    it('should_ThrowTokenAlreadyRegisteredError_When_TokenAlreadyRegistered', () => {
+    it('should throw token already registered error when token already registered', () => {
       // Given
       const token = Symbol('DuplicateInstance');
       container.registerInstance(token, {});
@@ -135,7 +135,7 @@ describe('Container', () => {
       expect(() => container.registerInstance(token, {})).toThrow(TokenAlreadyRegisteredError);
     });
 
-    it('should_NotCallFactory_When_InstanceAlreadyProvided', () => {
+    it('should not call factory when instance already provided', () => {
       // Given
       const token = Symbol('InstanceService');
       const instance = { value: 'test' };
@@ -144,12 +144,12 @@ describe('Container', () => {
       // When
       const resolved = container.resolve(token);
 
-      // Then - Factory should not be called since instance is already provided
+      // Then   Factory should not be called since instance is already provided
       expect(resolved).toBe(instance);
     });
   });
   describe('resolve', () => {
-    it('should_ResolveService_When_TokenRegistered', () => {
+    it('should resolve service when token registered', () => {
       // Given
       const token = Symbol('Service');
       const expectedValue = { data: 'test' };
@@ -162,7 +162,7 @@ describe('Container', () => {
       expect(resolved).toEqual(expectedValue);
     });
 
-    it('should_ThrowTokenNotRegisteredError_When_TokenNotRegistered', () => {
+    it('should throw token not registered error when token not registered', () => {
       // Given
       const token = Symbol('UnregisteredService');
 
@@ -170,7 +170,7 @@ describe('Container', () => {
       expect(() => container.resolve(token)).toThrow(TokenNotRegisteredError);
     });
 
-    it('should_PassContainerToFactory_When_Resolving', () => {
+    it('should pass container to factory when resolving', () => {
       // Given
       const token = Symbol('Service');
       const factory = jest.fn((c: IContainer) => {
@@ -186,7 +186,7 @@ describe('Container', () => {
       expect(factory).toHaveBeenCalledWith(container);
     });
 
-    it('should_ResolveNestedDependencies_When_ServiceDependsOnOtherServices', () => {
+    it('should resolve nested dependencies when service depends on other services', () => {
       // Given
       const configToken = Symbol('Config');
       const loggerToken = Symbol('Logger');
@@ -210,7 +210,7 @@ describe('Container', () => {
     });
   });
   describe('Circular Dependency Detection', () => {
-    it('should_ThrowCircularDependencyError_When_DirectCircularDependency', () => {
+    it('should throw circular dependency error when direct circular dependency', () => {
       // Given
       const tokenA = Symbol('ServiceA');
       container.register(tokenA, c => {
@@ -222,7 +222,7 @@ describe('Container', () => {
       expect(() => container.resolve(tokenA)).toThrow(CircularDependencyError);
     });
 
-    it('should_ThrowCircularDependencyError_When_IndirectCircularDependency', () => {
+    it('should throw circular dependency error when indirect circular dependency', () => {
       // Given
       const tokenA = Symbol('ServiceA');
       const tokenB = Symbol('ServiceB');
@@ -232,7 +232,7 @@ describe('Container', () => {
         return {};
       });
       container.register(tokenB, c => {
-        c.resolve(tokenA); // Circular: A -> B -> A
+        c.resolve(tokenA); // Circular: A  > B  > A
         return {};
       });
 
@@ -240,7 +240,7 @@ describe('Container', () => {
       expect(() => container.resolve(tokenA)).toThrow(CircularDependencyError);
     });
 
-    it('should_IncludeDependencyChain_When_CircularDependencyDetected', () => {
+    it('should include dependency chain when circular dependency detected', () => {
       // Given
       const tokenA = Symbol.for('ServiceA');
       const tokenB = Symbol.for('ServiceB');
@@ -255,7 +255,7 @@ describe('Container', () => {
         return {};
       });
       container.register(tokenC, c => {
-        c.resolve(tokenA); // Circular: A -> B -> C -> A
+        c.resolve(tokenA); // Circular: A  > B  > C  > A
         return {};
       });
 
@@ -272,7 +272,7 @@ describe('Container', () => {
     });
   });
   describe('Error Handling', () => {
-    it('should_ThrowContainerError_When_FactoryThrowsError', () => {
+    it('should throw container error when factory throws error', () => {
       // Given
       const token = Symbol('FailingService');
       container.register(token, () => {
@@ -288,7 +288,7 @@ describe('Container', () => {
       }
     });
 
-    it('should_HandleNonErrorThrows_When_FactoryThrowsNonError', () => {
+    it('should handle non error throws when factory throws non error', () => {
       // Given
       const token = Symbol('StringThrowingService');
       container.register(token, () => {
@@ -304,7 +304,7 @@ describe('Container', () => {
       }
     });
 
-    it('should_HandleObjectThrows_When_FactoryThrowsObject', () => {
+    it('should handle object throws when factory throws object', () => {
       // Given
       const token = Symbol('ObjectThrowingService');
       container.register(token, () => {
@@ -320,7 +320,7 @@ describe('Container', () => {
       }
     });
 
-    it('should_CleanupResolutionStack_When_ErrorOccurs', () => {
+    it('should cleanup resolution stack when error occurs', () => {
       // Given
       const tokenA = Symbol('ServiceA');
       const tokenB = Symbol('ServiceB');
@@ -340,13 +340,13 @@ describe('Container', () => {
         // Ignore error
       }
 
-      // Then - Should be able to resolve other services without issues
+      // Then   Should be able to resolve other services without issues
       const tokenC = Symbol('ServiceC');
       container.register(tokenC, () => ({ value: 'ok' }));
       expect(() => container.resolve(tokenC)).not.toThrow();
     });
 
-    it('should_PreserveCircularDependencyError_When_ThrowingCircularError', () => {
+    it('should preserve circular dependency error when throwing circular error', () => {
       // Given
       const tokenA = Symbol('ServiceA');
       container.register(tokenA, c => {
@@ -370,7 +370,7 @@ describe('Container', () => {
     });
   });
   describe('isRegistered', () => {
-    it('should_ReturnTrue_When_TokenIsRegistered', () => {
+    it('should return true when token is registered', () => {
       // Given
       const token = Symbol('RegisteredService');
       container.register(token, () => ({}));
@@ -382,7 +382,7 @@ describe('Container', () => {
       expect(result).toBe(true);
     });
 
-    it('should_ReturnFalse_When_TokenIsNotRegistered', () => {
+    it('should return false when token is not registered', () => {
       // Given
       const token = Symbol('UnregisteredService');
 
@@ -393,7 +393,7 @@ describe('Container', () => {
       expect(result).toBe(false);
     });
 
-    it('should_ReturnTrue_When_SingletonIsRegistered', () => {
+    it('should return true when singleton is registered', () => {
       // Given
       const token = Symbol('SingletonService');
       container.registerSingleton(token, () => ({}));
@@ -405,7 +405,7 @@ describe('Container', () => {
       expect(result).toBe(true);
     });
 
-    it('should_ReturnTrue_When_InstanceIsRegistered', () => {
+    it('should return true when instance is registered', () => {
       // Given
       const token = Symbol('InstanceService');
       container.registerInstance(token, {});
@@ -417,8 +417,8 @@ describe('Container', () => {
       expect(result).toBe(true);
     });
   });
-  describe('registerInstance - Internal Factory Coverage', () => {
-    it('should_StoreLambdaFactoryReturningInstance_When_RegisterInstanceCalled', () => {
+  describe('registerInstance   Internal Factory Coverage', () => {
+    it('should store lambda factory returning instance when register instance called', () => {
       // Given
       const token = Symbol('TestInstance');
       const instance = { test: 'value' };
@@ -441,8 +441,8 @@ describe('Container', () => {
       expect(factoryResult).toBe(instance);
     });
   });
-  describe('Resolution Stack Cleanup - Finally Block', () => {
-    it('should_CleanupResolutionStack_When_FactoryThrowsError', () => {
+  describe('Resolution Stack Cleanup   Finally Block', () => {
+    it('should cleanup resolution stack when factory throws error', () => {
       // Given
       const tokenA = Symbol('ServiceA');
       const tokenB = Symbol('ServiceB');
@@ -456,29 +456,29 @@ describe('Container', () => {
 
       container.register(tokenB, () => ({ value: 'B works' }));
 
-      // When - First resolution fails
+      // When   First resolution fails
       try {
         container.resolve(tokenA);
       } catch (error) {
         expect(error).toBeInstanceOf(ContainerError);
       }
 
-      // Then - Stack should be cleaned up, allowing subsequent resolutions
+      // Then   Stack should be cleaned up, allowing subsequent resolutions
       expect(() => container.resolve(tokenB)).not.toThrow();
       expect(container.resolve<{ value: string }>(tokenB).value).toBe('B works');
 
-      // When - Try to resolve failing service again
+      // When   Try to resolve failing service again
       try {
         container.resolve(tokenA);
       } catch (error) {
         expect(error).toBeInstanceOf(ContainerError);
       }
 
-      // Then - Should have attempted twice (stack was cleaned each time)
+      // Then   Should have attempted twice (stack was cleaned each time)
       expect(resolutionAttempts).toBe(2);
     });
 
-    it('should_CleanupResolutionStack_When_CircularDependencyDetected', () => {
+    it('should cleanup resolution stack when circular dependency detected', () => {
       // Given
       const tokenA = Symbol('ServiceA');
       const tokenB = Symbol('ServiceB');
@@ -496,26 +496,26 @@ describe('Container', () => {
 
       container.register(tokenC, () => ({ name: 'C' }));
 
-      // When - Circular dependency throws
+      // When   Circular dependency throws
       try {
         container.resolve(tokenA);
       } catch (error) {
         expect(error).toBeInstanceOf(CircularDependencyError);
       }
 
-      // Then - Stack should be cleaned, allowing other resolutions
+      // Then   Stack should be cleaned, allowing other resolutions
       expect(() => container.resolve(tokenC)).not.toThrow();
       expect(container.resolve<{ name: string }>(tokenC).name).toBe('C');
     });
 
-    it('should_CleanupStackAtEachLevel_When_NestedResolutionsFail', () => {
+    it('should cleanup stack at each level when nested resolutions fail', () => {
       // Given
       const tokenA = Symbol('ServiceA');
       const tokenB = Symbol('ServiceB');
       const tokenC = Symbol('ServiceC');
       const tokenD = Symbol('ServiceD');
 
-      // A -> B -> C -> D (D fails)
+      // A  > B  > C  > D (D fails)
       container.register(tokenD, () => {
         throw new Error('D fails');
       });
@@ -526,16 +526,16 @@ describe('Container', () => {
       });
 
       container.register(tokenB, c => {
-        c.resolve(tokenC); // This will fail due to C -> D failure
+        c.resolve(tokenC); // This will fail due to C  > D failure
         return { name: 'B' };
       });
 
       container.register(tokenA, c => {
-        c.resolve(tokenB); // This will fail due to B -> C -> D failure
+        c.resolve(tokenB); // This will fail due to B  > C  > D failure
         return { name: 'A' };
       });
 
-      // When - Resolution fails at deepest level
+      // When   Resolution fails at deepest level
       try {
         container.resolve(tokenA);
       } catch (error) {
@@ -543,7 +543,7 @@ describe('Container', () => {
         expect((error as ContainerError).message).toContain('D fails');
       }
 
-      // Then - Stack should be completely cleaned
+      // Then   Stack should be completely cleaned
       // Register a new simple service and verify it resolves
       const tokenE = Symbol('ServiceE');
       container.register(tokenE, () => ({ name: 'E' }));
@@ -552,7 +552,7 @@ describe('Container', () => {
       expect(container.resolve<{ name: string }>(tokenE).name).toBe('E');
     });
 
-    it('should_MaintainStackIntegrity_When_MultipleErrorsOccur', () => {
+    it('should maintain stack integrity when multiple errors occur', () => {
       // Given
       const failingToken1 = Symbol('FailingService1');
       const failingToken2 = Symbol('FailingService2');
@@ -568,39 +568,39 @@ describe('Container', () => {
 
       container.register(workingToken, () => ({ value: 'works' }));
 
-      // When - Multiple errors occur
+      // When   Multiple errors occur
       expect(() => container.resolve(failingToken1)).toThrow(ContainerError);
       expect(() => container.resolve(failingToken2)).toThrow(ContainerError);
       expect(() => container.resolve(failingToken1)).toThrow(ContainerError);
 
-      // Then - Working service still resolves correctly
+      // Then   Working service still resolves correctly
       expect(() => container.resolve(workingToken)).not.toThrow();
       expect(container.resolve<{ value: string }>(workingToken).value).toBe('works');
     });
 
-    it('should_CleanupStack_When_NonErrorObjectThrown', () => {
+    it('should cleanup stack when non error object thrown', () => {
       // Given
       const tokenA = Symbol('ServiceA');
       const tokenB = Symbol('ServiceB');
 
       container.register(tokenA, () => {
-        throw 'String error'; // Non-Error object
+        throw 'String error'; // Non Error object
       });
 
       container.register(tokenB, () => ({ value: 'B' }));
 
-      // When - Non-Error thrown
+      // When   Non Error thrown
       try {
         container.resolve(tokenA);
       } catch (error) {
         expect(error).toBeInstanceOf(ContainerError);
       }
 
-      // Then - Stack cleaned, other services work
+      // Then   Stack cleaned, other services work
       expect(() => container.resolve(tokenB)).not.toThrow();
     });
 
-    it('should_CleanupStackCorrectly_When_PartialResolutionSucceeds', () => {
+    it('should cleanup stack correctly when partial resolution succeeds', () => {
       // Given
       const tokenA = Symbol('ServiceA');
       const tokenB = Symbol('ServiceB');
@@ -624,14 +624,14 @@ describe('Container', () => {
         return { b, c: cc };
       });
 
-      // When - A fails due to C, but B was successfully resolved
+      // When   A fails due to C, but B was successfully resolved
       try {
         container.resolve(tokenA);
       } catch (error) {
         expect(error).toBeInstanceOf(ContainerError);
       }
 
-      // Then - B singleton should be cached despite A's failure
+      // Then   B singleton should be cached despite A's failure
       const directB = container.resolve<{ name: string }>(tokenB);
       expect(directB.name).toBe('B');
       expect(bResolutionCount).toBe(1); // B was only created once

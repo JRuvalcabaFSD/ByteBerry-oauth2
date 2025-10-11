@@ -27,3 +27,4 @@ export * from './services/clock.service';
 export * from './services/uuid.service';
 export * from './services/winston.service';
 export * from './services/pkceValidator.service';
+export * from './services/jwt.service';

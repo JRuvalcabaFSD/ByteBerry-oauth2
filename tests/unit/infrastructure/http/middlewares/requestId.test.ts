@@ -17,14 +17,14 @@ describe('RequestId Middleware', () => {
     });
   });
 
-  it('should_GenerateRequestId_When_NoHeaderProvided', async () => {
+  it('should generate request id when no header provided', async () => {
     const response = await request(app).get('/test');
 
     expect(response.body.requestId).toBeDefined();
     expect(response.headers['x-request-id']).toBeDefined();
   });
 
-  it('should_UseProvidedRequestId_When_HeaderPresent', async () => {
+  it('should use provided request id when header present', async () => {
     const customRequestId = 'custom-id-12345';
 
     const response = await request(app).get('/test').set('x-request-id', customRequestId);
@@ -33,7 +33,7 @@ describe('RequestId Middleware', () => {
     expect(response.headers['x-request-id']).toBe(customRequestId);
   });
 
-  it('should_SetResponseHeader_When_RequestProcessed', async () => {
+  it('should set response header when request processed', async () => {
     const response = await request(app).get('/test');
 
     expect(response.headers['x-request-id']).toBeDefined();

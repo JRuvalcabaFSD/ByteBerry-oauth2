@@ -30,12 +30,12 @@ describe('WinstonLoggerService', () => {
   });
 
   describe('Basic Functionality', () => {
-    it('should_CreateInstance_When_Instantiated', () => {
+    it('should create instance when instantiated', () => {
       expect(logger).toBeDefined();
       expect(logger).toBeInstanceOf(WinstonLoggerService);
     });
 
-    it('should_HaveAllLogMethods_When_Created', () => {
+    it('should have all log methods when created', () => {
       expect(typeof logger.info).toBe('function');
       expect(typeof logger.child).toBe('function');
       expect(typeof logger.debug).toBe('function');
@@ -43,7 +43,7 @@ describe('WinstonLoggerService', () => {
       expect(typeof logger.log).toBe('function');
       expect(typeof logger.warn).toBe('function');
     });
-    it('should_NotThrow_When_LoggingMessages', () => {
+    it('should not throw when logging messages', () => {
       expect(() => logger.info('tests')).not.toThrow();
       expect(() => logger.debug('tests')).not.toThrow();
       expect(() => logger.error('tests')).not.toThrow();
@@ -51,7 +51,7 @@ describe('WinstonLoggerService', () => {
     });
   });
   describe('Child Logger', () => {
-    it('should_CreateChildLogger_When_Called', () => {
+    it('should create child logger when called', () => {
       const child = logger.child({ requestId: 'tests-123' });
 
       expect(child).toBeDefined();
@@ -61,14 +61,14 @@ describe('WinstonLoggerService', () => {
   });
 
   describe('Clock Integration', () => {
-    it('should_UseClockForTimestamp_When_Logging', () => {
+    it('should use clock for timestamp when logging', () => {
       logger.info('test message');
 
       expect(mockClock.isoString).toHaveBeenCalledWith();
     });
   });
   describe('log - Service Name Fallback', () => {
-    it('should_UseConfigServiceName_When_ContextServiceIsUndefined', () => {
+    it('should use config service name when context service is undefined', () => {
       // Given
       const mockWinstonLog = jest.fn();
       const loggerInstance = new WinstonLoggerService(mockConfig, mockClock);
@@ -87,7 +87,7 @@ describe('WinstonLoggerService', () => {
       expect(logEntry.service).toBe('test-service'); // Viene de mockConfig.serviceName
     });
 
-    it('should_UseContextService_When_ContextServiceProvided', () => {
+    it('should use context service when context service provided', () => {
       // Given
       const mockWinstonLog = jest.fn();
       const loggerInstance = new WinstonLoggerService(mockConfig, mockClock);
@@ -104,7 +104,7 @@ describe('WinstonLoggerService', () => {
       expect(logEntry.service).toBe('custom-service'); // Usa el del context
     });
 
-    it('should_UseConfigServiceName_When_ContextServiceIsNull', () => {
+    it('should use config service name when context service is null', () => {
       // Given
       const mockWinstonLog = jest.fn();
       const loggerInstance = new WinstonLoggerService(mockConfig, mockClock);
@@ -139,7 +139,7 @@ describe('WinstonLoggerService', () => {
       };
     });
 
-    it('should_CreateLoggerInProductionMode_When_IsProductionTrue', () => {
+    it('should create logger in production mode when is production true', () => {
       // When
       const prodLogger = new WinstonLoggerService(productionConfig, mockClock);
 
@@ -148,7 +148,7 @@ describe('WinstonLoggerService', () => {
       expect(productionConfig.isProduction).toHaveBeenCalled();
     });
 
-    it('should_UseDevelopmentMode_When_NotProduction', () => {
+    it('should use development mode when not production', () => {
       // Given
       const devConfig = { ...mockConfig, isProduction: jest.fn().mockReturnValue(false) };
 
@@ -178,7 +178,7 @@ describe('WinstonLoggerService', () => {
       };
     });
 
-    it('should_CreateLoggerInProductionMode_When_IsProductionTrue', () => {
+    it('should create logger in production mode when is production true', () => {
       // When
       const prodLogger = new WinstonLoggerService(productionConfig, mockClock);
 
@@ -187,7 +187,7 @@ describe('WinstonLoggerService', () => {
       expect(productionConfig.isProduction).toHaveBeenCalled();
     });
 
-    it('should_UseDevelopmentMode_When_NotProduction', () => {
+    it('should use development mode when not production', () => {
       // Given
       const devConfig = { ...mockConfig, isProduction: jest.fn().mockReturnValue(false) };
 

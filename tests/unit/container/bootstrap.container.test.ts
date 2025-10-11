@@ -6,7 +6,7 @@ describe('bootstrapContainer', () => {
   });
 
   describe('Container Creation', () => {
-    it('should_CreateContainerInstance_When_Called', () => {
+    it('should create container instance when called', () => {
       const container = bootstrapContainer();
 
       expect(container).toBeDefined();
@@ -15,12 +15,12 @@ describe('bootstrapContainer', () => {
       expect(typeof container.isRegistered).toBe('function');
     });
   });
-  describe('Critical Services Validation - Line 36 Coverage', () => {
+  describe('Critical Services Validation', () => {
     beforeEach(() => {
       jest.resetModules();
       jest.clearAllMocks();
     });
-    it('should_ThrowContainerCreationError_When_CriticalServiceNotRegistered', async () => {
+    it('should throw container creation error when critical service not registered', async () => {
       await jest.isolateModulesAsync(async () => {
         const mod = await import('@container');
         const { ContainerError } = await import('@shared');

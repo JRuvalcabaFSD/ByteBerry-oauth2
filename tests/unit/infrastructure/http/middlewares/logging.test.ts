@@ -25,14 +25,14 @@ describe('Logger Middleware', () => {
     });
   });
 
-  it('should_AttachLoggerToRequest_When_RequestProcessed', async () => {
+  it('should attach logger to request when request processed', async () => {
     await request(app).get('/test');
 
     // Si no lanza error, el logger fue attachado correctamente
     expect(true).toBe(true);
   });
 
-  it('should_ThrowError_When_RequestIdMissing', () => {
+  it('should throw error when request id missing', () => {
     const appWithoutRequestId = express();
     appWithoutRequestId.use(createLoggerMiddleware(logger, clock));
     appWithoutRequestId.get('/test', (_req, res) => {

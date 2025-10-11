@@ -9,7 +9,7 @@ describe('ClockService', () => {
   });
 
   describe('now', () => {
-    it('should_ReturnDateInstance_When_Called', () => {
+    it('should return date instance when called', () => {
       // When
       const result = clockService.now();
 
@@ -17,7 +17,7 @@ describe('ClockService', () => {
       expect(result).toBeInstanceOf(Date);
     });
 
-    it('should_ReturnCurrentTime_When_Called', () => {
+    it('should return current time when called', () => {
       // Given
       const before = Date.now();
 
@@ -32,7 +32,7 @@ describe('ClockService', () => {
   });
 
   describe('timestamp', () => {
-    it('should_ReturnNumber_When_Called', () => {
+    it('should return number when called', () => {
       // When
       const result = clockService.timestamp();
 
@@ -40,7 +40,7 @@ describe('ClockService', () => {
       expect(typeof result).toBe('number');
     });
 
-    it('should_ReturnMillisecondsSinceEpoch_When_Called', () => {
+    it('should return milliseconds since epoch when called', () => {
       // Given
       const before = Date.now();
 
@@ -55,7 +55,7 @@ describe('ClockService', () => {
   });
 
   describe('isoString', () => {
-    it('should_ReturnISOString_When_Called', () => {
+    it('should return iso string when called', () => {
       // When
       const result = clockService.isoString();
 
@@ -64,7 +64,7 @@ describe('ClockService', () => {
       expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     });
 
-    it('should_BeValidISO8601Format_When_Called', () => {
+    it('should be valid iso8601 format when called', () => {
       // When
       const result = clockService.isoString();
       const parsed = new Date(result);
@@ -75,7 +75,7 @@ describe('ClockService', () => {
   });
 
   describe('createClockService', () => {
-    it('should_ReturnClockServiceInstance_When_Called', () => {
+    it('should return clock service instance when called', () => {
       // When
       const service = createClockService();
 
