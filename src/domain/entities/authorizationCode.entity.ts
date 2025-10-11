@@ -1,5 +1,6 @@
 import { IAuthorizationCode, IAuthorizationCodeMetadata } from '@/interfaces';
 
+/* c8 ignore start */
 /**
  * Represents an OAuth2 Authorization Code entity.
  *
@@ -40,11 +41,13 @@ import { IAuthorizationCode, IAuthorizationCodeMetadata } from '@/interfaces';
  *
  * @memberof AuthorizationCodeEntity
  */
+/* c8 ignore stop */
 
 export class AuthorizationCodeEntity implements IAuthorizationCode {
   public used: boolean = false;
   public createAt: Date;
 
+  /* c8 ignore start */
   /**
    * Creates an instance of AuthorizationCodeEntity.
    * @param {string} code The unique authorization code string.
@@ -52,6 +55,7 @@ export class AuthorizationCodeEntity implements IAuthorizationCode {
    * @throws {Error} If the code format is invalid.
    * @memberof AuthorizationCodeEntity
    */
+  /* c8 ignore stop */
 
   constructor(
     public readonly code: string,
@@ -61,6 +65,7 @@ export class AuthorizationCodeEntity implements IAuthorizationCode {
     this.validateFormat();
   }
 
+  /* c8 ignore start */
   /**
    * Validates the format of the authorization code.
    *
@@ -74,12 +79,14 @@ export class AuthorizationCodeEntity implements IAuthorizationCode {
    * new AuthorizationCodeEntity('12345678901234567890', { ... }); // Throws error: must start with AC_
    * new AuthorizationCodeEntity('AC_12345', { ... }); // Throws error: too short
    */
+  /* c8 ignore stop */
 
   private validateFormat(): void {
     if (!this.code.startsWith('AC_')) throw new Error('Invalid authorization code format: must start with AC_');
     if (this.code.length < 20) throw new Error('Invalid authorization code format: too short');
   }
 
+  /* c8 ignore start */
   /**
    * Checks if the authorization code is valid (not used and not expired).
    *
@@ -91,11 +98,13 @@ export class AuthorizationCodeEntity implements IAuthorizationCode {
    *   // Proceed with authorization
    * }
    */
+  /* c8 ignore stop */
 
   public isValid(): boolean {
     return !this.used && !this.isExpired();
   }
 
+  /* c8 ignore start */
   /**
    * Checks if the authorization code has expired.
    *
@@ -107,11 +116,13 @@ export class AuthorizationCodeEntity implements IAuthorizationCode {
    *   // Handle expired code
    * }
    */
+  /* c8 ignore stop */
 
   public isExpired(): boolean {
     return new Date() > this.metadata.expiresAt;
   }
 
+  /* c8 ignore start */
   /**
    * Marks the authorization code as used.	 *
    *
@@ -125,6 +136,7 @@ export class AuthorizationCodeEntity implements IAuthorizationCode {
    *
    * @throws {Error} If the code is already used or expired.
    */
+  /* c8 ignore stop */
 
   public markAsUsed(): void {
     if (this.used) throw new Error('Authorization code already used');
@@ -132,6 +144,7 @@ export class AuthorizationCodeEntity implements IAuthorizationCode {
     this.used = true;
   }
 
+  /* c8 ignore start */
   /**
    * Validates that the provided client ID matches the one in the metadata.
    *
@@ -146,11 +159,13 @@ export class AuthorizationCodeEntity implements IAuthorizationCode {
    * }
    * @memberof AuthorizationCodeEntity
    */
+  /* c8 ignore stop */
 
   public validateClientId(clientId: string): boolean {
     return this.metadata.clientId === clientId;
   }
 
+  /* c8 ignore start */
   /**
    * Validates that the provided redirect URI matches the one in the metadata.
    *
@@ -165,11 +180,13 @@ export class AuthorizationCodeEntity implements IAuthorizationCode {
    * }
    * @memberof AuthorizationCodeEntity
    */
+  /* c8 ignore stop */
 
   public validateRedirectUri(redirectUri: string): boolean {
     return this.metadata.redirectUri === redirectUri;
   }
 
+  /* c8 ignore start */
   /**
    * Retrieves the code challenge associated with the authorization code.
    *
@@ -180,11 +197,13 @@ export class AuthorizationCodeEntity implements IAuthorizationCode {
    * console.log(challenge); // Outputs the code challenge
    * @memberof AuthorizationCodeEntity
    */
+  /* c8 ignore stop */
 
   public getCodeChallenge(): string {
     return this.metadata.codeChallenge;
   }
 
+  /* c8 ignore start */
   /**
    * Serializes the entity to a plain object conforming to IAuthorizationCode.
    *
@@ -201,6 +220,7 @@ export class AuthorizationCodeEntity implements IAuthorizationCode {
    * // }
    * @memberof AuthorizationCodeEntity
    */
+  /* c8 ignore stop */
 
   public toObject(): IAuthorizationCode {
     return {

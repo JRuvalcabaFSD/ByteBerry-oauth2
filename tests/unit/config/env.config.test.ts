@@ -13,7 +13,14 @@ describe('Config', () => {
 
   beforeEach(() => {
     jest.resetModules();
-    process.env = { CORS_ORIGINS: '*' };
+    process.env = {
+      CORS_ORIGINS: '*',
+      JWT_ISSUER: 'byteberry-oauth2',
+      JWT_AUDIENCE: 'byteberry-api',
+      JWT_EXPIRES_IN: '900',
+      JWT_PRIVATE_KEY: '-----BEGIN RSA PRIVATE KEY-----\nMIIE...\n-----END RSA PRIVATE KEY-----',
+      JWT_PUBLIC_KEY: '-----BEGIN PUBLIC KEY-----\nMIIB...\n-----END PUBLIC KEY-----',
+    };
   });
 
   afterEach(() => {

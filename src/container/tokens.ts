@@ -37,6 +37,7 @@ export const TOKENS = {
 
   //OAuth2 services
   PckValidator: Symbol.for('PckValidator'),
+  JwtService: Symbol.for('JwtService'),
 
   //OAuth2 repositories
   AuthorizationCodeRepository: Symbol.for('AuthorizationCodeRepository'),

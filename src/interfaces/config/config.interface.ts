@@ -1,3 +1,4 @@
+import { IJwtConfig } from '@/interfaces';
 /**
  * Describes the allowed runtime environments for the application.
  *
@@ -80,6 +81,7 @@ export interface IConfig {
   readonly serviceName: string;
   readonly version: string;
   readonly corsOrigins: string[];
+  readonly jwt: IJwtConfig;
   isDevelopment(): boolean;
   isProduction(): boolean;
   isTest(): boolean;

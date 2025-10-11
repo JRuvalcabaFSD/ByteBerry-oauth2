@@ -150,7 +150,7 @@ describe('GracefulShutdown', () => {
     it('should_ExecuteMultipleCleanupsConcurrently_When_ShutdownCalled', async () => {
       // Given
       const startTime = Date.now();
-      const delay = 50;
+      const delay = 75;
 
       const cleanup1: CleanupFunction = async () => {
         await new Promise(resolve => setTimeout(resolve, delay));

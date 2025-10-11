@@ -40,6 +40,7 @@ export function bootstrapContainer(): IContainer {
   // ==========================================
   container.registerSingleton(TOKENS.PckValidator, factories.createPkceValidator);
   container.registerSingleton(TOKENS.AuthorizationCodeRepository, factories.createAuthorizationCodeRepository);
+  container.register(TOKENS.JwtService, factories.createJwtService);
 
   // ==========================================
   // USE CASES

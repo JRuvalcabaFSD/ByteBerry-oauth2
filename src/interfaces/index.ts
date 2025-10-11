@@ -23,3 +23,4 @@ export * from './infrastructure/services/clock.interface';
 export * from './infrastructure/services/uuid.interface';
 export * from './infrastructure/services/logger.interface';
 export * from './infrastructure/services/pkceValidator.interface';
+export * from './infrastructure/services/jwt.interface';

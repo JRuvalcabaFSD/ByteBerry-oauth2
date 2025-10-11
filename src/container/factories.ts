@@ -3,6 +3,7 @@ import * as services from '@/infrastructure';
 
 import { TOKENS } from '@/container';
 import { IContainer } from '@/interfaces';
+import { JwtService } from '@/infrastructure/services/jwt.service';
 
 /**
  * Creates a WinstonLoggerService using dependencies resolved from the provided container.
@@ -147,4 +148,22 @@ export function createAuthController(c: IContainer): services.AuthController {
 
 export function createGracefulShutdown(c: IContainer): services.GracefulShutdown {
   return new services.GracefulShutdown(c.resolve(TOKENS.Logger));
+}
+
+/**
+ * Creates and configures a JwtService using dependencies resolved from the provided inversion-of-control container.
+ *
+ * The container must supply bindings for TOKENS.Config, TOKENS.Logger, and TOKENS.Clock.
+ *
+ * @param c - The IoC container used to resolve JwtService dependencies.
+ * @returns A JwtService instance initialized with configuration, logging, and clock services.
+ * @throws If any required dependency (Config, Logger, or Clock) cannot be resolved from the container.
+ *
+ * @example
+ * const jwt = createJwtService(container);
+ * const token = await jwt.sign({ sub: user.id });
+ */
+
+export function createJwtService(c: IContainer): JwtService {
+  return new JwtService(c.resolve(TOKENS.Config), c.resolve(TOKENS.Logger), c.resolve(TOKENS.Clock));
 }

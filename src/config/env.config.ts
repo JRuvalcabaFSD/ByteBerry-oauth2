@@ -2,8 +2,8 @@ import dotenv from 'dotenv';
 import { get } from 'env-var';
 import pkg from '../../package.json';
 
-import { IConfig, LogLevel, NodeEnv } from '@/interfaces';
-import { ConfigError } from '@/shared';
+import { IConfig, IJwtConfig, LogLevel, NodeEnv } from '@/interfaces';
+import { ConfigError, JwtConfigurationError } from '@/shared';
 
 /**
  * Singleton service configuration that loads, validates, and exposes runtime
@@ -19,6 +19,7 @@ import { ConfigError } from '@/shared';
  * - NODE_ENV: 'development' | 'production' | 'test' (default: 'development')
  * - LOG_LEVEL: 'debug' | 'info' | 'warn' | 'error' (default: 'info')
  * - SERVICE_NAME: service identifier (default: 'byteberry-oauth2')
+ *
  *
  * Exposed properties:
  * - port: number
@@ -66,6 +67,7 @@ export class Config implements IConfig {
   public readonly serviceName: string;
   public readonly version: string;
   public readonly corsOrigins: string[];
+  public readonly jwt: IJwtConfig;
   private static instance: Config | null = null;
 
   /**
@@ -83,6 +85,7 @@ export class Config implements IConfig {
       this.serviceName = get('SERVICE_NAME').default('byteberry-oauth2').required().asString();
       this.corsOrigins = get('CORS_ORIGINS').required().asArray();
       this.version = process.env.npm_package_version || pkg.version || '0.0.0';
+      this.jwt = this.loadJwtConfig();
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new ConfigError(`Failed to validate environment variables: ${errorMessage}`, {
@@ -122,6 +125,68 @@ export class Config implements IConfig {
 
   public isTest(): boolean {
     return this.nodeEnv === 'test';
+  }
+
+  /**
+   * Loads, validates, and normalizes JWT configuration from environment variables.
+   *
+   * Environment variables:
+   * - JWT_PRIVATE_KEY (required): PEM-encoded private key.
+   * - JWT_PUBLIC_KEY (required): PEM-encoded public key.
+   * - JWT_ISSUER (optional): defaults to the current service name.
+   * - JWT_AUDIENCE (optional): defaults to "byteberry-api".
+   * - JWT_EXPIRES_IN (optional): token lifetime in seconds; defaults to 900.
+   *
+   * Validation:
+   * - Ensures both keys appear to be PEM-formatted (contain the expected BEGIN/END headers).
+   * - Keys are normalized via an internal formatter to ensure proper PEM structure before use.
+   *
+   * @returns IJwtConfig A fully validated and normalized JWT configuration, including keys, issuer, audience, and expiration.
+   * @throws JwtConfigurationError If either JWT_PRIVATE_KEY or JWT_PUBLIC_KEY does not appear to be in PEM format.
+   * @remarks Intended for internal configuration bootstrap; relies on process environment for values.
+   */
+
+  private loadJwtConfig(): IJwtConfig {
+    const privateKey = get('JWT_PRIVATE_KEY').required().asString();
+    const publicKey = get('JWT_PUBLIC_KEY').required().asString();
+    const issuer = get('JWT_ISSUER').default(this.serviceName).asString();
+    const audience = get('JWT_AUDIENCE').default('byteberry-api').asString();
+    const expiresIn = get('JWT_EXPIRES_IN').default(900).asIntPositive();
+
+    if (!privateKey.includes('BEGIN PRIVATE KEY') && !privateKey.includes('BEGIN RSA PRIVATE KEY')) {
+      throw new JwtConfigurationError('JWT_PRIVATE_KEY must be in PEM format');
+    }
+    if (!publicKey.includes('BEGIN PUBLIC KEY') && !publicKey.includes('BEGIN RSA PUBLIC KEY')) {
+      throw new JwtConfigurationError('JWT_PUBLIC_KEY must be in PEM format');
+    }
+
+    return {
+      publicKey: this.formatPemKey(privateKey),
+      privateKey: this.formatPemKey(privateKey),
+      issuer,
+      audience,
+      expiresIn,
+    };
+  }
+
+  /**
+   * Formats a PEM key by replacing escaped newline characters with actual newlines.
+   * This is commonly needed when PEM keys are stored in environment variables or
+   * configuration files where newlines are escaped.
+   *
+   * @param key - The PEM key string with escaped newline characters (\\n)
+   * @returns The formatted PEM key string with proper newline characters (\n)
+   *
+   * @example
+   * ```typescript
+   * const escapedKey = "-----BEGIN PRIVATE KEY-----\\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC...\\n-----END PRIVATE KEY-----";
+   * const formattedKey = formatPemKey(escapedKey);
+   * // Returns: "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC...\n-----END PRIVATE KEY-----"
+   * ```
+   */
+
+  private formatPemKey(key: string) {
+    return key.replace(/\\n/g, '\n');
   }
 
   /**
@@ -167,19 +232,13 @@ export class Config implements IConfig {
 /**
  * Creates and returns the application configuration for the current runtime environment.
  *
- * Delegates to the underlying configuration provider (e.g., Config.getConfig) to resolve
- * values from environment variables, configuration files, or defaults.
- *
- * Use this helper at application startup to obtain a single configuration object that can
- * be shared across the application.
- *
  * @returns The resolved IConfig instance containing application settings.
- * @throws {Error} If configuration resolution fails or required values are missing.
+ * @throws {ConfigError} If configuration resolution fails or required values are missing.
  * @example
+ * import { createConfig } from './config/env.config';
  * const config = createConfig();
  * // Use `config` throughout the application
  */
-
 export function createConfig(): IConfig {
   return Config.getConfig();
 }
