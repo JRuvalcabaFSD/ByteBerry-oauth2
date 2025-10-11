@@ -1,5 +1,6 @@
-import { IConfig } from '@/interfaces';
 import cors, { CorsOptions } from 'cors';
+
+import { IConfig } from '@/interfaces';
 
 /**
  * Creates a CORS middleware with predefined configuration options.

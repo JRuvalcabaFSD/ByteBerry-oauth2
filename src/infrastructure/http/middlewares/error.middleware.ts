@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { IConfig, ILogger } from '@/interfaces';
-import { HttpError } from '@/shared/errors/http.errors';
+import { HttpError } from '@/shared';
 
 /**
  * Creates an Express error handling middleware that logs errors and returns standardized error responses.

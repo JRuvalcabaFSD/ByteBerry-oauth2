@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 import { get } from 'env-var';
+import pkg from '../../package.json';
 
 import { IConfig, LogLevel, NodeEnv } from '@/interfaces';
-import pkg from '../../package.json';
 import { ConfigError } from '@/shared';
 
 /**

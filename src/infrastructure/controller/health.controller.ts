@@ -2,18 +2,7 @@ import os from 'os';
 import { Request, Response } from 'express';
 
 import { criticalServices } from '@/container';
-import {
-  DependencyResponse,
-  IClock,
-  IConfig,
-  IContainer,
-  IDeepHealthResponse,
-  IHealthController,
-  IHealthResponse,
-  ILogger,
-  IUuid,
-  SystemInfoResponse,
-} from '@/interfaces';
+import * as interfaces from '@/interfaces';
 
 /**
  * Provides HTTP health check endpoints for the service, including a fast "basic" liveness check
@@ -49,7 +38,7 @@ import {
  * @implements IHealthController
  */
 
-export class HealthController implements IHealthController {
+export class HealthController implements interfaces.IHealthController {
   /**
    * Creates a HealthController.
    *
@@ -64,11 +53,11 @@ export class HealthController implements IHealthController {
    */
 
   constructor(
-    private readonly container: IContainer,
-    private readonly config: IConfig,
-    private readonly logger: ILogger,
-    private readonly uuid: IUuid,
-    private readonly clock: IClock
+    private readonly container: interfaces.IContainer,
+    private readonly config: interfaces.IConfig,
+    private readonly logger: interfaces.ILogger,
+    private readonly uuid: interfaces.IUuid,
+    private readonly clock: interfaces.IClock
   ) {}
 
   /**
@@ -95,7 +84,7 @@ export class HealthController implements IHealthController {
       const requestId = req.requestId || this.uuid.generate();
       const uptime = Math.floor(process.uptime() * 1000);
 
-      const response: IHealthResponse = {
+      const response: interfaces.IHealthResponse = {
         status: 'healthy',
         timestamp: this.clock.isoString(),
         service: this.config.serviceName,
@@ -147,7 +136,7 @@ export class HealthController implements IHealthController {
       const systemInfo = this.getSystemInfo();
       const overallStatus = this.determineOverallStatus(dependencies);
 
-      const deepHealthResponse: IDeepHealthResponse = {
+      const deepHealthResponse: interfaces.IDeepHealthResponse = {
         status: overallStatus,
         timestamp: this.clock.isoString(),
         service: this.config.serviceName,
@@ -195,8 +184,8 @@ export class HealthController implements IHealthController {
    * Logs include the measured response time for the deep check and dependency count.
    */
 
-  private async checkDependencies(): Promise<Record<string, DependencyResponse>> {
-    const dependencies: Record<string, DependencyResponse> = {};
+  private async checkDependencies(): Promise<Record<string, interfaces.DependencyResponse>> {
+    const dependencies: Record<string, interfaces.DependencyResponse> = {};
 
     for (const service of criticalServices) {
       const startTime = this.clock.timestamp();
@@ -254,7 +243,7 @@ export class HealthController implements IHealthController {
    * @internal
    */
 
-  private getSystemInfo(): SystemInfoResponse {
+  private getSystemInfo(): interfaces.SystemInfoResponse {
     const totalMemory = os.totalmem();
     const freeMemory = os.freemem();
     const usedMemory = totalMemory - freeMemory;
@@ -282,7 +271,7 @@ export class HealthController implements IHealthController {
    * @internal
    */
 
-  private determineOverallStatus(dependencies: Record<string, DependencyResponse>): 'healthy' | 'unhealthy' | 'degraded' {
+  private determineOverallStatus(dependencies: Record<string, interfaces.DependencyResponse>): 'healthy' | 'unhealthy' | 'degraded' {
     const statuses = Object.values(dependencies).map(dep => dep.status);
 
     if (statuses.every(status => status === 'healthy')) {
@@ -322,7 +311,7 @@ export class HealthController implements IHealthController {
         stack: error.stack,
       });
 
-      const errorResponse: Partial<IHealthResponse> = {
+      const errorResponse: Partial<interfaces.IHealthResponse> = {
         status: 'unhealthy',
         timestamp: this.clock.isoString(),
         service: this.config.serviceName,

@@ -1,5 +1,6 @@
 //Controllers
 export * from './controller/health.controller';
+export * from './controller/auth.controller';
 
 //Http
 export * from './http/httpServer';

@@ -1,14 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import * as interfaces from '@/interfaces';
+
 import { Request, Response } from 'express';
-import {
-  IAuthController,
-  IAuthorizeRequest,
-  IAuthorizeResponse,
-  IJwksResponse,
-  ILogger,
-  ITokenRequest,
-  ITokenResponse,
-} from '@/interfaces';
 import { BadRequestError } from '@/shared/errors/http.errors';
 import { ExchangeAuthorizationCodeUseCase, GenerateAuthorizationCodeUseCase, ValidatorPkceChallengeUseCase } from '@/application';
 
@@ -48,7 +41,7 @@ import { ExchangeAuthorizationCodeUseCase, GenerateAuthorizationCodeUseCase, Val
  * @see {@link https://tools.ietf.org/html/rfc7636} PKCE by OAuth Public Clients
  */
 
-export class AuthController implements IAuthController {
+export class AuthController implements interfaces.IAuthController {
   /**
    * Initializes a new instance of the AuthController.
    *
@@ -61,7 +54,7 @@ export class AuthController implements IAuthController {
    */
 
   constructor(
-    private readonly logger: ILogger,
+    private readonly logger: interfaces.ILogger,
     private readonly generateAuthCode: GenerateAuthorizationCodeUseCase,
     private readonly exchangeAuthCode: ExchangeAuthorizationCodeUseCase,
     private readonly validatePkce: ValidatorPkceChallengeUseCase
@@ -113,7 +106,7 @@ export class AuthController implements IAuthController {
         scopes: authorizeParams.scope?.split(''),
       });
 
-      const response: IAuthorizeResponse = {
+      const response: interfaces.IAuthorizeResponse = {
         code,
         state: authorizeParams.state,
       };
@@ -168,7 +161,7 @@ export class AuthController implements IAuthController {
 
       // TODO: In T059, generate JWT access token with RS256
       // For now, return mock response
-      const mockResponse: ITokenResponse = {
+      const mockResponse: interfaces.ITokenResponse = {
         access_token: 'mock_jwt_token_' + Date.now(),
         token_type: 'Bearer',
         expires_in: 900, // 15 minutes
@@ -205,7 +198,7 @@ export class AuthController implements IAuthController {
     this.logger.info('JWKS request received', context);
 
     try {
-      const mockResponse: IJwksResponse = {
+      const mockResponse: interfaces.IJwksResponse = {
         keys: [
           {
             kty: 'RSA',
@@ -241,7 +234,7 @@ export class AuthController implements IAuthController {
    * @memberof AuthController
    */
 
-  private validateAuthorizeRequest(query: any): IAuthorizeRequest {
+  private validateAuthorizeRequest(query: any): interfaces.IAuthorizeRequest {
     if (!query.response_type) throw new BadRequestError('Missing required parameter: response_type');
     if (query.response_type !== 'code') throw new BadRequestError('Invalid response_type. Must be "code"');
     if (!query.client_id) throw new BadRequestError('Missing required parameter: client_id');
@@ -271,7 +264,7 @@ export class AuthController implements IAuthController {
    * @memberof AuthController
    */
 
-  private validateTokenRequest(body: any): ITokenRequest {
+  private validateTokenRequest(body: any): interfaces.ITokenRequest {
     if (!body.grant_type) throw new BadRequestError('Missing required parameter: grant_type');
     if (body.grant_type !== 'authorization_code') throw new BadRequestError('Invalid grant_type. Must be "authorization_code"');
     if (!body.code) throw new BadRequestError('Missing required parameter: code');

@@ -1,7 +1,6 @@
-import { TOKENS } from '@/container';
-import { GracefulShutdown } from '@/infrastructure/lifecycle/shutdown';
-import { AuthorizationCodeRepositoryImpl } from '@/infrastructure/repositories/authorizationCode.repository.impl';
+import { AuthorizationCodeRepositoryImpl, GracefulShutdown } from '@/infrastructure';
 import { IContainer, IHttpServer, ILogger } from '@/interfaces';
+import { TOKENS } from '@/container';
 
 export function configureShutdown(container: IContainer): GracefulShutdown {
   const gracefulShutdown = container.resolve<GracefulShutdown>(TOKENS.GracefulShutdown);

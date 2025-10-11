@@ -1,5 +1,6 @@
-import { IAuthController } from '@/interfaces';
 import { Router } from 'express';
+
+import { IAuthController } from '@/interfaces';
 
 /**
  * Creates and configures authentication routes for OAuth2 endpoints.

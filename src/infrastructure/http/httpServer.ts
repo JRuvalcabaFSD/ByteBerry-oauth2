@@ -1,15 +1,9 @@
 import { Server } from 'http';
 import express, { Application } from 'express';
 
+import * as infra from '@/infrastructure';
+
 import { IAuthController, IClock, IConfig, IHealthController, IHttpServer, ILogger, IUuid, ServerInfo } from '@/interfaces';
-import {
-  createCORSMiddleware,
-  createErrorMiddleware,
-  createHealthRoutes,
-  createLoggerMiddleware,
-  createRequestIdMiddleware,
-  createSecurityMiddleware,
-} from '@/infrastructure';
 import { createAuthRoutes } from '@/infrastructure/http/routes/auth.routes';
 
 /**
@@ -193,10 +187,10 @@ export class HttpServer implements IHttpServer {
   private setupMiddlewares() {
     this.app.set('trust proxy', true);
     this.app.disable('x-powered-by');
-    this.app.use(createSecurityMiddleware());
-    this.app.use(createCORSMiddleware(this.config));
-    this.app.use(createRequestIdMiddleware(this.uuid));
-    this.app.use(createLoggerMiddleware(this.logger, this.clock));
+    this.app.use(infra.createSecurityMiddleware());
+    this.app.use(infra.createCORSMiddleware(this.config));
+    this.app.use(infra.createRequestIdMiddleware(this.uuid));
+    this.app.use(infra.createLoggerMiddleware(this.logger, this.clock));
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   }
@@ -215,7 +209,7 @@ export class HttpServer implements IHttpServer {
    */
 
   private setupRoutes() {
-    const healthRoutes = createHealthRoutes(this.healthController);
+    const healthRoutes = infra.createHealthRoutes(this.healthController);
     const authRoutes = createAuthRoutes(this.authController);
 
     this.app.use(healthRoutes);
@@ -259,7 +253,7 @@ export class HttpServer implements IHttpServer {
    */
 
   private setupErrorHandlers() {
-    this.app.use(createErrorMiddleware(this.logger, this.config));
+    this.app.use(infra.createErrorMiddleware(this.logger, this.config));
   }
 
   private getRoutesList(type: 'json' | 'text'): Record<string, unknown> | string[] {

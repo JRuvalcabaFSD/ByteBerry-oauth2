@@ -1,22 +1,11 @@
+import * as factories from '@container';
+
 import { createClockService, createUuidService } from '@/infrastructure';
-import {
-  createAuthController,
-  createAuthorizationCodeRepository,
-  createExchangeAuthorizationCodeUseCase,
-  createGenerateAuthorizationCodeUseCase,
-  createGracefulShutdown,
-  createHealthController,
-  createHttpServer,
-  createPkceValidator,
-  createValidatePkceChallengeUseCase,
-  createWinstonLoggerService,
-  criticalServices,
-  TOKENS,
-} from '@/container';
-import { Container } from '@/container/container';
 import { ContainerCreationError } from '@/shared';
 import { IContainer } from '@/interfaces';
 import { createConfig } from '@/config';
+
+const { TOKENS } = factories;
 
 /**
  * Creates and configures a dependency injection container with all required services.
@@ -36,42 +25,42 @@ import { createConfig } from '@/config';
  */
 
 export function bootstrapContainer(): IContainer {
-  const container = new Container();
+  const container = new factories.Container();
 
   // ==========================================
   // CORE SERVICES
   // ==========================================
   container.registerSingleton(TOKENS.Config, createConfig);
-  container.registerSingleton(TOKENS.Logger, createWinstonLoggerService);
+  container.registerSingleton(TOKENS.Logger, factories.createWinstonLoggerService);
   container.registerSingleton(TOKENS.Clock, createClockService);
   container.registerSingleton(TOKENS.Uuid, createUuidService);
 
   // ==========================================
   // OAUTH2 SERVICES
   // ==========================================
-  container.registerSingleton(TOKENS.PckValidator, createPkceValidator);
-  container.registerSingleton(TOKENS.AuthorizationCodeRepository, createAuthorizationCodeRepository);
+  container.registerSingleton(TOKENS.PckValidator, factories.createPkceValidator);
+  container.registerSingleton(TOKENS.AuthorizationCodeRepository, factories.createAuthorizationCodeRepository);
 
   // ==========================================
   // USE CASES
   // ==========================================
-  container.register(TOKENS.GenerateAuthorizationCodeUseCase, createGenerateAuthorizationCodeUseCase);
-  container.register(TOKENS.ValidatePkceChallengeUseCase, createValidatePkceChallengeUseCase);
-  container.register(TOKENS.ExchangeAuthorizationUseCase, createExchangeAuthorizationCodeUseCase);
+  container.register(TOKENS.GenerateAuthorizationCodeUseCase, factories.createGenerateAuthorizationCodeUseCase);
+  container.register(TOKENS.ValidatePkceChallengeUseCase, factories.createValidatePkceChallengeUseCase);
+  container.register(TOKENS.ExchangeAuthorizationUseCase, factories.createExchangeAuthorizationCodeUseCase);
 
   // ==========================================
   // CONTROLLERS
   // ==========================================
-  container.register(TOKENS.HealthController, createHealthController);
-  container.register(TOKENS.AuthController, createAuthController);
+  container.register(TOKENS.HealthController, factories.createHealthController);
+  container.register(TOKENS.AuthController, factories.createAuthController);
 
   // ==========================================
   // INFRASTRUCTURE
   // ==========================================
-  container.registerSingleton(TOKENS.HttpServer, createHttpServer);
-  container.registerSingleton(TOKENS.GracefulShutdown, createGracefulShutdown);
+  container.registerSingleton(TOKENS.HttpServer, factories.createHttpServer);
+  container.registerSingleton(TOKENS.GracefulShutdown, factories.createGracefulShutdown);
 
-  criticalServices.forEach(({ token }) => {
+  factories.criticalServices.forEach(({ token }) => {
     if (!container.isRegistered(token)) throw new ContainerCreationError(token);
   });
 

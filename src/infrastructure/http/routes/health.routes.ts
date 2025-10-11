@@ -1,5 +1,6 @@
-import { IHealthController } from '@/interfaces';
 import { Router } from 'express';
+
+import { IHealthController } from '@/interfaces';
 
 /**
  * Creates and configures an Express Router that exposes health check endpoints.

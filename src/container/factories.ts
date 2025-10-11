@@ -1,18 +1,7 @@
-import {
-  ExchangeAuthorizationCodeUseCase,
-  GenerateAuthorizationCodeUseCase,
-  ValidatorPkceChallengeUseCase as ValidatePkceChallengeUseCase,
-} from '@/application';
+import * as usesCases from '@/application';
+import * as services from '@/infrastructure';
+
 import { TOKENS } from '@/container';
-import {
-  AuthorizationCodeRepositoryImpl,
-  GracefulShutdown,
-  HealthController,
-  HttpServer,
-  PkceValidatorService,
-  WinstonLoggerService,
-} from '@/infrastructure';
-import { AuthController } from '@/infrastructure/controller/auth.controller';
 import { IContainer } from '@/interfaces';
 
 /**
@@ -26,8 +15,8 @@ import { IContainer } from '@/interfaces';
  * WinstonLoggerService constructor.
  */
 
-export function createWinstonLoggerService(c: IContainer): WinstonLoggerService {
-  return new WinstonLoggerService(c.resolve(TOKENS.Config), c.resolve(TOKENS.Clock));
+export function createWinstonLoggerService(c: IContainer): services.WinstonLoggerService {
+  return new services.WinstonLoggerService(c.resolve(TOKENS.Config), c.resolve(TOKENS.Clock));
 }
 
 /**
@@ -38,8 +27,8 @@ export function createWinstonLoggerService(c: IContainer): WinstonLoggerService 
  * @returns A fully constructed `HttpServer` instance with all dependencies injected.
  */
 
-export function createHttpServer(c: IContainer): HttpServer {
-  return new HttpServer(
+export function createHttpServer(c: IContainer): services.HttpServer {
+  return new services.HttpServer(
     c.resolve(TOKENS.Config),
     c.resolve(TOKENS.Logger),
     c.resolve(TOKENS.Uuid),
@@ -64,8 +53,14 @@ export function createHttpServer(c: IContainer): HttpServer {
  * @remarks Ensure all required tokens are bound in the container before invoking this factory.
  */
 
-export function createHealthController(c: IContainer): HealthController {
-  return new HealthController(c, c.resolve(TOKENS.Config), c.resolve(TOKENS.Logger), c.resolve(TOKENS.Uuid), c.resolve(TOKENS.Clock));
+export function createHealthController(c: IContainer): services.HealthController {
+  return new services.HealthController(
+    c,
+    c.resolve(TOKENS.Config),
+    c.resolve(TOKENS.Logger),
+    c.resolve(TOKENS.Uuid),
+    c.resolve(TOKENS.Clock)
+  );
 }
 
 /**
@@ -75,8 +70,8 @@ export function createHealthController(c: IContainer): HealthController {
  * @returns An instance of PkceValidatorService.
  */
 
-export function createPkceValidator(c: IContainer): PkceValidatorService {
-  return new PkceValidatorService(c.resolve(TOKENS.Logger));
+export function createPkceValidator(c: IContainer): services.PkceValidatorService {
+  return new services.PkceValidatorService(c.resolve(TOKENS.Logger));
 }
 
 /**
@@ -86,8 +81,8 @@ export function createPkceValidator(c: IContainer): PkceValidatorService {
  * @returns An instance of AuthorizationCodeRepositoryImpl.
  */
 
-export function createAuthorizationCodeRepository(c: IContainer): AuthorizationCodeRepositoryImpl {
-  return new AuthorizationCodeRepositoryImpl(c.resolve(TOKENS.Logger));
+export function createAuthorizationCodeRepository(c: IContainer): services.AuthorizationCodeRepositoryImpl {
+  return new services.AuthorizationCodeRepositoryImpl(c.resolve(TOKENS.Logger));
 }
 
 /**
@@ -97,8 +92,8 @@ export function createAuthorizationCodeRepository(c: IContainer): AuthorizationC
  * @returns An instance of GenerateAuthorizationCodeUseCase.
  */
 
-export function createGenerateAuthorizationCodeUseCase(c: IContainer): GenerateAuthorizationCodeUseCase {
-  return new GenerateAuthorizationCodeUseCase(
+export function createGenerateAuthorizationCodeUseCase(c: IContainer): usesCases.GenerateAuthorizationCodeUseCase {
+  return new usesCases.GenerateAuthorizationCodeUseCase(
     c.resolve(TOKENS.AuthorizationCodeRepository),
     c.resolve(TOKENS.Uuid),
     c.resolve(TOKENS.Logger)
@@ -112,8 +107,8 @@ export function createGenerateAuthorizationCodeUseCase(c: IContainer): GenerateA
  * @returns An instance of ExchangeAuthorizationCodeUseCase.
  */
 
-export function createExchangeAuthorizationCodeUseCase(c: IContainer): ExchangeAuthorizationCodeUseCase {
-  return new ExchangeAuthorizationCodeUseCase(c.resolve(TOKENS.AuthorizationCodeRepository), c.resolve(TOKENS.Logger));
+export function createExchangeAuthorizationCodeUseCase(c: IContainer): usesCases.ExchangeAuthorizationCodeUseCase {
+  return new usesCases.ExchangeAuthorizationCodeUseCase(c.resolve(TOKENS.AuthorizationCodeRepository), c.resolve(TOKENS.Logger));
 }
 
 /**
@@ -123,8 +118,8 @@ export function createExchangeAuthorizationCodeUseCase(c: IContainer): ExchangeA
  * @returns An instance of ValidatePkceChallengeUseCase.
  */
 
-export function createValidatePkceChallengeUseCase(c: IContainer): ValidatePkceChallengeUseCase {
-  return new ValidatePkceChallengeUseCase(c.resolve(TOKENS.PckValidator), c.resolve(TOKENS.Logger));
+export function createValidatePkceChallengeUseCase(c: IContainer): usesCases.ValidatorPkceChallengeUseCase {
+  return new usesCases.ValidatorPkceChallengeUseCase(c.resolve(TOKENS.PckValidator), c.resolve(TOKENS.Logger));
 }
 
 /**
@@ -134,8 +129,8 @@ export function createValidatePkceChallengeUseCase(c: IContainer): ValidatePkceC
  * @returns An instance of AuthController with the required dependencies injected.
  */
 
-export function createAuthController(c: IContainer): AuthController {
-  return new AuthController(
+export function createAuthController(c: IContainer): services.AuthController {
+  return new services.AuthController(
     c.resolve(TOKENS.Logger),
     c.resolve(TOKENS.GenerateAuthorizationCodeUseCase),
     c.resolve(TOKENS.ExchangeAuthorizationUseCase),
@@ -150,6 +145,6 @@ export function createAuthController(c: IContainer): AuthController {
  * @returns A new instance of GracefulShutdown initialized with the logger from the container.
  */
 
-export function createGracefulShutdown(c: IContainer): GracefulShutdown {
-  return new GracefulShutdown(c.resolve(TOKENS.Logger));
+export function createGracefulShutdown(c: IContainer): services.GracefulShutdown {
+  return new services.GracefulShutdown(c.resolve(TOKENS.Logger));
 }

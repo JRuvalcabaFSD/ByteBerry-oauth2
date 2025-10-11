@@ -1,5 +1,5 @@
 import { ILogger, IPkceValidator } from '@/interfaces';
-import { BadRequestError } from '@/shared/errors/http.errors';
+import { BadRequestError } from '@/shared';
 
 /**
  * Use case for validating a PKCE (Proof Key for Code Exchange) challenge.
