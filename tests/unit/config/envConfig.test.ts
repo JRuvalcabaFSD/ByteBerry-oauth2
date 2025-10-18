@@ -42,7 +42,7 @@ describe('Config', () => {
       process.env = {
         NODE_ENV: 'production',
         PORT: '8080',
-        LOG_LEVEL: 'debug',
+        LOG_LEVEL: 'warn',
         SERVICE_NAME: 'Custom Oauth2',
         CORS_ALLOWED_ORIGINS: 'http://example.com',
       };
@@ -52,7 +52,7 @@ describe('Config', () => {
 
       expect(config.nodeEnv).toBe('production');
       expect(config.port).toBe(8080);
-      expect(config.logLevel).toBe('debug');
+      expect(config.logLevel).toBe('warn');
       expect(config.serviceName).toBe('Custom Oauth2');
       expect(config.corsOrigins).toEqual(['http://example.com']);
     });

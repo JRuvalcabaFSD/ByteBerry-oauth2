@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-import { Config } from '@/config';
-import { getErrorMessage } from '@/shared/functions/general';
+import { bootstrapContainer } from '@/container';
+import { getErrorMessage } from '@/shared';
 
 (() => {
   main().catch(error => {
@@ -10,7 +10,9 @@ import { getErrorMessage } from '@/shared/functions/general';
 })();
 
 async function main(): Promise<void> {
-  const config = Config.getConfig();
+  const container = bootstrapContainer();
+
+  const config = container.resolve('Config');
 
   console.log({ config });
 }
