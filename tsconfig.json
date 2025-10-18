@@ -16,6 +16,7 @@
     "declarationMap": true,
     "removeComments": true,
     "noEmitOnError": true,
+    "resolveJsonModule": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 

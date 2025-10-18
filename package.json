@@ -34,6 +34,8 @@
     "@eslint/js": "^9.36.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.5.2",
     "@types/supertest": "^6.0.3",
@@ -59,5 +61,14 @@
     "tsx": "^4.20.6",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.44.1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "16.4.5",
+    "env-var": "^7.5.0",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "winston": "^3.18.3",
+    "winston-daily-rotate-file": "^5.0.0"
   }
 }
