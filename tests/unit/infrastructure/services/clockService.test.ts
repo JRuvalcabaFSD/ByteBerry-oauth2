@@ -2,7 +2,7 @@
  * Unit tests for ClockService
  *
  * @description Tests the clock service implementation that provides
- * current-time utilities including Date objects, timestamps, and
+ * current time utilities including Date objects, timestamps, and
  * formatted date strings.
  *
  * @author JRuvalcabaFSD
@@ -20,7 +20,7 @@ describe('ClockService', () => {
   });
 
   describe('Interface Compliance', () => {
-    it('should_ImplementIClock_When_ServiceCreated', () => {
+    it('should implement i clock when service created', () => {
       // Act & Assert
       expect(clockService).toBeInstanceOf(ClockService);
 
@@ -30,7 +30,7 @@ describe('ClockService', () => {
       expect(typeof clockService.isoString).toBe('function');
     });
 
-    it('should_BeAssignableToIClock_When_ServiceCreated', () => {
+    it('should be assignable to i clock when service created', () => {
       // Act
       const clock: IClock = clockService;
 
@@ -43,7 +43,7 @@ describe('ClockService', () => {
   });
 
   describe('now() method', () => {
-    it('should_ReturnDateObject_When_NowCalled', () => {
+    it('should return date object when now called', () => {
       // Act
       const result = clockService.now();
 
@@ -51,7 +51,7 @@ describe('ClockService', () => {
       expect(result).toBeInstanceOf(Date);
     });
 
-    it('should_ReturnCurrentTime_When_NowCalled', () => {
+    it('should return current time when now called', () => {
       // Arrange
       const beforeCall = Date.now();
 
@@ -67,7 +67,7 @@ describe('ClockService', () => {
       expect(resultTime).toBeLessThanOrEqual(afterCall);
     });
 
-    it('should_ReturnDifferentInstances_When_CalledMultipleTimes', () => {
+    it('should return different instances when called multiple times', () => {
       // Act
       const date1 = clockService.now();
       const date2 = clockService.now();
@@ -78,7 +78,7 @@ describe('ClockService', () => {
       expect(date2).toBeInstanceOf(Date);
     });
 
-    it('should_ReturnProgessiveTime_When_CalledWithDelay', async () => {
+    it('should return progressive time when called with delay', async () => {
       // Act
       const time1 = clockService.now();
       await new Promise(resolve => setTimeout(resolve, 10)); // 10ms delay
@@ -88,7 +88,7 @@ describe('ClockService', () => {
       expect(time2.getTime()).toBeGreaterThan(time1.getTime());
     });
 
-    it('should_AllowMutationWithoutAffectingService_When_DateMutated', () => {
+    it('should allow mutation without affecting service when date mutated', () => {
       // Act
       const originalDate = clockService.now();
       const originalTime = originalDate.getTime();
@@ -107,7 +107,7 @@ describe('ClockService', () => {
   });
 
   describe('timestamp() method', () => {
-    it('should_ReturnNumber_When_TimestampCalled', () => {
+    it('should return number when timestamp called', () => {
       // Act
       const result = clockService.timestamp();
 
@@ -115,7 +115,7 @@ describe('ClockService', () => {
       expect(typeof result).toBe('number');
     });
 
-    it('should_ReturnCurrentTimestamp_When_TimestampCalled', () => {
+    it('should return current timestamp when timestamp called', () => {
       // Arrange
       const beforeCall = Date.now();
 
@@ -130,7 +130,7 @@ describe('ClockService', () => {
       expect(result).toBeLessThanOrEqual(afterCall);
     });
 
-    it('should_ReturnEpochMilliseconds_When_TimestampCalled', () => {
+    it('should return epoch milliseconds when timestamp called', () => {
       // Act
       const timestamp = clockService.timestamp();
 
@@ -140,7 +140,7 @@ describe('ClockService', () => {
       expect(Number.isInteger(timestamp)).toBe(true);
     });
 
-    it('should_ReturnIncreasingValues_When_CalledMultipleTimes', async () => {
+    it('should return increasing values when called multiple times', async () => {
       // Act
       const timestamp1 = clockService.timestamp();
       await new Promise(resolve => setTimeout(resolve, 5)); // Small delay
@@ -150,10 +150,10 @@ describe('ClockService', () => {
       expect(timestamp2).toBeGreaterThan(timestamp1);
     });
 
-    it('should_MatchDateNow_When_CalledSimultaneously', () => {
+    it('should match date now when called simultaneously', () => {
       // Arrange
       // Mock Date.now to return a fixed value
-      const fixedTimestamp = 1640995200000; // 2022-01-01T00:00:00.000Z
+      const fixedTimestamp = 1640995200000; // 2022 01 01T00:00:00.000Z
       const originalDateNow = Date.now;
       Date.now = jest.fn(() => fixedTimestamp);
 
@@ -170,7 +170,7 @@ describe('ClockService', () => {
       }
     });
 
-    it('should_BeConsistentWithNowMethod_When_CalledTogether', () => {
+    it('should be consistent with now method when called together', () => {
       // Act
       const dateObj = clockService.now();
       const timestamp = clockService.timestamp();
@@ -183,7 +183,7 @@ describe('ClockService', () => {
   });
 
   describe('isoString() method', () => {
-    it('should_ReturnString_When_IsoStringCalled', () => {
+    it('should return string when iso string called', () => {
       // Act
       const result = clockService.isoString();
 
@@ -191,7 +191,7 @@ describe('ClockService', () => {
       expect(typeof result).toBe('string');
     });
 
-    it('should_ReturnDateString_When_IsoStringCalled', () => {
+    it('should return date string when iso string called', () => {
       // Act
       const result = clockService.isoString();
 
@@ -200,9 +200,9 @@ describe('ClockService', () => {
       // Examples: "Fri Oct 17 2025", "Mon Jan 01 2024"
     });
 
-    it('should_MatchToDateStringFormat_When_IsoStringCalled', () => {
+    it('should match to date string format when iso string called', () => {
       // Arrange
-      const fixedDate = new Date('2025-10-17T12:30:45.123Z');
+      const fixedDate = new Date('2025 10 17T12:30:45.123Z');
       const originalDate = global.Date;
 
       // Mock Date constructor to return fixed date
@@ -222,19 +222,19 @@ describe('ClockService', () => {
       }
     });
 
-    it('should_NotReturnISOFormat_When_IsoStringCalled', () => {
+    it('should not return iso format when iso string called', () => {
       // Act
       const result = clockService.isoString();
 
       // Assert
-      // Should NOT be ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)
-      expect(result).not.toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+      // Should NOT be ISO 8601 format (YYYY MM DDTHH:mm:ss.sssZ)
+      expect(result).not.toMatch(/^\d{4} \d{2} \d{2}T\d{2}:\d{2}:\d{2}/);
 
       // Should be toDateString format instead
       expect(result).toMatch(/^[A-Za-z]{3} [A-Za-z]{3} \d{1,2} \d{4}$/);
     });
 
-    it('should_ReturnCurrentDateString_When_IsoStringCalled', () => {
+    it('should return current date string when iso string called', () => {
       // Arrange
       const today = new Date();
       const expectedFormat = today.toDateString();
@@ -246,7 +246,7 @@ describe('ClockService', () => {
       expect(result).toBe(expectedFormat);
     });
 
-    it('should_BeConsistentWithCurrentDate_When_CalledMultipleTimesQuickly', () => {
+    it('should be consistent with current date when called multiple times quickly', () => {
       // Act
       const result1 = clockService.isoString();
       const result2 = clockService.isoString();
@@ -258,7 +258,7 @@ describe('ClockService', () => {
   });
 
   describe('Method Consistency', () => {
-    it('should_HaveConsistentTime_When_AllMethodsCalledTogether', () => {
+    it('should have consistent time when all methods called together', () => {
       // Act
       const dateObj = clockService.now();
       const timestamp = clockService.timestamp();
@@ -273,7 +273,7 @@ describe('ClockService', () => {
       expect(dateString).toBe(dateObj.toDateString());
     });
 
-    it('should_ReflectSameDay_When_CalledSimultaneously', () => {
+    it('should reflect same day when called simultaneously', () => {
       // Act
       const now = clockService.now();
       const isoString = clockService.isoString();
@@ -284,7 +284,7 @@ describe('ClockService', () => {
   });
 
   describe('Testability and Mocking', () => {
-    it('should_BeMockable_When_UsedInTests', () => {
+    it('should be mockable when used in tests', () => {
       // Arrange
       const mockClock: IClock = {
         now: jest.fn(() => new Date('2025-01-01T00:00:00.000Z')),
@@ -306,9 +306,9 @@ describe('ClockService', () => {
       expect(mockClock.isoString).toHaveBeenCalled();
     });
 
-    it('should_AllowDeterministicTesting_When_DateMocked', () => {
+    it('should allow deterministic testing when date mocked', () => {
       // Arrange
-      const fixedDate = new Date('2025-12-25T15:30:00.000Z');
+      const fixedDate = new Date('2025 12 25T15:30:00.000Z');
       const originalDate = global.Date;
 
       // Mock global Date

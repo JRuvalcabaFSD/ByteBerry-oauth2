@@ -28,7 +28,7 @@ describe('UuidService', () => {
   });
 
   describe('Interface Compliance', () => {
-    it('should_ImplementIUuid_When_ServiceCreated', () => {
+    it('should implement i uuid when service created', () => {
       // Act & Assert
       expect(uuidService).toBeInstanceOf(UuidService);
 
@@ -37,7 +37,7 @@ describe('UuidService', () => {
       expect(typeof uuidService.isValid).toBe('function');
     });
 
-    it('should_BeAssignableToIUuid_When_ServiceCreated', () => {
+    it('should be assignable to i uuid when service created', () => {
       // Act
       const uuid: IUuid = uuidService;
 
@@ -49,7 +49,7 @@ describe('UuidService', () => {
   });
 
   describe('generate() method', () => {
-    it('should_CallCryptoRandomUUID_When_GenerateCalled', () => {
+    it('should call crypto random uuid when generate called', () => {
       // Arrange
       const expectedUuid = '6f1e2d3c-4b5a-4f6e-9a0b-123456789abc';
       mockRandomUUID.mockReturnValue(expectedUuid);
@@ -63,7 +63,7 @@ describe('UuidService', () => {
       expect(result).toBe(expectedUuid);
     });
 
-    it('should_ReturnString_When_GenerateCalled', () => {
+    it('should return string when generate called', () => {
       // Arrange
       // Use a valid UUID-like string so it matches the template literal type
       mockRandomUUID.mockReturnValue('6f1e2d3c-4b5a-4f6e-9a0b-123456789abc');
@@ -75,7 +75,7 @@ describe('UuidService', () => {
       expect(typeof result).toBe('string');
     });
 
-    it('should_ReturnUUIDFormat_When_GenerateCalled', () => {
+    it('should return uuid format when generate called', () => {
       // Arrange
       const validUuid = '550e8400-e29b-41d4-a716-446655440000';
       mockRandomUUID.mockReturnValue(validUuid);
@@ -87,7 +87,7 @@ describe('UuidService', () => {
       expect(result).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
     });
 
-    it('should_ReturnDifferentValues_When_CalledMultipleTimes', () => {
+    it('should return different values when called multiple times', () => {
       // Arrange
       const uuid1 = '6f1e2d3c-4b5a-4f6e-9a0b-123456789abc';
       const uuid2 = '7a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d';
@@ -104,7 +104,7 @@ describe('UuidService', () => {
       expect(mockRandomUUID).toHaveBeenCalledTimes(2);
     });
 
-    it('should_DelegateToNodeCrypto_When_GenerateCalled', () => {
+    it('should delegate to node crypto when generate called', () => {
       // Arrange
       const expectedUuid = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
       mockRandomUUID.mockReturnValue(expectedUuid);
@@ -117,7 +117,7 @@ describe('UuidService', () => {
       expect(mockRandomUUID).toHaveBeenCalledWith();
     });
 
-    it('should_HandleCryptoErrors_When_RandomUUIDThrows', () => {
+    it('should handle crypto errors when random uuid throws', () => {
       // Arrange
       const error = new Error('Crypto not available');
       mockRandomUUID.mockImplementation(() => {
@@ -131,7 +131,7 @@ describe('UuidService', () => {
 
   describe('isValid() method', () => {
     describe('Valid UUIDs', () => {
-      it('should_ReturnTrue_When_ValidV4UUIDProvided', () => {
+      it('should return true when valid v4 uuid provided', () => {
         // Arrange
         const validUuids = [
           '6f1e2d3c-4b5a-4f6e-9a0b-123456789abc',
@@ -146,7 +146,7 @@ describe('UuidService', () => {
         });
       });
 
-      it('should_ReturnTrue_When_UppercaseUUIDProvided', () => {
+      it('should return true when uppercase uuid provided', () => {
         // Arrange
         const uppercaseUuid = '6F1E2D3C-4B5A-4F6E-9A0B-123456789ABC';
 
@@ -157,7 +157,7 @@ describe('UuidService', () => {
         expect(result).toBe(true);
       });
 
-      it('should_ReturnTrue_When_MixedCaseUUIDProvided', () => {
+      it('should return true when mixed case uuid provided', () => {
         // Arrange
         const mixedCaseUuid = '6f1E2d3C-4B5a-4F6e-9A0b-123456789AbC';
 
@@ -168,7 +168,7 @@ describe('UuidService', () => {
         expect(result).toBe(true);
       });
 
-      it('should_ReturnTrue_When_Version4WithVariant8Provided', () => {
+      it('should return true when version4 with variant8 provided', () => {
         // Arrange - Version 4 (4th char of 3rd group), Variant 8 (1st char of 4th group)
         const uuid = '550e8400-e29b-41d4-8716-446655440000';
 
@@ -179,7 +179,7 @@ describe('UuidService', () => {
         expect(result).toBe(true);
       });
 
-      it('should_ReturnTrue_When_Version4WithVariant9Provided', () => {
+      it('should return true when version4 with variant9 provided', () => {
         // Arrange - Version 4, Variant 9
         const uuid = '550e8400-e29b-41d4-9716-446655440000';
 
@@ -190,7 +190,7 @@ describe('UuidService', () => {
         expect(result).toBe(true);
       });
 
-      it('should_ReturnTrue_When_Version4WithVariantAProvided', () => {
+      it('should return true when version4 with variant a provided', () => {
         // Arrange - Version 4, Variant A
         const uuid = '550e8400-e29b-41d4-a716-446655440000';
 
@@ -201,7 +201,7 @@ describe('UuidService', () => {
         expect(result).toBe(true);
       });
 
-      it('should_ReturnTrue_When_Version4WithVariantBProvided', () => {
+      it('should return true when version4 with variant b provided', () => {
         // Arrange - Version 4, Variant B
         const uuid = '550e8400-e29b-41d4-b716-446655440000';
 
@@ -214,7 +214,7 @@ describe('UuidService', () => {
     });
 
     describe('Invalid UUIDs', () => {
-      it('should_ReturnFalse_When_NonStringProvided', () => {
+      it('should return false when non string provided', () => {
         // Arrange
         const nonStringValues = [null, undefined, 123, true, {}, [], Symbol('uuid')];
 
@@ -224,7 +224,7 @@ describe('UuidService', () => {
         });
       });
 
-      it('should_ReturnFalse_When_EmptyStringProvided', () => {
+      it('should return false when empty string provided', () => {
         // Act
         const result = uuidService.isValid('');
 
@@ -232,7 +232,7 @@ describe('UuidService', () => {
         expect(result).toBe(false);
       });
 
-      it('should_ReturnFalse_When_InvalidFormatProvided', () => {
+      it('should return false when invalid format provided', () => {
         // Arrange
         const invalidFormats = [
           'not-a-uuid',
@@ -249,7 +249,7 @@ describe('UuidService', () => {
         });
       });
 
-      it('should_ReturnFalse_When_WrongVersionProvided', () => {
+      it('should return false when wrong version provided', () => {
         // Arrange - Wrong version (not 4)
         const wrongVersionUuids = [
           '550e8400-e29b-11d1-a716-446655440000', // Version 1
@@ -264,7 +264,7 @@ describe('UuidService', () => {
         });
       });
 
-      it('should_ReturnFalse_When_WrongVariantProvided', () => {
+      it('should return false when wrong variant provided', () => {
         // Arrange - Wrong variant (not 8, 9, a, b)
         const wrongVariantUuids = [
           '550e8400-e29b-41d4-0716-446655440000', // Variant 0
@@ -279,7 +279,7 @@ describe('UuidService', () => {
         });
       });
 
-      it('should_ReturnFalse_When_IncorrectSegmentLengthProvided', () => {
+      it('should return false when incorrect segment length provided', () => {
         // Arrange
         const incorrectLengthUuids = [
           '550e840-e29b-41d4-a716-446655440000', // First segment too short
@@ -300,7 +300,7 @@ describe('UuidService', () => {
         });
       });
 
-      it('should_ReturnFalse_When_SpecialCharactersProvided', () => {
+      it('should return false when special characters provided', () => {
         // Arrange
         const specialCharUuids = [
           '550e8400-e29b-41d4-a716-44665544000@', // Special character at end
@@ -318,7 +318,7 @@ describe('UuidService', () => {
     });
 
     describe('Edge Cases', () => {
-      it('should_ReturnFalse_When_NullProvided', () => {
+      it('should return false when null provided', () => {
         // Act
         const result = uuidService.isValid(null as any);
 
@@ -326,7 +326,7 @@ describe('UuidService', () => {
         expect(result).toBe(false);
       });
 
-      it('should_ReturnFalse_When_UndefinedProvided', () => {
+      it('should return false when undefined provided', () => {
         // Act
         const result = uuidService.isValid(undefined as any);
 
@@ -334,7 +334,7 @@ describe('UuidService', () => {
         expect(result).toBe(false);
       });
 
-      it('should_HandleLongStrings_When_VeryLongStringProvided', () => {
+      it('should handle long strings when very long string provided', () => {
         // Arrange
         const longString = 'a'.repeat(1000);
 
@@ -359,7 +359,7 @@ describe('UuidService', () => {
   });
 
   describe('Static UUID_REGEX', () => {
-    it('should_HaveCorrectPattern_When_AccessingRegex', () => {
+    it('should have correct pattern when accessing regex', () => {
       // Act
       const regex = (UuidService as any).UUID_REGEX;
 
@@ -368,7 +368,7 @@ describe('UuidService', () => {
       expect(regex.flags).toContain('i'); // Case-insensitive
     });
 
-    it('should_MatchValidUUIDs_When_RegexTested', () => {
+    it('should match valid uui ds when regex tested', () => {
       // Arrange
       const regex = (UuidService as any).UUID_REGEX;
       const validUuid = '6f1e2d3c-4b5a-4f6e-9a0b-123456789abc';
@@ -380,7 +380,7 @@ describe('UuidService', () => {
       expect(result).toBe(true);
     });
 
-    it('should_RejectInvalidUUIDs_When_RegexTested', () => {
+    it('should reject invalid uui ds when regex tested', () => {
       // Arrange
       const regex = (UuidService as any).UUID_REGEX;
       const invalidUuid = 'not-a-uuid';
@@ -394,7 +394,7 @@ describe('UuidService', () => {
   });
 
   describe('Integration with generate()', () => {
-    it('should_GenerateValidUUIDs_When_GenerateAndValidateTogether', () => {
+    it('should generate valid uui ds when generate and validate together', () => {
       // Arrange
       const validUuid: `${string}-${string}-${string}-${string}-${string}` = '6f1e2d3c-4b5a-4f6e-9a0b-123456789abc';
       mockRandomUUID.mockReturnValue(validUuid);
@@ -407,7 +407,7 @@ describe('UuidService', () => {
       expect(isValid).toBe(true);
     });
 
-    it('should_ValidateGeneratedUUIDs_When_CalledMultipleTimes', () => {
+    it('should validate generated uui ds when called multiple times', () => {
       // Arrange
       const validUuids: Array<`${string}-${string}-${string}-${string}-${string}`> = [
         '6f1e2d3c-4b5a-4f6e-9a0b-123456789abc',
@@ -426,7 +426,7 @@ describe('UuidService', () => {
   });
 
   describe('Performance', () => {
-    it('should_GenerateQuickly_When_CalledManyTimes', () => {
+    it('should generate quickly when called many times', () => {
       // Arrange
       mockRandomUUID.mockReturnValue('6f1e2d3c-4b5a-4f6e-9a0b-123456789abc' as `${string}-${string}-${string}-${string}-${string}`);
       const iterations = 1000;
@@ -445,7 +445,7 @@ describe('UuidService', () => {
       expect(mockRandomUUID).toHaveBeenCalledTimes(iterations);
     });
 
-    it('should_ValidateQuickly_When_CalledManyTimes', () => {
+    it('should validate quickly when called many times', () => {
       // Arrange
       const uuid = '6f1e2d3c-4b5a-4f6e-9a0b-123456789abc';
       const iterations = 1000;
@@ -465,7 +465,7 @@ describe('UuidService', () => {
   });
 
   describe('Testability and Mocking', () => {
-    it('should_BeMockable_When_UsedInTests', () => {
+    it('should be mockable when used in tests', () => {
       // Arrange
       const mockUuid: IUuid = {
         generate: jest.fn(() => 'mock-uuid'),
@@ -483,7 +483,7 @@ describe('UuidService', () => {
       expect(mockUuid.isValid).toHaveBeenCalledWith('test-uuid');
     });
 
-    it('should_AllowPredictableTesting_When_CryptoMocked', () => {
+    it('should allow predictable testing when crypto mocked', () => {
       // Arrange
       const predictableUuid = 'test-uuid-123-456-789';
       mockRandomUUID.mockReturnValue(predictableUuid);
@@ -503,7 +503,7 @@ describe('createUuidService factory', () => {
     jest.clearAllMocks();
   });
 
-  it('should_ReturnUuidServiceInstance_When_FactoryCalled', () => {
+  it('should return uuid service instance when factory called', () => {
     // Act
     const uuidService = createUuidService();
 
@@ -513,7 +513,7 @@ describe('createUuidService factory', () => {
     expect(uuidService).toHaveProperty('isValid');
   });
 
-  it('should_ReturnNewInstance_When_CalledMultipleTimes', () => {
+  it('should return new instance when called multiple times', () => {
     // Act
     const service1 = createUuidService();
     const service2 = createUuidService();
@@ -524,7 +524,7 @@ describe('createUuidService factory', () => {
     expect(service2).toBeInstanceOf(UuidService);
   });
 
-  it('should_ReturnFunctionalService_When_FactoryCalled', () => {
+  it('should return functional service when factory called', () => {
     // Arrange
     const mockUuid = '6f1e2d3c-4b5a-4f6e-9a0b-123456789abc';
     (randomUUID as jest.MockedFunction<typeof randomUUID>).mockReturnValue(mockUuid);
@@ -537,7 +537,7 @@ describe('createUuidService factory', () => {
     expect(typeof uuidService.isValid('test')).toBe('boolean');
   });
 
-  it('should_BeUsableInDIContainer_When_FactoryProvided', () => {
+  it('should be usable in di container when factory provided', () => {
     // Arrange
     const mockContainer = {
       registerSingleton: jest.fn(),
@@ -554,7 +554,7 @@ describe('createUuidService factory', () => {
     expect(service).toBeInstanceOf(UuidService);
   });
 
-  it('should_ProduceDifferentInstances_When_FactoryUsedInContainer', () => {
+  it('should produce different instances when factory used in container', () => {
     // Arrange
     const factory = createUuidService;
 

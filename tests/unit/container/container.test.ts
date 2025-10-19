@@ -61,7 +61,7 @@ describe('Container', () => {
       });
     });
     describe('registerInstance', () => {
-      it('should_RegisterInstance_When_ValidTokenAndInstanceProvided', () => {
+      it('should register instance when valid token and instance provided', () => {
         // Arrange
         const instance = { getValue: () => 'instance' };
 
@@ -69,7 +69,7 @@ describe('Container', () => {
         expect(() => container.registerInstance('Config', instance)).not.toThrow();
       });
 
-      it('should_ThrowTokenAlreadyRegisteredError_When_TokenAlreadyExists', () => {
+      it('should throw token already registered error when token already exists', () => {
         // Arrange
         const instance1 = { getValue: () => 'first' };
         const instance2 = { getValue: () => 'second' };
@@ -79,12 +79,12 @@ describe('Container', () => {
         expect(() => container.registerInstance('Config', instance2)).toThrow(TokenAlreadyRegisteredError);
       });
 
-      it('should_AcceptNullInstance_When_NullProvided', () => {
+      it('should accept null instance when null provided', () => {
         // Act & Assert
         expect(() => container.registerInstance('Config', null)).not.toThrow();
       });
 
-      it('should_AcceptUndefinedInstance_When_UndefinedProvided', () => {
+      it('should accept undefined instance when undefined provided', () => {
         // Act & Assert
         expect(() => container.registerInstance('Config', undefined)).not.toThrow();
       });
@@ -136,7 +136,7 @@ describe('Container', () => {
       });
     });
     describe('Singleton Services', () => {
-      it('should_ReturnSameInstance_When_ResolvingSingletonMultipleTimes', () => {
+      it('should return same instance when resolving singleton multiple times', () => {
         // Arrange
         const factory = () => ({ getValue: () => 'singleton' });
         container.registerSingleton('Config', factory);
@@ -150,7 +150,7 @@ describe('Container', () => {
         expect(instance1.getValue()).toBe('singleton');
       });
 
-      it('should_CallFactoryOnce_When_ResolvingSingletonMultipleTimes', () => {
+      it('should call factory once when resolving singleton multiple times', () => {
         // Arrange
         const mockFactory = jest.fn(() => ({ getValue: () => 'singleton' }));
         container.registerSingleton('Config', mockFactory);
@@ -165,7 +165,7 @@ describe('Container', () => {
         expect(mockFactory).toHaveBeenCalledWith(container);
       });
 
-      it('should_CacheInstanceAfterFirstResolution_When_ResolvingSingleton', () => {
+      it('should cache instance after first resolution when resolving singleton', () => {
         // Arrange
         let created = false;
         const factory = () => {
@@ -185,7 +185,7 @@ describe('Container', () => {
       });
     });
     describe('Instance Services', () => {
-      it('should_ReturnRegisteredInstance_When_ResolvingInstanceService', () => {
+      it('should return registered instance when resolving instance service', () => {
         // Arrange
         const originalInstance = { getValue: () => 'registered' };
         container.registerInstance('Config', originalInstance);
@@ -197,7 +197,7 @@ describe('Container', () => {
         expect(resolvedInstance).toBe(originalInstance);
       });
 
-      it('should_ReturnSameInstance_When_ResolvingInstanceMultipleTimes', () => {
+      it('should return same instance when resolving instance multiple times', () => {
         // Arrange
         const originalInstance = { getValue: () => 'registered' };
         container.registerInstance('Config', originalInstance);
@@ -211,7 +211,7 @@ describe('Container', () => {
         expect(instance1).toBe(originalInstance);
       });
 
-      it('should_ReturnNullInstance_When_NullWasRegistered', () => {
+      it('should return null instance when null was registered', () => {
         // Arrange
         container.registerInstance('Config', null);
 
@@ -223,13 +223,13 @@ describe('Container', () => {
       });
     });
     describe('Error Cases', () => {
-      it('should_ThrowTokenNotRegisteredError_When_ResolvingUnregisteredToken', () => {
+      it('should throw token not registered error when resolving unregistered token', () => {
         // Act & Assert
         expect(() => container.resolve('Config')).toThrow(TokenNotRegisteredError);
         expect(() => container.resolve('Config')).toThrow("Token 'Config' is not registered");
       });
 
-      it('should_WrapFactoryError_When_FactoryThrows', () => {
+      it('should wrap factory error when factory throws', () => {
         // Arrange
         const factory = () => {
           throw new Error('Factory failed');
@@ -241,7 +241,7 @@ describe('Container', () => {
         expect(() => container.resolve('Config')).toThrow("Failed to resolve service 'Config': Factory failed");
       });
 
-      it('should_IncludeTokenInError_When_FactoryThrows', () => {
+      it('should include token in error when factory throws', () => {
         // Arrange
         const factory = () => {
           throw new Error('Custom error');
@@ -258,7 +258,7 @@ describe('Container', () => {
         }
       });
 
-      it('should_PropagateCircularDependencyError_When_FactoryThrowsCircularError', () => {
+      it('should propagate circular dependency error when factory throws circular error', () => {
         // Arrange
         const circularError = new CircularDependencyError(['Config', 'Logger'], 'Config');
         const factory = () => {
@@ -273,7 +273,7 @@ describe('Container', () => {
     });
   });
   describe('Circular Dependency Detection', () => {
-    it('should_DetectSimpleCircularDependency_When_ServiceDependsOnItself', () => {
+    it('should detect simple circular dependency when service depends on itself', () => {
       // Arrange
       container.register('Config', c => c.resolve('Config'));
 
@@ -282,7 +282,7 @@ describe('Container', () => {
       expect(() => container.resolve('Config')).toThrow('Circular dependency detected: Config -> Config');
     });
 
-    it('should_DetectTwoServiceCircularDependency_When_ServicesCircularlyDepend', () => {
+    it('should detect two service circular dependency when services circularly depend', () => {
       // Arrange
       container.register('Config', c => ({ dep: c.resolve('Logger') }));
       container.register('Logger', c => ({ dep: c.resolve('Config') }));
@@ -292,7 +292,7 @@ describe('Container', () => {
       expect(() => container.resolve('Config')).toThrow('Circular dependency detected: Config -> Logger -> Config');
     });
 
-    it('should_DetectComplexCircularDependency_When_LongChainCircularlyDepends', () => {
+    it('should detect complex circular dependency when long chain circularly depends', () => {
       // Arrange
       container.register('Config', c => ({ dep: c.resolve('Logger') }));
       container.register('Logger', c => ({ dep: c.resolve('Clock') }));
@@ -304,7 +304,7 @@ describe('Container', () => {
       expect(() => container.resolve('Config')).toThrow('Circular dependency detected: Config -> Logger -> Clock -> Uuid -> Config');
     });
 
-    it('should_ResetResolutionStack_When_ResolutionCompletes', () => {
+    it('should reset resolution stack when resolution completes', () => {
       // Arrange
       container.register('Config', () => ({ value: 'config' }));
       container.register('Logger', c => ({ config: c.resolve('Config') }));
@@ -312,11 +312,11 @@ describe('Container', () => {
       // Act
       container.resolve('Logger'); // This should complete successfully
 
-      // Assert - resolving again should work (stack was reset)
+      // Assert   resolving again should work (stack was reset)
       expect(() => container.resolve('Logger')).not.toThrow();
     });
 
-    it('should_ResetResolutionStack_When_ResolutionFails', () => {
+    it('should reset resolution stack when resolution fails', () => {
       // Arrange
       container.register('Config', () => {
         throw new Error('Factory error');
@@ -332,7 +332,7 @@ describe('Container', () => {
   });
 
   describe('Service Registration Check', () => {
-    it('should_ReturnTrue_When_ServiceIsRegistered', () => {
+    it('should return true when service is registered', () => {
       // Arrange
       container.register('Config', () => ({ value: 'test' }));
 
@@ -340,12 +340,12 @@ describe('Container', () => {
       expect(container.isRegistered('Config')).toBe(true);
     });
 
-    it('should_ReturnFalse_When_ServiceIsNotRegistered', () => {
+    it('should return false when service is not registered', () => {
       // Act & Assert
       expect(container.isRegistered('Config')).toBe(false);
     });
 
-    it('should_ReturnTrue_When_SingletonIsRegistered', () => {
+    it('should return true when singleton is registered', () => {
       // Arrange
       container.registerSingleton('Logger', () => ({ log: () => {} }));
 
@@ -353,7 +353,7 @@ describe('Container', () => {
       expect(container.isRegistered('Logger')).toBe(true);
     });
 
-    it('should_ReturnTrue_When_InstanceIsRegistered', () => {
+    it('should return true when instance is registered', () => {
       // Arrange
       container.registerInstance('Clock', { now: () => new Date() });
 
@@ -361,7 +361,7 @@ describe('Container', () => {
       expect(container.isRegistered('Clock')).toBe(true);
     });
 
-    it('should_ReturnTrueForAllRegisteredServices_When_MultipleServicesRegistered', () => {
+    it('should return true for all registered services when multiple services registered', () => {
       // Arrange
       container.register('Config', () => ({}));
       container.registerSingleton('Logger', () => ({}));
@@ -400,7 +400,7 @@ describe('Container', () => {
     beforeEach(() => {
       container = new Container<ServiceMap>();
     });
-    it('should_MaintainTypeInformation_When_ResolvingTypedService', () => {
+    it('should maintain type information when resolving typed service', () => {
       // Arrange
       interface ITypedService {
         getValue(): string;
@@ -422,7 +422,7 @@ describe('Container', () => {
       expect(service.getNumber()).toBe(42);
     });
 
-    it('should_PreserveFactoryReturnType_When_RegisteringService', () => {
+    it('should preserve factory return type when registering service', () => {
       // Arrange
       const complexFactory = () => ({
         nested: {
@@ -444,7 +444,7 @@ describe('Container', () => {
     });
   });
   describe('Edge Cases and Error Recovery', () => {
-    it('should_HandleFactoryReturningUndefined_When_FactoryReturnsUndefined', () => {
+    it('should handle factory returning undefined when factory returns undefined', () => {
       // Arrange
       container.register('Config', () => undefined);
 
@@ -455,7 +455,7 @@ describe('Container', () => {
       expect(service).toBeUndefined();
     });
 
-    it('should_HandleFactoryReturningNull_When_FactoryReturnsNull', () => {
+    it('should handle factory returning null when factory returns null', () => {
       // Arrange
       container.register('Logger', () => null);
 
@@ -466,7 +466,7 @@ describe('Container', () => {
       expect(service).toBeNull();
     });
 
-    it('should_HandleAsyncFactory_When_FactoryReturnsPromise', () => {
+    it('should handle async factory when factory returns promise', () => {
       // Arrange
       container.register('Config', () => Promise.resolve({ async: true }));
 
@@ -477,7 +477,7 @@ describe('Container', () => {
       expect(service).toBeInstanceOf(Promise);
     });
 
-    it('should_MaintainIsolation_When_MultipleContainerInstances', () => {
+    it('should maintain isolation when multiple container instances', () => {
       // Arrange
       const container1 = new Container();
       const container2 = new Container();
@@ -498,7 +498,7 @@ describe('Container', () => {
   });
 
   describe('Performance Characteristics', () => {
-    it('should_ResolveQuickly_When_ResolvingManyServices', () => {
+    it('should resolve quickly when resolving many services', () => {
       // Arrange
       for (let i = 0; i < 100; i++) {
         container.register(`Service${i}` as any, () => ({ id: i }));
@@ -515,7 +515,7 @@ describe('Container', () => {
       expect(endTime - startTime).toBeLessThan(100); // Should be very fast
     });
 
-    it('should_CacheSingletonEfficiently_When_ResolvingManySingletons', () => {
+    it('should cache singleton efficiently when resolving many singletons', () => {
       // Arrange
       let factoryCallCount = 0;
       container.registerSingleton('Config', () => {

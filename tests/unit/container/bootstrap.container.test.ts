@@ -60,7 +60,7 @@ describe('bootstrap.container', () => {
   });
 
   describe('Core Functionality', () => {
-    it('should_CreateNewContainerInstance_When_BootstrapCalled', () => {
+    it('should create new container instance when bootstrap called', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -72,7 +72,7 @@ describe('bootstrap.container', () => {
       expect(result).toBe(mockContainer);
     });
 
-    it('should_RegisterConfigSingleton_When_BootstrapCalled', () => {
+    it('should register config singleton when bootstrap called', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -83,7 +83,7 @@ describe('bootstrap.container', () => {
       expect(mockContainer.registerSingleton).toHaveBeenCalledWith('Config', createConfig);
     });
 
-    it('should_RegisterClockSingleton_When_BootstrapCalled', () => {
+    it('should register clock singleton when bootstrap called', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -94,7 +94,7 @@ describe('bootstrap.container', () => {
       expect(mockContainer.registerSingleton).toHaveBeenCalledWith('Clock', createConfig);
     });
 
-    it('should_RegisterUuidSingleton_When_BootstrapCalled', () => {
+    it('should register uuid singleton when bootstrap called', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -105,7 +105,7 @@ describe('bootstrap.container', () => {
       expect(mockContainer.registerSingleton).toHaveBeenCalledWith('Uuid', createUuidService);
     });
 
-    it('should_RegisterAllRequiredServices_When_BootstrapCalled', () => {
+    it('should register all required services when bootstrap called', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -121,7 +121,7 @@ describe('bootstrap.container', () => {
   });
 
   describe('Critical Services Validation', () => {
-    it('should_ValidateAllCriticalServices_When_BootstrapCalled', () => {
+    it('should validate all critical services when bootstrap called', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -134,7 +134,7 @@ describe('bootstrap.container', () => {
       });
     });
 
-    it('should_CheckConfigService_When_ValidatingCriticalServices', () => {
+    it('should check config service when validating critical services', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -145,7 +145,7 @@ describe('bootstrap.container', () => {
       expect(mockContainer.isRegistered).toHaveBeenCalledWith('Config');
     });
 
-    it('should_CheckClockService_When_ValidatingCriticalServices', () => {
+    it('should check clock service when validating critical services', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -156,7 +156,7 @@ describe('bootstrap.container', () => {
       expect(mockContainer.isRegistered).toHaveBeenCalledWith('Clock');
     });
 
-    it('should_CheckUuidService_When_ValidatingCriticalServices', () => {
+    it('should check uuid service when validating critical services', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -169,7 +169,7 @@ describe('bootstrap.container', () => {
   });
 
   describe('Error Handling', () => {
-    it('should_ThrowContainerCreationError_When_ConfigServiceNotRegistered', () => {
+    it('should throw container creation error when config service not registered', () => {
       // Arrange
       mockContainer.isRegistered.mockImplementation(token => token !== 'Config');
 
@@ -178,7 +178,7 @@ describe('bootstrap.container', () => {
       expect(() => bootstrapContainer()).toThrow('Config service not registered');
     });
 
-    it('should_ThrowContainerCreationError_When_ClockServiceNotRegistered', () => {
+    it('should throw container creation error when clock service not registered', () => {
       // Arrange
       mockContainer.isRegistered.mockImplementation(token => token !== 'Clock');
 
@@ -187,7 +187,7 @@ describe('bootstrap.container', () => {
       expect(() => bootstrapContainer()).toThrow('Clock service not registered');
     });
 
-    it('should_ThrowContainerCreationError_When_UuidServiceNotRegistered', () => {
+    it('should throw container creation error when uuid service not registered', () => {
       // Arrange
       mockContainer.isRegistered.mockImplementation(token => token !== 'Uuid');
 
@@ -196,7 +196,7 @@ describe('bootstrap.container', () => {
       expect(() => bootstrapContainer()).toThrow('Uuid service not registered');
     });
 
-    it('should_ThrowContainerCreationError_When_MultipleCriticalServicesNotRegistered', () => {
+    it('should throw container creation error when multiple critical services not registered', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(false);
 
@@ -204,7 +204,7 @@ describe('bootstrap.container', () => {
       expect(() => bootstrapContainer()).toThrow(ContainerCreationError);
     });
 
-    it('should_ThrowFirstMissingService_When_MultipleCriticalServicesNotRegistered', () => {
+    it('should throw first missing service when multiple critical services not registered', () => {
       // Arrange
       mockContainer.isRegistered.mockImplementation(token => token !== 'Config' && token !== 'Clock');
 
@@ -214,7 +214,7 @@ describe('bootstrap.container', () => {
   });
 
   describe('Registration Order', () => {
-    it('should_RegisterServicesBeforeValidation_When_BootstrapCalled', () => {
+    it('should register services before validation when bootstrap called', () => {
       // Arrange
       let registrationCallCount = 0;
       let validationCallCount = 0;
@@ -238,7 +238,7 @@ describe('bootstrap.container', () => {
       expect(validationCallCount).toBe(3);
     });
 
-    it('should_RegisterInCorrectOrder_When_BootstrapCalled', () => {
+    it('should register in correct order when bootstrap called', () => {
       // Arrange
       const registrationOrder: string[] = [];
       mockContainer.registerSingleton.mockImplementation(token => {
@@ -255,7 +255,7 @@ describe('bootstrap.container', () => {
   });
 
   describe('Factory Function Integration', () => {
-    it('should_UseCreateConfigFactory_When_RegisteringConfigService', () => {
+    it('should use create config factory when registering config service', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -270,7 +270,7 @@ describe('bootstrap.container', () => {
       expect(configCall[1]).toBe(createConfig);
     });
 
-    it('should_UseCreateUuidServiceFactory_When_RegisteringUuidService', () => {
+    it('should use create uuid service factory when registering uuid service', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -287,7 +287,7 @@ describe('bootstrap.container', () => {
   });
 
   describe('Return Value', () => {
-    it('should_ReturnContainerInstance_When_BootstrapSuccessful', () => {
+    it('should return container instance when bootstrap successful', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -302,7 +302,7 @@ describe('bootstrap.container', () => {
       expect(result).toHaveProperty('isRegistered');
     });
 
-    it('should_ReturnFunctionalContainer_When_BootstrapSuccessful', () => {
+    it('should return functional container when bootstrap successful', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -318,13 +318,13 @@ describe('bootstrap.container', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should_HandleEmptyCriticalServices_When_ArrayEmpty', async () => {
+    it('should handle empty critical services when array empty', async () => {
       // Arrange
       jest.doMock('@/container/tokens', () => ({
         criticalServices: [],
       }));
 
-      // Re-import to get mocked criticalServices
+      // Re import to get mocked criticalServices
       jest.resetModules();
       const { bootstrapContainer } = await import('@/container/bootstrap.container');
 
@@ -334,13 +334,13 @@ describe('bootstrap.container', () => {
       expect(() => bootstrapContainer()).not.toThrow();
     });
 
-    it('should_NotCallIsRegistered_When_CriticalServicesEmpty', async () => {
+    it('should not call is registered when critical services empty', async () => {
       // Arrange
       jest.doMock('@/container/tokens', () => ({
         criticalServices: [],
       }));
 
-      // Re-import to get mocked criticalServices
+      // Re import to get mocked criticalServices
       jest.resetModules();
       const { bootstrapContainer } = await import('@/container/bootstrap.container');
 
@@ -355,7 +355,7 @@ describe('bootstrap.container', () => {
   });
 
   describe('Integration Behavior', () => {
-    it('should_CreateFreshContainerInstance_When_CalledMultipleTimes', () => {
+    it('should create fresh container instance when called multiple times', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
@@ -369,7 +369,7 @@ describe('bootstrap.container', () => {
       expect(container2).toBe(mockContainer); // Same mock instance, but created twice
     });
 
-    it('should_RegisterServicesInEachInstance_When_CalledMultipleTimes', () => {
+    it('should-register-services-in-each-instance-when-called-multiple-times', () => {
       // Arrange
       mockContainer.isRegistered.mockReturnValue(true);
 
