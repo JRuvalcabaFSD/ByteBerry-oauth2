@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ServiceMap, Token } from '@/container';
 
 /**
@@ -28,51 +29,10 @@ import { ServiceMap, Token } from '@/container';
 
 export type lifecycle = 'singleton' | 'transient';
 
-/**
- * A lightweight dependency injection container interface.
- *
- * Provides registration and resolution primitives for services identified by a "Token".
- * Implementations are expected to manage service lifetimes (transient vs singleton),
- * support registering pre-created instances, and allow resolving services by token.
- *
- * The container is passed into factories so factories may resolve other dependencies
- * from the same container (enabling nested or dependent registrations).
- *
- * Remarks:
- * - Token is a unique service identifier (e.g. string, symbol, constructor, or a dedicated token type).
- * - ServiceMap is a project-specific mapping from Token to the concrete service type returned by `resolve`.
- * - Implementations may throw an error when resolving an unregistered token; callers should either
- *   check `isRegistered` first or handle resolution errors.
- *
- * Methods:
- * @template T - The type produced by the provided factory or instance when registering.
- * @param token - The identifier used to register or resolve a service.
- * @param factory - A function that produces an instance of the service. Receives the container to allow
- *                  resolving other dependencies during construction.
- * @returns void for registration methods.
- *
- * register:
- * - Registers a factory that produces a new instance each time `resolve` is called (transient lifetime).
- *
- * registerSingleton:
- * - Registers a factory whose returned instance is created once (lazily on first resolve or eagerly,
- *   depending on implementation) and reused for subsequent resolves (singleton lifetime).
- *
- * registerInstance:
- * - Registers an already-created instance for the given token. The provided instance is returned on resolve.
- *
- * resolve:
- * - Resolves and returns the service associated with the token. The generic return type corresponds
- *   to the mapping declared in ServiceMap for the given token.
- *
- * isRegistered:
- * - Returns true if a factory, singleton, or instance has been registered for the token; otherwise false.
- */
-
-export interface IContainer {
-  register<T>(token: Token, factory: (container: IContainer) => T): void;
-  registerSingleton<T>(token: Token, factory: (container: IContainer) => T): void;
-  registerInstance<T>(token: Token, instance: T): void;
-  resolve<T extends Token>(token: T): ServiceMap[T];
-  isRegistered(token: Token): boolean;
+export interface IContainer<TServiceMap extends Record<TToken, any>, TToken extends Token = Token> {
+  register<T>(token: TToken, factory: (container: IContainer<TServiceMap, TToken>) => T): void;
+  registerSingleton<T>(token: TToken, factory: (container: IContainer<TServiceMap, TToken>) => T): void;
+  registerInstance<T>(token: TToken, instance: T): void;
+  resolve<T extends TToken>(token: T): TServiceMap[T];
+  isRegistered(token: TToken): boolean;
 }

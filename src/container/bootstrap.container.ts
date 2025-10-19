@@ -1,5 +1,5 @@
 import { createConfig } from '@/config';
-import { Container, criticalServices, Token } from '@/container';
+import { Container, criticalServices, ServiceMap, Token } from '@/container';
 import { createUuidService } from '@/infrastructure';
 import { IContainer } from '@/interfaces';
 import { ContainerCreationError } from '@/shared';
@@ -20,8 +20,8 @@ import { ContainerCreationError } from '@/shared';
  * @throws {ContainerCreationError} If any token in `criticalServices` is not registered.
  */
 
-export function bootstrapContainer(): IContainer {
-  const container = new Container();
+export function bootstrapContainer(): IContainer<ServiceMap> {
+  const container = new Container<ServiceMap>();
 
   container.registerSingleton('Config', createConfig);
   container.registerSingleton('Clock', createConfig);

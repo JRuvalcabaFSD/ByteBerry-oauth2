@@ -318,6 +318,16 @@ describe('Config', () => {
       // Act & Assert
       expect(() => Config.getConfig()).toThrow(ConfigError);
     });
+    it('should throw error when the env is production and logLevel as debug', async () => {
+      // Arrange
+      process.env.NODE_ENV = 'production';
+      process.env.LOG_LEVEL = 'debug';
+      const { Config } = await import('@config');
+      const { ConfigError } = await import('@shared');
+
+      // Act & Assert
+      expect(() => Config.getConfig()).toThrow(ConfigError);
+    });
 
     it('should handle single cors origin when only one origin provided', async () => {
       // Arrange
