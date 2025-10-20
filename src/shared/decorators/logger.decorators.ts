@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// src/logger/loggerDecorators.ts
 import { ILogger } from '@/interfaces';
+import { Token } from '@/container';
 
 const WRAPPED_FLAG = Symbol('__logger_wrapped__');
 const ORIGINAL_LOGGER = Symbol('__original_logger__');
@@ -9,18 +11,20 @@ const BASE_CONTEXT = Symbol('__base_context__');
 const LOGGER_METHODS = ['debug', 'info', 'warn', 'error', 'log'];
 
 /**
- * Type guard that asserts whether a value appears to implement the minimal ILogger shape.
+ * Type guard that determines whether a value behaves like an ILogger.
  *
- * Performs a runtime check that the provided value is neither null nor undefined and that
- * it exposes callable `debug` and `info` properties. This function narrows the type of
- * `x` to `ILogger` when it returns `true`.
+ * Checks that the provided value is not null/undefined and that it exposes
+ * callable `debug` and `info` properties. Use this in conditional expressions
+ * to narrow the type to `ILogger`.
  *
- * Note: this only verifies the presence and callability of `debug` and `info`. It does
- * not guarantee any additional `ILogger` contract (such as method signatures, behavior,
- * or other optional properties).
+ * @param x - The value to test for logger-like shape.
+ * @returns True if `x` appears to implement the minimal `ILogger` shape (has callable `debug` and `info`), otherwise false.
  *
- * @param x - Value to inspect.
- * @returns `true` if `x` is non-null/undefined and has `debug` and `info` methods; otherwise `false`.
+ * @remarks
+ * This is a lightweight, structural runtime check and does not guarantee full
+ * conformance to the `ILogger` interface (only the presence and type of the
+ * two methods are verified). If your logger interface includes additional
+ * required members or specific behavior, perform further validation.
  */
 
 function isLoggerLike(x: any): x is ILogger {
@@ -28,51 +32,40 @@ function isLoggerLike(x: any): x is ILogger {
 }
 
 /**
- * Wraps a logger or function with a contextual logger prefix.
+ * Wraps either a logger or a function with a contextual logger prefix.
  *
- * Generic:
- * @template T - Either an ILogger instance or a callable (function/middleware).
+ * @template T - Either an ILogger implementation or a callable (e.g. middleware/handler).
  *
- * Behavior:
- * - If `target` is an ILogger (object exposing logging methods), returns a Proxy
- *   that intercepts calls to configured logging methods (LOGGER_METHODS) and
- *   prefixes the first string argument with `[context] ` when it is not already
- *   present. The wrapper avoids double-wrapping by checking a WRAPPED_FLAG
- *   attached to the logger.
- * - If `target` is a function, returns a wrapped function that searches the
- *   invocation arguments for an object containing a `logger` or `log` property;
- *   if found, it emits a debug message with the given context when the function
- *   is executed, then forwards the call to the original function.
+ * @param target - The object to wrap. If it has a `debug` property it is treated as a logger; if it is
+ *   a function it is treated as a callable to be wrapped. If it is neither, it is returned unchanged.
+ * @param context - The context string to prefix to log messages (e.g. "MyService").
  *
- * Type preservation:
- * - The returned value preserves the static type of `T` so the wrapper can be
- *   used transparently in call sites expecting the original logger or function.
+ * @returns The original target, or a proxied/logger-wrapped instance:
+ * - When `target` is an ILogger:
+ *   - Returns a Proxy over the original logger that prefixes the first string argument of logging
+ *     method calls with `"[<context>]"`, but only if that prefix is not already present.
+ *   - Only methods listed in `LOGGER_METHODS` are wrapped; other properties/methods are forwarded.
+ *   - The wrapper avoids double-wrapping by inspecting and preserving an `ORIGINAL_LOGGER` property
+ *     and setting a `WRAPPED_FLAG` (and also records `BASE_CONTEXT`) on the returned proxy.
+ *   - The Proxy delegates to the original logger for actual logging after prefixing.
+ * - When `target` is a function:
+ *   - Returns a wrapped function that searches its arguments for an object containing `.logger` or `.log`.
+ *   - If such an argument with a `.logger` is found, the wrapper calls `logger.debug("[<context>] Function executed")`
+ *     before invoking the original function.
+ *   - The wrapper preserves the original function's parameter and return types.
  *
- * Side effects / metadata:
- * - When wrapping a logger, the returned proxy will have metadata properties
- *   attached:
- *     - ORIGINAL_LOGGER: reference to the original (unproxied) logger
- *     - BASE_CONTEXT: the provided `context` string
- *     - WRAPPED_FLAG: marker equal to `context` to indicate it is already wrapped
- *
- * Notes:
- * - Only the first argument of type `string` passed to recognized logger
- *   methods is prefixed.
- * - The list of intercepted methods is controlled by LOGGER_METHODS.
- *
- * @param target - The logger instance or function to wrap.
- * @param context - The context string to prefix log messages with (without brackets).
- * @returns The proxied logger or wrapped function, typed as `T`.
+ * @remarks
+ * - Prefixing only applies when the first argument of the wrapped logging method is a string.
+ * - The check to avoid re-prefixing uses a simple `startsWith` test against `"[<context>]"`.
+ * - The implementation relies on the external symbols/constants `WRAPPED_FLAG`, `ORIGINAL_LOGGER`,
+ *   `BASE_CONTEXT`, and `LOGGER_METHODS` to manage wrapping state and determine which methods to intercept.
+ * - This function mutates the returned proxy by attaching the above symbol properties; it does not deep-clone
+ *   the logger.
  *
  * @example
- * ```ts
- * const loggerWithCtx = withLoggerContext(myLogger, 'Auth');
- * loggerWithCtx.info('User logged in'); // => "[Auth] User logged in"
- *
- * const wrappedMiddleware = withLoggerContext(myMiddleware, 'Auth');
- * // when invoked with an arg containing { logger }, it will emit a debug entry:
- * // logger.debug("[Auth] Function executed")
- * ```
+ * // Given a logger `log` and context "Auth":
+ * // const ctxLogger = withLoggerContext(log, "Auth");
+ * // ctxLogger.debug("User signed in") => "[Auth] User signed in"
  */
 
 export function withLoggerContext<T extends ILogger | ((...args: any[]) => any)>(target: T, context: string): T {
@@ -130,14 +123,86 @@ export function withLoggerContext<T extends ILogger | ((...args: any[]) => any)>
   return target;
 }
 
+/**
+ * Retrieves the underlying/original logger from a possibly-decorated logger instance.
+ *
+ * This function detects whether the provided object is "logger-like" (using
+ * `isLoggerLike`). If it is, it will attempt to unwrap a previously-stored
+ * original logger using the `ORIGINAL_LOGGER` symbol property. If the symbol
+ * property is not present or the value is not accessible, the input `logger`
+ * is returned unchanged.
+ *
+ * @param logger - A logger instance that may have been wrapped or decorated.
+ * @returns The original, underlying ILogger if available; otherwise returns the
+ *          provided `logger` as-is.
+ *
+ * @remarks
+ * - This is a non-mutating accessor: it does not modify the provided `logger`.
+ * - The detection logic relies on `isLoggerLike` and the `ORIGINAL_LOGGER`
+ *   symbol; ensure those are available and consistent with any decorator
+ *   implementations.
+ *
+ * @see isLoggerLike
+ * @see ORIGINAL_LOGGER
+ *
+ * @example
+ * // Given a logger that was wrapped and preserved its original under the
+ * // ORIGINAL_LOGGER symbol, this function will return that original instance.
+ * const original = getOriginalLogger(maybeWrappedLogger);
+ */
+
 function getOriginalLogger(logger: ILogger): ILogger {
   if (!isLoggerLike(logger)) return logger;
   return (logger as any)[ORIGINAL_LOGGER] ?? logger;
 }
 
+/**
+ * Retrieves the base logging context associated with a logger.
+ *
+ * Attempts to read the internal BASE_CONTEXT value from the provided ILogger instance.
+ * Returns the context as a string when present, otherwise returns undefined.
+ *
+ * @param logger - The ILogger instance to query for its base context.
+ * @returns The base context string for the logger, or undefined if none is set.
+ */
+
 function getBaseContext(logger: ILogger): string | undefined {
   return (logger as any)[BASE_CONTEXT];
 }
+
+/**
+ * Class decorator that ensures logger-like objects associated with a class instance are wrapped
+ * with a context identifying the class name.
+ *
+ * Behavior:
+ * - Wraps any constructor arguments that are logger-like with `withLoggerContext(logger, className)` prior
+ *   to calling the original constructor so injected loggers carry the class context.
+ * - After the original constructor runs, inspects the instance's own properties and wraps any logger-like
+ *   properties with the same class context.
+ * - If a logger-like object already exposes a base context equal to the class name, it is not re-wrapped
+ *   (prevents double-wrapping).
+ * - Uses `constructor.name` or the fallback string `"UnknownClass"` as the context value.
+ *
+ * Example:
+ * ```ts
+ * @LogContextClass()
+ * class MyService {
+ *   constructor(private logger: ILogger) {}
+ * }
+ * // Injected or assigned loggers will be proxied so emitted logs include the class context "MyService".
+ * ```
+ *
+ * @template T The constructor type being decorated.
+ * @returns A subclass constructor that preserves the original behavior but wraps logger-like constructor
+ *          arguments and instance properties with a class-level logger context.
+ *
+ * @remarks
+ * - This decorator depends on the presence of helper functions/types in scope: `isLoggerLike`, `withLoggerContext`,
+ *   `getBaseContext`, `getOriginalLogger`, and the `ILogger` shape.
+ * - Intended for use with dependency-injected or manually-provided logger instances so logs automatically
+ *   include the class context without modifying call sites.
+ * - Side effects: mutates instance properties that are logger-like to replace them with context-wrapped proxies.
+ */
 
 export function LogContextClass() {
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -171,54 +236,50 @@ export function LogContextClass() {
 }
 
 /**
- * Method decorator factory that temporarily injects a contextualized logger into
- * logger-like properties of the method's `this` object for the duration of the
- * method invocation.
+ * Method decorator that temporarily injects a contextual logger into any logger-like
+ * properties found on the instance for the duration of the decorated method call.
  *
- * The decorator:
- * - Captures a reliable static class name at decoration time (prototype or constructor).
- * - At call time, prefers a useful runtime class name (this.constructor.name) when available.
- * - Builds a context string of the form `ClassName.methodName`.
- * - Scans the own enumerable properties of `this` (Object.keys) and, for each
- *   property that satisfies `isLoggerLike`, replaces it with a context-wrapped
- *   proxy produced by `withLoggerContext(getOriginalLogger(prop), ctx)`.
- * - Skips replacement when a logger already carries the same `WRAPPED_FLAG` context.
- * - Calls the original method and awaits its result if it returns a Promise.
- * - Always restores the original logger properties in a finally block, even if
- *   the method throws or rejects.
+ * Behavior:
+ * - Captures a reliable "static" class name at decoration time (from the target or its constructor).
+ * - At runtime, prefers the instance constructor name if available, falling back to the captured
+ *   static name or "UnknownClass".
+ * - Builds a context string of the form "<ClassName>.<methodName>" and uses it to wrap logger-like
+ *   properties on the instance before invoking the original method.
+ * - Only enumerable own properties of the instance (Object.keys(this)) are inspected.
+ * - For each property that satisfies isLoggerLike(prop):
+ *     - Retrieves an original logger via getOriginalLogger(prop).
+ *     - If the property is already wrapped with the same context (prop[WRAPPED_FLAG] === ctx), it is skipped.
+ *     - Otherwise replaces the property with a wrapper produced by withLoggerContext(originalLogger, ctx).
+ * - Restores all replaced properties to their original values in a finally block, ensuring restoration
+ *   even if the original method throws or returns a rejected Promise.
+ * - Supports both synchronous and asynchronous methods: if the original method returns a Promise,
+ *   the decorator awaits it and returns the resolved value (or propagates rejection).
  *
- * Important notes:
- * - The decorator mutates the instance (or class for static methods) only for
- *   the duration of the method call and restores the original properties after
- *   completion.
- * - Only own enumerable properties are considered (Object.keys); inherited or
- *   non-enumerable logger properties will not be wrapped.
- * - The decorator relies on the presence and semantics of helper utilities:
- *   `isLoggerLike`, `getOriginalLogger`, `withLoggerContext` and the `WRAPPED_FLAG`
- *   sentinel. Those must be available in scope for the decorator to function as intended.
+ * Constraints and expectations:
+ * - Intended for methods only. If applied to a non-method (i.e., descriptor is missing or descriptor.value
+ *   is not a function), the decorator throws an Error.
+ * - Relies on the helper utilities isLoggerLike, getOriginalLogger, withLoggerContext and the sentinel
+ *   WRAPPED_FLAG to detect and wrap logger-like objects.
+ * - The temporary replacement is limited in scope to the method invocation; other concurrent calls
+ *   to the same instance will see the wrapped loggers only while the call is executing.
  *
- * @returns A MethodDecorator that wraps the target method and temporarily injects
- *          contextualized logger proxies into logger-like properties of `this`.
+ * @returns {MethodDecorator} A decorator function that wraps the target method with the context-injection logic.
  *
- * @throws {Error} When the decorator is applied to a class element that is not a method
- *                 (descriptor is missing or descriptor.value is not a function).
+ * @throws {Error} If the decorator is applied to a target that does not have a function descriptor.value
+ *                 (i.e., not a method).
  *
  * @example
- * class Service {
- *   logger = createLogger();
+ * class MyService {
+ *   logger = createLogger(...); // logger-like object
  *
  *   @LogContextMethod()
  *   async doWork() {
- *     // During this call, `this.logger` will include the context "Service.doWork"
- *     this.logger.info('starting work');
- *     await someAsyncOperation();
+ *     // During this call, this.logger will be temporarily wrapped with context "MyService.doWork"
+ *     this.logger.info('started');
+ *     await doSomethingAsync();
+ *     this.logger.info('finished');
  *   }
  * }
- *
- * @remarks
- * - Works for both synchronous and asynchronous methods.
- * - Uses a best-effort runtime class name and falls back to the static name captured
- *   at decoration time, finally using 'UnknownClass' if none are available.
  */
 
 export function LogContextMethod(): MethodDecorator {
@@ -287,28 +348,18 @@ export function LogContextMethod(): MethodDecorator {
 }
 
 /**
- * Wraps a function so that the first argument (an ILogger) is replaced with a
- * context-enhanced logger before invoking the original function.
+ * Wraps a function so it always receives a logger augmented with a context derived from the wrapped function's name.
  *
- * @template T - A function type. The original function is expected to accept an ILogger
- *               as its first parameter followed by any number of additional arguments.
- * @param fn - The function to wrap. When the returned function is called, it will:
- *               1. Create a context-aware logger by calling `withLoggerContext(logger, fn.name || 'AnonymousFunction')`.
- *               2. Invoke `fn` with that wrapped logger as the first argument, forwarding all remaining arguments unchanged.
- * @returns A function with the same call signature as `fn` (typed as `T`). When invoked it returns whatever `fn` returns
- *          and will propagate any errors thrown by `fn`.
+ * The returned wrapper expects an `ILogger` as its first argument and forwards the remaining arguments to the original function.
+ * At call time the wrapper constructs `wrappedLogger` via `withLoggerContext(logger, fn.name || 'AnonymousFunction')`
+ * and invokes the original function with that `wrappedLogger` followed by the original arguments.
  *
- * @remarks
- * - `fn.name` is used to derive the logger context; if `fn` is anonymous, the literal 'AnonymousFunction' is used.
- * - This wrapper casts the returned function to `T` to preserve the original function's type shape; callers should ensure
- *   `fn`'s first parameter is indeed an `ILogger`.
- * - The wrapper does not alter `this` binding of the original function; if `fn` depends on a particular `this`, callers
- *   must bind it appropriately before wrapping or call the wrapped function with an explicit receiver.
+ * Note: The function is returned with a cast to `T` for convenience; at runtime the wrapper always expects an `ILogger`
+ * as the first parameter regardless of the original `T` signature.
  *
- * @example
- * // Given `fn: (logger: ILogger, id: string) => Promise<void>`
- * // const wrapped = logContextFunction(fn);
- * // wrapped(logger, 'abc') // calls fn(withLoggerContext(logger, 'fnName'), 'abc')
+ * @typeParam T - The function type being wrapped.
+ * @param fn - The target function to wrap. It should accept a logger as its first argument.
+ * @returns A function that takes an `ILogger` and the original function's remaining arguments, and returns the original function's result.
  */
 
 export function logContextFunction<T extends (...args: any[]) => any>(fn: T): T {
@@ -319,44 +370,30 @@ export function logContextFunction<T extends (...args: any[]) => any>(fn: T): T 
 }
 
 /**
- * Creates a proxy around a dependency container that attaches a logging context
- * to any resolved Logger instances.
+ * Creates a proxied container that injects a logger context when resolving the Logger token.
  *
- * The returned object has the same static type as the provided container (T)
- * but intercepts accesses to the "resolve" property. When "resolve" is invoked
- * with the token "Logger" and the resolved value satisfies `isLoggerLike`, the
- * logger instance is wrapped with `withLoggerContext(..., context)` before
- * being returned. All other tokens and all other properties are forwarded to
- * the original container unchanged.
- *
- * @template T - Type of the container. Must have a `resolve(token: string): any` method.
- * @param container - The original container whose `resolve` method will be proxied.
- * @param context - The logging context string to attach to resolved Logger instances.
- * @returns A proxied container (typed as T) that injects the provided logging context
- *          into resolved Logger instances while preserving all other container behavior.
+ * @typeParam T - The type of the container. Must provide a `resolve<K extends Token>(token: K): any` method.
+ * @param container - The original dependency container to wrap. The proxy forwards all property access to this container except for the `resolve` property.
+ * @param context - The context string to attach to any logger instances returned for the `Logger` token.
+ * @returns A proxied container of the same type `T`. The proxy intercepts calls to `resolve` and:
+ *  - If `token === 'Logger'` and the resolved value satisfies `isLoggerLike`, returns `withLoggerContext(resolvedLogger, context)`.
+ *  - Otherwise returns the original resolved value.
  *
  * @remarks
- * - This function relies on the runtime functions `isLoggerLike` and
- *   `withLoggerContext` to detect logger-like objects and attach context,
- *   respectively.
- * - The proxy only intercepts property access where the property name strictly
- *   equals "resolve". Other property names (including symbols) are returned
- *   directly from the original container.
- * - The original container is not mutated; the proxy forwards calls to it.
- * - If `container.resolve` throws or returns a non-logger value for the "Logger"
- *   token, the proxy will propagate that behavior/value unchanged (except when
- *   `isLoggerLike` returns true, in which case the logger is wrapped).
+ * - The original container is not mutated; this function returns a `Proxy` that delegates to it.
+ * - Only the `resolve` accessor is special-cased; all other properties and methods are passthrough.
+ * - Correct behavior depends on the `isLoggerLike` guard and the `withLoggerContext` wrapper.
  *
  * @example
- * // const proxied = createLoggerContextContainer(container, 'request-id-123');
- * // proxied.resolve('Logger'); // returns logger wrapped with 'request-id-123' context
+ * const scoped = createLoggerContextContainer(container, 'UserService');
+ * const logger = scoped.resolve('Logger'); // logger will be wrapped with the "UserService" context if logger-like
  */
 
-export function createLoggerContextContainer<T extends { resolve: (token: string) => any }>(container: T, context: string): T {
+export function createLoggerContextContainer<T extends { resolve<K extends Token>(token: K): any }>(container: T, context: string): T {
   return new Proxy(container, {
     get(target, prop) {
       if (prop === 'resolve') {
-        return (token: string) => {
+        return <K extends Token>(token: K) => {
           const resolved = target.resolve(token);
           if (token === 'Logger' && isLoggerLike(resolved)) {
             return withLoggerContext(resolved, context);
@@ -364,7 +401,42 @@ export function createLoggerContextContainer<T extends { resolve: (token: string
           return resolved;
         };
       }
-      return target[prop as keyof T];
+      return (target as any)[prop];
     },
   });
+}
+
+/**
+ * Wraps a container's `resolve` method to inject a contextualized logger when the `Logger` token is requested.
+ *
+ * Replaces `container.resolve` with a wrapper that:
+ * - calls the original `resolve` (bound to the container) for all tokens,
+ * - when the requested token is strictly equal to the string `'Logger'` and the resolved value satisfies
+ *   `isLoggerLike`, returns `withLoggerContext(resolved, context)` instead of the raw logger,
+ * - otherwise returns the original resolved value.
+ *
+ * The function mutates the provided container in-place and returns the same container instance.
+ *
+ * @param container - An IoC/container object that exposes a `resolve` method. The method will be rebound and wrapped.
+ * @param context - A string context that will be associated with returned logger instances via `withLoggerContext`.
+ * @returns The same container instance that was passed in, after its `resolve` method has been wrapped.
+ *
+ * @remarks
+ * - The original `resolve` is bound to the container to preserve its original `this` behavior.
+ * - Only the token strictly equal to `'Logger'` is affected; all other tokens are resolved unchanged.
+ * - This function relies on `isLoggerLike` and `withLoggerContext` being available in the surrounding scope.
+ */
+
+export function wrapContainerLogger(container: any, context: string): any {
+  const originalResolve = container.resolve.bind(container);
+
+  container.resolve = function <T extends Token>(token: T) {
+    const resolved = originalResolve(token);
+    if (token === 'Logger' && isLoggerLike(resolved)) {
+      return withLoggerContext(resolved, context);
+    }
+    return resolved;
+  };
+
+  return container;
 }

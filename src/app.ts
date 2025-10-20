@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { bootstrapContainer } from '@/container';
-import { getErrorMessage } from '@/shared';
+import { createLoggerContextContainer, getErrorMessage } from '@/shared';
 
 (() => {
   main().catch(error => {
@@ -12,8 +12,10 @@ import { getErrorMessage } from '@/shared';
 async function main(): Promise<void> {
   const container = bootstrapContainer();
 
-  const config = container.resolve('Config');
-  const logger = container.resolve('Logger');
+  const containerContext = createLoggerContextContainer(container, 'Main');
 
-  logger.info('Service starting', { config });
+  const config = container.resolve('Config');
+  const logger = containerContext.resolve('Logger');
+
+  logger.info(`${config.serviceName} [ver: ${config.version}] Service initialized successfully`);
 }
