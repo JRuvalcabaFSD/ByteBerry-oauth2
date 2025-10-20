@@ -52,4 +52,4 @@ export interface ServiceMap {
  * const isCritical = criticalServices.includes('Config');
  */
 
-export const criticalServices = ['Config', 'Clock', 'Uuid'];
+export const criticalServices = ['Config', 'Clock', 'Uuid', 'Logger'];

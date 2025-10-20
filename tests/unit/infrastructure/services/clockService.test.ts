@@ -41,7 +41,6 @@ describe('ClockService', () => {
       expect(clock.isoString).toBeDefined();
     });
   });
-
   describe('now() method', () => {
     it('should return date object when now called', () => {
       // Act
@@ -196,29 +195,26 @@ describe('ClockService', () => {
       const result = clockService.isoString();
 
       // Assert
-      expect(result).toMatch(/^[A-Za-z]{3} [A-Za-z]{3} \d{1,2} \d{4}$/);
-      // Examples: "Fri Oct 17 2025", "Mon Jan 01 2024"
+      // Expect ISO 8601 format: 2025-10-17T12:30:45.123Z
+      expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     });
 
     it('should match to date string format when iso string called', () => {
       // Arrange
-      const fixedDate = new Date('2025 10 17T12:30:45.123Z');
-      const originalDate = global.Date;
-
-      // Mock Date constructor to return fixed date
-      global.Date = jest.fn(() => fixedDate) as any;
-      global.Date.now = originalDate.now;
+      const fixedDate = new Date('2025-10-17T12:30:45.123Z');
+      jest.useFakeTimers();
+      jest.setSystemTime(fixedDate);
 
       try {
-        // Act
-        const result = clockService.isoString();
-        const expected = fixedDate.toDateString();
+        // Act - create service after setting system time
+        const localClock = new ClockService();
+        const result = localClock.isoString();
+        const expected = fixedDate.toISOString();
 
-        // Assert
+        // Assert - ISO equality for the mocked fixed date
         expect(result).toBe(expected);
       } finally {
-        // Cleanup
-        global.Date = originalDate;
+        jest.useRealTimers();
       }
     });
 
@@ -227,23 +223,22 @@ describe('ClockService', () => {
       const result = clockService.isoString();
 
       // Assert
-      // Should NOT be ISO 8601 format (YYYY MM DDTHH:mm:ss.sssZ)
-      expect(result).not.toMatch(/^\d{4} \d{2} \d{2}T\d{2}:\d{2}:\d{2}/);
+      // Should be ISO 8601 format
+      expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
 
-      // Should be toDateString format instead
-      expect(result).toMatch(/^[A-Za-z]{3} [A-Za-z]{3} \d{1,2} \d{4}$/);
+      // Should NOT be toDateString format
+      expect(result).not.toMatch(/^[A-Za-z]{3} [A-Za-z]{3} \d{1,2} \d{4}$/);
     });
 
     it('should return current date string when iso string called', () => {
       // Arrange
-      const today = new Date();
-      const expectedFormat = today.toDateString();
-
       // Act
       const result = clockService.isoString();
 
-      // Assert
-      expect(result).toBe(expectedFormat);
+      // Assert: the returned ISO should parse to a timestamp close to now
+      const parsed = Date.parse(result);
+      const now = Date.now();
+      expect(Math.abs(parsed - now)).toBeLessThan(1000); // within 1s
     });
 
     it('should be consistent with current date when called multiple times quickly', () => {
@@ -251,9 +246,10 @@ describe('ClockService', () => {
       const result1 = clockService.isoString();
       const result2 = clockService.isoString();
 
-      // Assert
-      // Should be the same since called within the same day
-      expect(result1).toBe(result2);
+      // Assert: times should be close (calls executed quickly)
+      const t1 = Date.parse(result1);
+      const t2 = Date.parse(result2);
+      expect(Math.abs(t1 - t2)).toBeLessThan(50); // within 50ms
     });
   });
 
@@ -269,8 +265,9 @@ describe('ClockService', () => {
       const timeDifference = Math.abs(dateObj.getTime() - timestamp);
       expect(timeDifference).toBeLessThan(10);
 
-      // Date string should match date object
-      expect(dateString).toBe(dateObj.toDateString());
+      // Date string should match date object (ISO) within a small delta
+      const parsed = Date.parse(dateString);
+      expect(Math.abs(parsed - dateObj.getTime())).toBeLessThan(10);
     });
 
     it('should reflect same day when called simultaneously', () => {
@@ -278,8 +275,8 @@ describe('ClockService', () => {
       const now = clockService.now();
       const isoString = clockService.isoString();
 
-      // Assert
-      expect(isoString).toBe(now.toDateString());
+      // Assert - ISO timestamp should be within a small delta of now
+      expect(Math.abs(now.getTime() - Date.parse(isoString))).toBeLessThan(10);
     });
   });
 
@@ -289,7 +286,7 @@ describe('ClockService', () => {
       const mockClock: IClock = {
         now: jest.fn(() => new Date('2025-01-01T00:00:00.000Z')),
         timestamp: jest.fn(() => 1640995200000),
-        isoString: jest.fn(() => 'Sat Jan 01 2025'),
+        isoString: jest.fn(() => '2025-01-01T00:00:00.000Z'),
       };
 
       // Act
@@ -300,34 +297,30 @@ describe('ClockService', () => {
       // Assert
       expect(now.toISOString()).toBe('2025-01-01T00:00:00.000Z');
       expect(timestamp).toBe(1640995200000);
-      expect(isoString).toBe('Sat Jan 01 2025');
+      expect(isoString).toBe('2025-01-01T00:00:00.000Z');
       expect(mockClock.now).toHaveBeenCalled();
       expect(mockClock.timestamp).toHaveBeenCalled();
       expect(mockClock.isoString).toHaveBeenCalled();
     });
 
     it('should allow deterministic testing when date mocked', () => {
-      // Arrange
-      const fixedDate = new Date('2025 12 25T15:30:00.000Z');
-      const originalDate = global.Date;
+      const fixedDate = new Date('2025-12-25T15:30:00.000Z');
 
-      // Mock global Date
-      global.Date = jest.fn(() => fixedDate) as any;
-      global.Date.now = jest.fn(() => fixedDate.getTime());
+      // Forzar uso de fake timers "modern" con casteo para evitar error de tipos
+      (jest.useFakeTimers as unknown as (mode?: any) => void)('modern');
+      jest.setSystemTime(fixedDate);
 
       try {
-        // Act
-        const now = clockService.now();
-        const timestamp = clockService.timestamp();
-        const isoString = clockService.isoString();
+        const localClock = new ClockService();
+        const now = localClock.now();
+        const timestamp = localClock.timestamp();
+        const isoString = localClock.isoString();
 
-        // Assert
-        expect(now).toBe(fixedDate);
+        expect(now.getTime()).toBe(fixedDate.getTime());
         expect(timestamp).toBe(fixedDate.getTime());
-        expect(isoString).toBe(fixedDate.toDateString());
+        expect(isoString).toBe(fixedDate.toISOString());
       } finally {
-        // Cleanup
-        global.Date = originalDate;
+        jest.useRealTimers();
       }
     });
   });

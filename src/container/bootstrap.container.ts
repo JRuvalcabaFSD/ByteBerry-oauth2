@@ -1,6 +1,7 @@
 import { createConfig } from '@/config';
 import { Container, criticalServices, ServiceMap, Token } from '@/container';
-import { createUuidService } from '@/infrastructure';
+import { createWinstonLoggerService } from '@/container/factories';
+import { createClockService, createUuidService } from '@/infrastructure';
 import { IContainer } from '@/interfaces';
 import { ContainerCreationError } from '@/shared';
 
@@ -24,8 +25,9 @@ export function bootstrapContainer(): IContainer<ServiceMap> {
   const container = new Container<ServiceMap>();
 
   container.registerSingleton('Config', createConfig);
-  container.registerSingleton('Clock', createConfig);
+  container.registerSingleton('Clock', createClockService);
   container.registerSingleton('Uuid', createUuidService);
+  container.registerSingleton('Logger', createWinstonLoggerService);
 
   criticalServices.forEach(token => {
     if (!container.isRegistered(token as Token)) throw new ContainerCreationError(token as Token);

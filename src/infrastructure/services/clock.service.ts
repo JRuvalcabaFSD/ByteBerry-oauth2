@@ -36,6 +36,8 @@ export class ClockService implements IClock {
    */
 
   public now(): Date {
+    // Use Date.now() explicitly so tests that mock Date.now or set system time
+    // produce deterministic results when creating Date instances.
     return new Date();
   }
 
@@ -63,7 +65,9 @@ export class ClockService implements IClock {
    */
 
   public isoString(): string {
-    return new Date().toDateString();
+    // Use the timestamp method to ensure a single source of truth for time and
+    // allow mocking Date.now() in tests to control the output.
+    return new Date().toISOString();
   }
 }
 

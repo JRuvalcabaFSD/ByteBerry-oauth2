@@ -13,6 +13,7 @@ async function main(): Promise<void> {
   const container = bootstrapContainer();
 
   const config = container.resolve('Config');
+  const logger = container.resolve('Logger');
 
-  console.log({ config });
+  logger.info('Service starting', { config });
 }
