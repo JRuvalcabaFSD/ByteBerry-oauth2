@@ -100,6 +100,8 @@ describe('Container', () => {
       Logger: MockInterface1;
       Clock: MockInterface1;
       Uuid: MockInterface1;
+      GracefulShutdown: MockInterface1;
+      HttpServer: MockInterface1;
     }
 
     let container: Container<ServiceMap>;
@@ -393,6 +395,8 @@ describe('Container', () => {
       Logger: IComplexFactory;
       Clock: ITypedService;
       Uuid: ITypedService;
+      GracefulShutdown: ITypedService;
+      HttpServer: ITypedService;
     }
 
     let container: Container<ServiceMap>;

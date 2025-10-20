@@ -1,6 +1,6 @@
 import { createConfig } from '@/config';
 import { Container, criticalServices, ServiceMap, Token } from '@/container';
-import { createWinstonLoggerService } from '@/container/factories';
+import { createGracefulShutdown, createHttpServer, createWinstonLoggerService } from '@/container/factories';
 import { createClockService, createUuidService } from '@/infrastructure';
 import { IContainer } from '@/interfaces';
 import { ContainerCreationError } from '@/shared';
@@ -28,6 +28,8 @@ export function bootstrapContainer(): IContainer<ServiceMap> {
   container.registerSingleton('Clock', createClockService);
   container.registerSingleton('Uuid', createUuidService);
   container.registerSingleton('Logger', createWinstonLoggerService);
+  container.registerSingleton('GracefulShutdown', createGracefulShutdown);
+  container.registerSingleton('HttpServer', createHttpServer);
 
   criticalServices.forEach(token => {
     if (!container.isRegistered(token as Token)) throw new ContainerCreationError(token as Token);

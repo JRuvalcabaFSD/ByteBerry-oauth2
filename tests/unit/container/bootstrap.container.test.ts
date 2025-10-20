@@ -14,7 +14,7 @@ import { createConfig } from '@/config';
 import { createClockService, createUuidService } from '@/infrastructure';
 import { ContainerCreationError } from '@/shared';
 import { IContainer } from '@/interfaces';
-import { createWinstonLoggerService } from '@/container/factories';
+import { createGracefulShutdown, createWinstonLoggerService } from '@/container/factories';
 
 // Mock dependencies
 jest.mock('@/config', () => ({
@@ -114,11 +114,12 @@ describe('bootstrap.container', () => {
       bootstrapContainer();
 
       // Assert
-      expect(mockContainer.registerSingleton).toHaveBeenCalledTimes(4);
+      expect(mockContainer.registerSingleton).toHaveBeenCalledTimes(5);
       expect(mockContainer.registerSingleton).toHaveBeenNthCalledWith(1, 'Config', createConfig);
       expect(mockContainer.registerSingleton).toHaveBeenNthCalledWith(2, 'Clock', createClockService);
       expect(mockContainer.registerSingleton).toHaveBeenNthCalledWith(3, 'Uuid', createUuidService);
       expect(mockContainer.registerSingleton).toHaveBeenNthCalledWith(4, 'Logger', createWinstonLoggerService);
+      expect(mockContainer.registerSingleton).toHaveBeenNthCalledWith(5, 'GracefulShutdown', createGracefulShutdown);
     });
   });
 
@@ -228,7 +229,7 @@ describe('bootstrap.container', () => {
       mockContainer.isRegistered.mockImplementation(() => {
         validationCallCount++;
         // Ensure registrations happened before validations
-        expect(registrationCallCount).toBe(4);
+        expect(registrationCallCount).toBe(5);
         return true;
       });
 
@@ -236,7 +237,7 @@ describe('bootstrap.container', () => {
       bootstrapContainer();
 
       // Assert
-      expect(registrationCallCount).toBe(4);
+      expect(registrationCallCount).toBe(5);
       expect(validationCallCount).toBe(3);
     });
 
@@ -252,7 +253,7 @@ describe('bootstrap.container', () => {
       bootstrapContainer();
 
       // Assert
-      expect(registrationOrder).toEqual(['Config', 'Clock', 'Uuid', 'Logger']);
+      expect(registrationOrder).toEqual(['Config', 'Clock', 'Uuid', 'Logger', 'GracefulShutdown']);
     });
   });
 
@@ -380,7 +381,7 @@ describe('bootstrap.container', () => {
       bootstrapContainer();
 
       // Assert
-      expect(mockContainer.registerSingleton).toHaveBeenCalledTimes(8); // 4 services × 2 calls
+      expect(mockContainer.registerSingleton).toHaveBeenCalledTimes(10); // 5 services × 2 calls
     });
   });
 });

@@ -370,26 +370,29 @@ export function logContextFunction<T extends (...args: any[]) => any>(fn: T): T 
 }
 
 /**
- * Creates a proxied container that injects a logger context when resolving the Logger token.
+ * Wraps a dependency-injection container with a proxy that injects a logging context into resolved logger instances.
  *
- * @typeParam T - The type of the container. Must provide a `resolve<K extends Token>(token: K): any` method.
- * @param container - The original dependency container to wrap. The proxy forwards all property access to this container except for the `resolve` property.
- * @param context - The context string to attach to any logger instances returned for the `Logger` token.
- * @returns A proxied container of the same type `T`. The proxy intercepts calls to `resolve` and:
- *  - If `token === 'Logger'` and the resolved value satisfies `isLoggerLike`, returns `withLoggerContext(resolvedLogger, context)`.
- *  - Otherwise returns the original resolved value.
+ * The returned proxy forwards all property access to the original container except for the `resolve` method,
+ * which is intercepted. When `resolve` is called and the requested token is the string literal 'Logger',
+ * the resolved value is inspected with `isLoggerLike`. If it appears to be a logger, it is wrapped with
+ * `withLoggerContext` using the provided `context` string before being returned; otherwise the original
+ * resolved value is returned unchanged.
  *
- * @remarks
- * - The original container is not mutated; this function returns a `Proxy` that delegates to it.
- * - Only the `resolve` accessor is special-cased; all other properties and methods are passthrough.
- * - Correct behavior depends on the `isLoggerLike` guard and the `withLoggerContext` wrapper.
+ * This function is generic over the container type `T`, which is expected to provide a `resolve` method
+ * of the shape `resolve<K extends Token>(token: K): any`. The proxy preserves all other container members
+ * and behavior.
  *
- * @example
- * const scoped = createLoggerContextContainer(container, 'UserService');
- * const logger = scoped.resolve('Logger'); // logger will be wrapped with the "UserService" context if logger-like
+ * Example use cases:
+ * - Attach request- or component-specific context to logger instances resolved from a shared container.
+ * - Ensure structured logs from different parts of an application include a consistent context value.
+ *
+ * @template T - Type of the container being wrapped. Must implement a `resolve` method.
+ * @param container - The DI container instance to wrap with logging-aware behavior.
+ * @param context - A string value representing the logging context to attach to resolved loggers.
+ * @returns A proxied container with the same surface as the original but with context-aware logger resolution.
  */
 
-export function createLoggerContextContainer<T extends { resolve<K extends Token>(token: K): any }>(container: T, context: string): T {
+export function wrapContainerLogger<T extends { resolve<K extends Token>(token: K): any }>(container: T, context: string): T {
   return new Proxy(container, {
     get(target, prop) {
       if (prop === 'resolve') {
@@ -404,39 +407,4 @@ export function createLoggerContextContainer<T extends { resolve<K extends Token
       return (target as any)[prop];
     },
   });
-}
-
-/**
- * Wraps a container's `resolve` method to inject a contextualized logger when the `Logger` token is requested.
- *
- * Replaces `container.resolve` with a wrapper that:
- * - calls the original `resolve` (bound to the container) for all tokens,
- * - when the requested token is strictly equal to the string `'Logger'` and the resolved value satisfies
- *   `isLoggerLike`, returns `withLoggerContext(resolved, context)` instead of the raw logger,
- * - otherwise returns the original resolved value.
- *
- * The function mutates the provided container in-place and returns the same container instance.
- *
- * @param container - An IoC/container object that exposes a `resolve` method. The method will be rebound and wrapped.
- * @param context - A string context that will be associated with returned logger instances via `withLoggerContext`.
- * @returns The same container instance that was passed in, after its `resolve` method has been wrapped.
- *
- * @remarks
- * - The original `resolve` is bound to the container to preserve its original `this` behavior.
- * - Only the token strictly equal to `'Logger'` is affected; all other tokens are resolved unchanged.
- * - This function relies on `isLoggerLike` and `withLoggerContext` being available in the surrounding scope.
- */
-
-export function wrapContainerLogger(container: any, context: string): any {
-  const originalResolve = container.resolve.bind(container);
-
-  container.resolve = function <T extends Token>(token: T) {
-    const resolved = originalResolve(token);
-    if (token === 'Logger' && isLoggerLike(resolved)) {
-      return withLoggerContext(resolved, context);
-    }
-    return resolved;
-  };
-
-  return container;
 }
