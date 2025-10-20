@@ -251,7 +251,7 @@ export class WinstonLoggerService implements ILogger {
     }
 
     const contextWithoutService = Object.entries(mergeContext)
-      .filter(([key]) => key !== 'service')
+      .filter(([key]) => key !== 'service' && key !== 'requestId')
       .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
 
     if (Object.keys(contextWithoutService).length > 0) {
