@@ -1,5 +1,6 @@
 import { ServiceMap } from '@/container/tokens';
 import { GracefulShutdown, HttpServer, WinstonLoggerService } from '@/infrastructure';
+import { HealthController } from '@/infrastructure/controllers/health.controller';
 import { IContainer } from '@/interfaces';
 
 /**
@@ -46,4 +47,16 @@ export function createGracefulShutdown(c: IContainer<ServiceMap>): GracefulShutd
 
 export function createHttpServer(c: IContainer<ServiceMap>): HttpServer {
   return new HttpServer(c);
+}
+
+/**
+ * Create a HealthController instance using the provided dependency container.
+ *
+ * @param c - The dependency container (IContainer<ServiceMap>) that supplies the services
+ *            and dependencies required by the HealthController.
+ * @returns A new HealthController constructed with the given container.
+ */
+
+export function createHealthController(c: IContainer<ServiceMap>): HealthController {
+  return new HealthController(c);
 }

@@ -14,7 +14,7 @@ import { createConfig } from '@/config';
 import { createClockService, createUuidService } from '@/infrastructure';
 import { ContainerCreationError } from '@/shared';
 import { IContainer } from '@/interfaces';
-import { createGracefulShutdown, createHttpServer, createWinstonLoggerService } from '@/container/factories';
+import { createGracefulShutdown, createHealthController, createHttpServer, createWinstonLoggerService } from '@/container/factories';
 
 // Mock dependencies
 jest.mock('@/config', () => ({
@@ -114,13 +114,14 @@ describe('bootstrap.container', () => {
       bootstrapContainer();
 
       // Assert
-      expect(mockContainer.registerSingleton).toHaveBeenCalledTimes(6);
+      expect(mockContainer.registerSingleton).toHaveBeenCalledTimes(7);
       expect(mockContainer.registerSingleton).toHaveBeenNthCalledWith(1, 'Config', createConfig);
       expect(mockContainer.registerSingleton).toHaveBeenNthCalledWith(2, 'Clock', createClockService);
       expect(mockContainer.registerSingleton).toHaveBeenNthCalledWith(3, 'Uuid', createUuidService);
       expect(mockContainer.registerSingleton).toHaveBeenNthCalledWith(4, 'Logger', createWinstonLoggerService);
       expect(mockContainer.registerSingleton).toHaveBeenNthCalledWith(5, 'GracefulShutdown', createGracefulShutdown);
       expect(mockContainer.registerSingleton).toHaveBeenNthCalledWith(6, 'HttpServer', createHttpServer);
+      expect(mockContainer.registerSingleton).toHaveBeenNthCalledWith(7, 'HealthController', createHealthController);
     });
   });
 
@@ -230,7 +231,7 @@ describe('bootstrap.container', () => {
       mockContainer.isRegistered.mockImplementation(() => {
         validationCallCount++;
         // Ensure registrations happened before validations
-        expect(registrationCallCount).toBe(6);
+        expect(registrationCallCount).toBe(7);
         return true;
       });
 
@@ -238,7 +239,7 @@ describe('bootstrap.container', () => {
       bootstrapContainer();
 
       // Assert
-      expect(registrationCallCount).toBe(6);
+      expect(registrationCallCount).toBe(7);
       expect(validationCallCount).toBe(3);
     });
 
@@ -254,7 +255,7 @@ describe('bootstrap.container', () => {
       bootstrapContainer();
 
       // Assert
-      expect(registrationOrder).toEqual(['Config', 'Clock', 'Uuid', 'Logger', 'GracefulShutdown', 'HttpServer']);
+      expect(registrationOrder).toEqual(['Config', 'Clock', 'Uuid', 'Logger', 'GracefulShutdown', 'HttpServer', 'HealthController']);
     });
   });
 
@@ -382,7 +383,7 @@ describe('bootstrap.container', () => {
       bootstrapContainer();
 
       // Assert
-      expect(mockContainer.registerSingleton).toHaveBeenCalledTimes(12); // 5 services × 2 calls
+      expect(mockContainer.registerSingleton).toHaveBeenCalledTimes(14); // 5 services × 2 calls
     });
   });
 });

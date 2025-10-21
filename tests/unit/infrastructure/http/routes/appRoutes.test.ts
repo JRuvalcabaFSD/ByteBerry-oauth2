@@ -7,19 +7,21 @@
  * @since 1.0.0
  */
 
-import { Request, Response, Router } from 'express';
-import { createAppRoutes } from '@/infrastructure/http/routes/app.routes';
+import type { Request, Response, Router } from 'express';
 import { IContainer, IConfig, IClock } from '@/interfaces';
 import { ServiceMap } from '@/container';
 
 // Mock Express Router
 const mockRouter = {
   get: jest.fn(),
+  use: jest.fn(),
 } as unknown as Router;
 
 jest.mock('express', () => ({
   Router: jest.fn(() => mockRouter),
 }));
+
+import { createAppRoutes } from '@/infrastructure/http/routes/app.routes';
 
 // Mock implementations
 const mockConfig = {
@@ -85,11 +87,35 @@ describe('App Routes', () => {
   it('should register home route correctly', () => {
     createAppRoutes(mockContainer);
 
-    expect(mockRouter.get).toHaveBeenCalledWith('/', expect.any(Function));
+    // Accept registration via router.get or router.use
+    const registeredViaGet = (mockRouter.get as jest.Mock).mock.calls.some((c: any[]) => c[0] === '/');
+    const registeredViaUse = (mockRouter.use as jest.Mock).mock.calls.some((c: any[]) => c[0] === '/');
+    expect(registeredViaGet || registeredViaUse).toBe(true);
 
-    // Get the route handler for home route
-    const homeRouteHandler = (mockRouter.get as jest.Mock).mock.calls.find(call => call[0] === '/')[1];
+    // Search all registrations (get/use) for the given path and return the handler
+    const findHandler = (path: string): ((req: Request, res: Response) => unknown) | undefined => {
+      const getCalls = (mockRouter.get as jest.Mock).mock.calls as any[][];
+      const useCalls = (mockRouter.use as jest.Mock).mock.calls as any[][];
 
+      const all = [...getCalls, ...useCalls];
+      const entry = all.find((c: any[]) => c[0] === path && typeof c[1] === 'function');
+      if (entry) return entry[1] as (req: Request, res: Response) => unknown;
+
+      // router.route('/').get(handler) pattern - check mocked route results if present
+      if ((mockRouter.route as jest.Mock)?.mock) {
+        const routeResults = (mockRouter.route as jest.Mock).mock.results.map((r: any) => r.value).filter(Boolean);
+        for (const res of routeResults) {
+          if (res.get && (res.get as jest.Mock).mock) {
+            const getOnRouteCall = (res.get as jest.Mock).mock.calls[0];
+            if (getOnRouteCall && typeof getOnRouteCall[0] === 'function') return getOnRouteCall[0];
+          }
+        }
+      }
+
+      return undefined;
+    };
+
+    const homeRouteHandler = findHandler('/');
     expect(homeRouteHandler).toBeDefined();
   });
 
@@ -101,8 +127,31 @@ describe('App Routes', () => {
   it('should return correct service information for home route', () => {
     createAppRoutes(mockContainer);
 
-    // Get and execute home route handler
-    const homeRouteHandler = (mockRouter.get as jest.Mock).mock.calls.find(call => call[0] === '/')[1];
+    // Find handler across get/use registrations and execute it
+    const findHandler = (path: string): ((req: Request, res: Response) => unknown) | undefined => {
+      const getCalls = (mockRouter.get as jest.Mock).mock.calls as any[][];
+      const useCalls = (mockRouter.use as jest.Mock).mock.calls as any[][];
+
+      const all = [...getCalls, ...useCalls];
+      const entry = all.find((c: any[]) => c[0] === path && typeof c[1] === 'function');
+      if (entry) return entry[1] as (req: Request, res: Response) => unknown;
+
+      if ((mockRouter.route as jest.Mock)?.mock) {
+        const routeResults = (mockRouter.route as jest.Mock).mock.results.map((r: any) => r.value).filter(Boolean);
+        for (const res of routeResults) {
+          if (res.get && (res.get as jest.Mock).mock) {
+            const getOnRouteCall = (res.get as jest.Mock).mock.calls[0];
+            if (getOnRouteCall && typeof getOnRouteCall[0] === 'function') return getOnRouteCall[0];
+          }
+        }
+      }
+
+      return undefined;
+    };
+
+    const homeRouteHandler = findHandler('/');
+
+    if (!homeRouteHandler) throw new Error('Home route handler not found');
 
     homeRouteHandler(mockRequest, mockResponse);
 
@@ -113,7 +162,7 @@ describe('App Routes', () => {
       timestamp: '2025-01-01T00:00:00.000Z',
       requestId: 'test-request-id',
       environment: 'test',
-      endpoints: { home: '/' },
+      endpoints: { home: '/', health: '/health', deepHealth: '/health/deep' },
     });
   });
 
@@ -152,7 +201,7 @@ describe('App Routes', () => {
       message: 'Route GET /test not found',
       requestId: 'test-request-id',
       timestamp: '2025-01-01T00:00:00.000Z',
-      endpoints: { home: '/' },
+      endpoints: { home: '/', health: '/health', deepHealth: '/health/deep' },
     });
   });
 });

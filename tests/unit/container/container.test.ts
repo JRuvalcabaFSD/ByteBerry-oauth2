@@ -102,6 +102,7 @@ describe('Container', () => {
       Uuid: MockInterface1;
       GracefulShutdown: MockInterface1;
       HttpServer: MockInterface1;
+      HealthController: MockInterface1;
     }
 
     let container: Container<ServiceMap>;
@@ -397,6 +398,7 @@ describe('Container', () => {
       Uuid: ITypedService;
       GracefulShutdown: ITypedService;
       HttpServer: ITypedService;
+      HealthController: ITypedService;
     }
 
     let container: Container<ServiceMap>;

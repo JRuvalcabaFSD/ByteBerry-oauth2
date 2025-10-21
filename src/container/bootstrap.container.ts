@@ -1,26 +1,11 @@
 import { createConfig } from '@/config';
 import { Container, criticalServices, ServiceMap, Token } from '@/container';
-import { createGracefulShutdown, createHttpServer, createWinstonLoggerService } from '@/container/factories';
+import { createGracefulShutdown, createHealthController, createHttpServer, createWinstonLoggerService } from '@/container/factories';
 import { createClockService, createUuidService } from '@/infrastructure';
 import { IContainer } from '@/interfaces';
 import { ContainerCreationError } from '@/shared';
 
-/**
- * Bootstraps and returns a dependency injection container pre-populated with core singletons.
- *
- * This function instantiates a new container, registers the following singleton services:
- * - 'Config' using the createConfig factory
- * - 'Clock' using the createConfig factory
- * - 'Uuid' using the createUuidService factory
- *
- * After registering these services it verifies that every token listed in the module-level
- * `criticalServices` collection is present in the container. If any required token is missing,
- * a ContainerCreationError is thrown to prevent starting with an invalid container state.
- *
- * @returns {IContainer} An initialized container with the required singletons registered.
- * @throws {ContainerCreationError} If any token in `criticalServices` is not registered.
- */
-
+//TODO documentar
 export function bootstrapContainer(): IContainer<ServiceMap> {
   const container = new Container<ServiceMap>();
 
@@ -30,6 +15,7 @@ export function bootstrapContainer(): IContainer<ServiceMap> {
   container.registerSingleton('Logger', createWinstonLoggerService);
   container.registerSingleton('GracefulShutdown', createGracefulShutdown);
   container.registerSingleton('HttpServer', createHttpServer);
+  container.registerSingleton('HealthController', createHealthController);
 
   criticalServices.forEach(token => {
     if (!container.isRegistered(token as Token)) throw new ContainerCreationError(token as Token);

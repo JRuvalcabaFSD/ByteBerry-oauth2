@@ -1,12 +1,16 @@
 import { Request, Response, Router } from 'express';
 import { ServiceMap } from '@/container';
 import { IContainer } from '@/interfaces';
+import { createHealthRoutes } from '@/infrastructure/http/routes/healthRoutes';
 
 //TODO documentar
 export function createAppRoutes(container: IContainer<ServiceMap>): Router {
   const router = Router();
   const config = container.resolve('Config');
   const clock = container.resolve('Clock');
+
+  //Health Routes
+  router.use('/health', createHealthRoutes(container.resolve('HealthController')));
 
   //Home route
   router.get('/', (req: Request, res: Response) => {
@@ -59,7 +63,11 @@ export function createAppRoutes(container: IContainer<ServiceMap>): Router {
  */
 
 function getRoutesList(type: 'json' | 'text'): Record<string, unknown> | string[] {
-  const routes = [{ name: 'home', value: '/', text: 'GET /' }];
+  const routes = [
+    { name: 'home', value: '/', text: 'GET /' },
+    { name: 'health', value: '/health', text: 'GET /health' },
+    { name: 'deepHealth', value: '/health/deep', text: 'GET /health/deep' },
+  ];
 
   if (type === 'json') {
     return routes.reduce(

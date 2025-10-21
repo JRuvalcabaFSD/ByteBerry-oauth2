@@ -1,5 +1,5 @@
 import { GracefulShutdown } from '@/infrastructure';
-import { IClock, IConfig, IHttpServer, ILogger, IUuid } from '@/interfaces';
+import { IClock, IConfig, IHealthController, IHttpServer, ILogger, IUuid } from '@/interfaces';
 
 /**
  * Identifies the built-in dependency-injection tokens used by the container.
@@ -15,7 +15,7 @@ import { IClock, IConfig, IHttpServer, ILogger, IUuid } from '@/interfaces';
  * @public
  */
 
-export type Token = 'Config' | 'Logger' | 'Clock' | 'Uuid' | 'GracefulShutdown' | 'HttpServer';
+export type Token = 'Config' | 'Logger' | 'Clock' | 'Uuid' | 'GracefulShutdown' | 'HttpServer' | 'HealthController';
 
 /**
  * Represents the set of services registered in the dependency-injection container.
@@ -36,6 +36,7 @@ export interface ServiceMap {
   Uuid: IUuid;
   GracefulShutdown: GracefulShutdown;
   HttpServer: IHttpServer;
+  HealthController: IHealthController;
 }
 
 /**
@@ -55,4 +56,4 @@ export interface ServiceMap {
  * const isCritical = criticalServices.includes('Config');
  */
 
-export const criticalServices = ['Config', 'Clock', 'Uuid', 'Logger', 'GracefulShutdown', 'HttpServer'];
+export const criticalServices = ['Config', 'Clock', 'Uuid', 'Logger', 'GracefulShutdown', 'HttpServer', 'HealthController'];
