@@ -26,3 +26,14 @@ export class ConfigError extends Error {
     this.name = 'ConfigError';
   }
 }
+
+//TODO mover a errores de Http
+export class CorsOriginsError extends Error {
+  public readonly origin: string;
+  constructor(origin: string) {
+    super(`Origin ${origin} not allowed by CORS`);
+    this.origin = origin;
+    this.name = 'CorsOriginsError';
+    this.stack = '';
+  }
+}

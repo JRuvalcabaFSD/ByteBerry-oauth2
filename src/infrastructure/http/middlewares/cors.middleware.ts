@@ -1,6 +1,7 @@
 import cors, { CorsOptions } from 'cors';
 
 import { IConfig } from '@/interfaces';
+import { CorsOriginsError } from '@/shared';
 
 /**
  * Creates and configures a CORS middleware instance for use with an Express/Connect app.
@@ -26,7 +27,13 @@ import { IConfig } from '@/interfaces';
 
 export function createCORSMiddleware(config: IConfig) {
   const corsOptions: CorsOptions = {
-    origin: config.corsOrigins,
+    origin: (origin, cb) => {
+      if (!origin || config.corsOrigins.includes(origin)) {
+        cb(null, true);
+      } else {
+        cb(new CorsOriginsError(origin), false);
+      }
+    },
     credentials: true,
     optionsSuccessStatus: 200,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -35,3 +42,23 @@ export function createCORSMiddleware(config: IConfig) {
 
   return cors(corsOptions);
 }
+
+// console.log('CORS Configuration:', config.corsOrigins); // Depuración
+// const corsOptions: CorsOptions = {
+//   origin: (origin, callback) => {
+//     console.log('Request Origin:', origin); // Depuración
+//     if (!origin || config.corsOrigins.includes(origin)) {
+//       console.log('Origin allowed:', origin);
+//       callback(null, true);
+//     } else {
+//       console.error('CORS Error: Origin not allowed', { origin, allowed: config.corsOrigins });
+//       callback(new Error('No permitido por CORS'));
+//     }
+//   },
+//   credentials: true,
+//   optionsSuccessStatus: 200,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+// };
+
+// return cors(corsOptions);

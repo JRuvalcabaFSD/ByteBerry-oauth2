@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { IConfig, ILogger } from '@/interfaces';
 import { withLoggerContext } from '@/shared';
 
+type ErrorHandler = (error: Error, req: Request, res: Response, config: IConfig) => void;
+
 /**
  * Creates an Express error-handling middleware that logs unhandled errors and returns a standardized 500 JSON response.
  *
@@ -24,22 +26,43 @@ import { withLoggerContext } from '@/shared';
 export function createErrorMiddleware(logger: ILogger, config: IConfig) {
   const ctxLogger = withLoggerContext(logger, 'createErrorMiddleware');
 
+  const errorHandlers: { [key: string]: ErrorHandler } = {
+    CorsOriginsError: (error: Error, req: Request, res: Response, config: IConfig) => {
+      const requestId = req.requestId || 'unknown';
+      const message = config.isDevelopment() ? error.message : 'Origin not allowed by CORS';
+      res.status(403).json({
+        error: 'Forbidden',
+        message,
+        requestId,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    // Add more error handlers here as needed, e.g., AuthenticationError, ValidationError, etc.
+    default: (error: Error, req: Request, res: Response, config: IConfig) => {
+      const requestId = req.requestId || 'unknown';
+      res.status(500).json({
+        error: 'Internal Server Error',
+        message: config.isDevelopment() ? error.message : 'Something went wrong',
+        requestId,
+        timestamp: new Date().toISOString(),
+      });
+    },
+  };
+
   return (error: Error, req: Request, res: Response, _next: NextFunction): void => {
     const requestId = req.requestId || 'unknown';
 
-    ctxLogger.error('Unhandled error in request', {
+    const errorName = error.name === 'Error' ? 'Unhandled' : error.name;
+
+    ctxLogger.error(`${errorName} error in request`, {
       requestId,
       error: error.message,
-      stack: error.stack,
+      stack: error.stack === '' ? undefined : error.stack,
       method: req.method,
       url: req.originalUrl || req.url,
     });
 
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: config.isDevelopment() ? error.message : 'Something went wrong',
-      requestId,
-      timestamp: new Date().toISOString(),
-    });
+    const errorHandler = errorHandlers[error.constructor.name] || errorHandlers['default'];
+    errorHandler(error, req, res, config);
   };
 }
