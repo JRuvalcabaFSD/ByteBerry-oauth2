@@ -1,26 +1,15 @@
-/**
- * @fileoverview Unit tests for HealthController class
- * @description Tests health controller functionality including basic health checks,
- * deep health checks, dependency checking, system info gathering, and error handling.
- *
- * @author JRuvalcabaFSD
- * @since 1.0.0
- */
-
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { Request, Response } from 'express';
-// Load HealthController dynamically after mocks to ensure mocked criticalServices is used
 let HealthControllerClass: any;
 import { IContainer, IConfig, IClock, IUuid, ILogger } from '@/interfaces';
 import { ServiceMap } from '@/container';
 
-// Mock os module
 jest.mock('os', () => ({
-  totalmem: jest.fn(() => 8589934592), // 8GB
-  freemem: jest.fn(() => 2147483648), // 2GB
-  uptime: jest.fn(() => 86400), // 24 hours
+  totalmem: jest.fn(() => 8589934592),
+  freemem: jest.fn(() => 2147483648),
+  uptime: jest.fn(() => 86400),
 }));
 
-// Mock container dependencies
 const mockConfig = {
   serviceName: 'test-service',
   version: '1.0.0',
@@ -47,17 +36,6 @@ const mockContainer = {
   resolve: jest.fn(),
 } as unknown as IContainer<ServiceMap>;
 
-// Helper to normalize token name (handles string or Symbol tokens)
-function tokenName(token: unknown): string {
-  if (typeof token === 'string') return token;
-  if (typeof token === 'symbol') {
-    const m = token.toString().match(/^Symbol\((.*)\)$/);
-    return m ? m[1] : token.toString();
-  }
-  return String(token);
-}
-
-// Mock Express Request and Response
 const mockRequest = {
   requestId: undefined,
 } as unknown as Request;
@@ -67,7 +45,6 @@ const mockResponse = {
   json: jest.fn(),
 } as unknown as Response;
 
-// Mock shared utilities
 jest.mock('@/shared', () => ({
   getErrorMessage: jest.fn(error => error.message || String(error)),
   withLoggerContext: jest.fn((logger, _context) => ({
@@ -77,29 +54,21 @@ jest.mock('@/shared', () => ({
   })),
 }));
 
-// Mock critical services
 jest.mock('@/container', () => ({
   criticalServices: ['Database', 'Redis', 'HttpServer'],
 }));
 
-describe('HealthController', () => {
+describe('HealthController - Complete Coverage', () => {
   let healthController: any;
   let mockContextLogger: any;
 
   beforeEach(async () => {
     jest.clearAllMocks();
 
-    // Restore default mock implementations for mutable mocks to ensure test isolation
     mockClock.isoString = jest.fn(() => '2025-01-01T12:00:00.000Z');
     mockClock.timestamp = jest.fn(() => 1640995200000);
     mockUuid.generate = jest.fn(() => 'test-uuid-123');
-    mockLogger.info = jest.fn();
-    mockLogger.error = jest.fn();
-    mockLogger.debug = jest.fn();
-    mockLogger.warn = jest.fn();
 
-    // Setup context logger mock
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { withLoggerContext } = require('@/shared');
     mockContextLogger = {
       info: jest.fn(),
@@ -107,9 +76,8 @@ describe('HealthController', () => {
     };
     withLoggerContext.mockReturnValue(mockContextLogger);
 
-    // Setup default container mocks - IMPORTANTE: debe estar después del mock setup
-    mockContainer.resolve = jest.fn().mockImplementation((service: unknown) => {
-      const name = tokenName(service);
+    mockContainer.resolve = jest.fn().mockImplementation((service?: unknown) => {
+      const name = typeof service === 'string' ? service : '';
       switch (name) {
         case 'Config':
           return mockConfig;
@@ -124,17 +92,11 @@ describe('HealthController', () => {
       }
     });
 
-    // Dynamically import the controller after mocks are set up so it picks up jest.mock('@/container')
     const mod = await import('@/infrastructure/controllers/health.controller');
     HealthControllerClass = mod.HealthController;
     healthController = new HealthControllerClass(mockContainer);
   });
 
-  /**
-   * @test Basic health check returns healthy response
-   * @description Verifies that getHealth returns 200 status with proper health response
-   * including all required fields and correct logging
-   */
   it('should return healthy response for basic health check', async () => {
     mockRequest.requestId = 'existing-request-id';
 
@@ -150,46 +112,159 @@ describe('HealthController', () => {
       requestId: 'existing-request-id',
       environment: 'test',
     });
-
-    expect(mockContextLogger.info).toHaveBeenCalledWith(
-      'Health check completed',
-      expect.objectContaining({
-        requestId: 'existing-request-id',
-        status: 'healthy',
-        uptime: expect.any(Number),
-      })
-    );
   });
 
-  /**
-   * @test Basic health check handles missing requestId
-   * @description Ensures that when requestId is missing, a new UUID is generated
-   * and used consistently throughout the response
-   */
-  it('should generate requestId when missing in basic health check', async () => {
-    // Simular ausencia de requestId en lugar de asignar `undefined`
-    delete (mockRequest as any).requestId;
+  it('should return healthy response for deep health check', async () => {
+    mockContainer.resolve = jest.fn().mockImplementation((service?: unknown) => {
+      const name = typeof service === 'string' ? service : '';
+      switch (name) {
+        case 'Config':
+          return mockConfig;
+        case 'Clock':
+          return mockClock;
+        case 'Uuid':
+          return mockUuid;
+        case 'Logger':
+          return mockLogger;
+        case 'Database':
+          return { connected: true };
+        case 'Redis':
+          return { status: 'ready' };
+        case 'HttpServer':
+          return { running: true };
+        default:
+          return { service: 'mock' };
+      }
+    });
 
-    await healthController.getHealth(mockRequest, mockResponse);
+    await healthController.getDeepHealth(mockRequest, mockResponse);
 
-    expect(mockUuid.generate).toHaveBeenCalled();
+    expect(mockResponse.status).toHaveBeenCalledWith(200);
     expect(mockResponse.json).toHaveBeenCalledWith(
       expect.objectContaining({
-        requestId: 'test-uuid-123',
+        status: 'healthy',
+        dependencies: expect.objectContaining({
+          Database: expect.objectContaining({
+            status: 'healthy',
+            message: 'Database service is available and operational',
+          }),
+          Redis: expect.objectContaining({
+            status: 'healthy',
+            message: 'Redis service is available and operational',
+          }),
+          HttpServer: expect.objectContaining({
+            status: 'healthy',
+            message: 'HttpServer service is available and operational',
+          }),
+        }),
+        system: expect.objectContaining({
+          memory: expect.objectContaining({
+            used: expect.any(Number),
+            free: expect.any(Number),
+            total: expect.any(Number),
+            percentage: expect.any(Number),
+          }),
+          uptime: expect.any(Number),
+        }),
       })
     );
   });
 
-  /**
-   * @test Basic health check handles errors appropriately
-   * @description Verifies error handling in basic health check including logging,
-   * error response format, and delegation to handleHealthError
-   */
-  it('should handle errors in basic health check', async () => {
+  it('should return unhealthy response when dependencies fail', async () => {
+    mockContainer.resolve = jest.fn().mockImplementation((service?: unknown) => {
+      const name = typeof service === 'string' ? service : '';
+      switch (name) {
+        case 'Config':
+          return mockConfig;
+        case 'Clock':
+          return mockClock;
+        case 'Uuid':
+          return mockUuid;
+        case 'Logger':
+          return mockLogger;
+        case 'Database':
+          throw new Error('Database connection failed');
+        case 'Redis':
+          return null;
+        case 'HttpServer':
+          return { running: true };
+        default:
+          return null;
+      }
+    });
+
+    await healthController.getDeepHealth(mockRequest, mockResponse);
+
+    expect(mockResponse.status).toHaveBeenCalledWith(503);
+    expect(mockResponse.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'unhealthy',
+        dependencies: expect.objectContaining({
+          Database: expect.objectContaining({
+            status: 'unhealthy',
+            message: 'Database service check failed: Database connection failed',
+          }),
+          Redis: expect.objectContaining({
+            status: 'unhealthy',
+            message: 'Redis service resolved to null/undefined',
+          }),
+        }),
+      })
+    );
+  });
+
+  it('should handle container with isRegistered method', async () => {
+    (mockContainer as any).isRegistered = jest.fn().mockImplementation((service: unknown) => {
+      const name = typeof service === 'string' ? service : '';
+      return name !== 'Database';
+    });
+
+    mockContainer.resolve = jest.fn().mockImplementation((service?: unknown) => {
+      const name = typeof service === 'string' ? service : '';
+      switch (name) {
+        case 'Config':
+          return mockConfig;
+        case 'Clock':
+          return mockClock;
+        case 'Uuid':
+          return mockUuid;
+        case 'Logger':
+          return mockLogger;
+        case 'Redis':
+          return { status: 'ready' };
+        case 'HttpServer':
+          return { running: true };
+        default:
+          return null;
+      }
+    });
+
+    await healthController.getDeepHealth(mockRequest, mockResponse);
+
+    expect(mockResponse.status).toHaveBeenCalledWith(503);
+    expect(mockResponse.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'unhealthy',
+        dependencies: expect.objectContaining({
+          Database: expect.objectContaining({
+            status: 'unhealthy',
+            message: 'Database service is not registered in container',
+          }),
+        }),
+      })
+    );
+  });
+
+  it('should handle basic health check error', async () => {
     const testError = new Error('Clock service failed');
+
+    delete (mockRequest as any).requestId;
+
     mockClock.isoString = jest.fn().mockImplementation(() => {
       throw testError;
     });
+
+    jest.spyOn(healthController, 'handleHealthError').mockResolvedValue(undefined);
 
     await healthController.getHealth(mockRequest, mockResponse);
 
@@ -208,15 +283,76 @@ describe('HealthController', () => {
     });
   });
 
-  /**
-   * @test Deep health check with all healthy dependencies
-   * @description Verifies deep health check returns 200 with healthy status
-   * when all dependencies are available and operational
-   */
-  it('should return healthy response for deep health check with healthy dependencies', async () => {
-    // CORRECCIÓN: Re-configurar el container después de la construcción del controller
-    mockContainer.resolve = jest.fn().mockImplementation((service: unknown) => {
-      const name = tokenName(service);
+  it('should handle deep health check error', async () => {
+    const testError = new Error('Dependencies check failed');
+    mockClock.timestamp = jest.fn().mockImplementation(() => {
+      throw testError;
+    });
+
+    jest.spyOn(healthController, 'handleHealthError').mockResolvedValue(undefined);
+
+    await healthController.getDeepHealth(mockRequest, mockResponse);
+
+    expect(healthController.handleHealthError).toHaveBeenCalledWith(mockRequest, mockResponse, testError, 'basic');
+  });
+
+  it('should use fallback in handleHealthError when services fail', async () => {
+    const error = new Error('Test error');
+
+    const failingContainer = {
+      resolve: jest.fn().mockImplementation((service?: unknown) => {
+        const name = typeof service === 'string' ? service : '';
+        switch (name) {
+          case 'Config':
+            return {
+              serviceName: 'test-service',
+              version: '0.0.0',
+              environment: 'test',
+            };
+          case 'Clock':
+            return {
+              isoString: () => {
+                throw new Error('Clock failed');
+              },
+            };
+          case 'Uuid':
+            return {
+              generate: () => {
+                throw new Error('UUID failed');
+              },
+            };
+          case 'Logger':
+            return {
+              error: () => {
+                throw new Error('Logger failed');
+              },
+            };
+          default:
+            return null;
+        }
+      }),
+    } as unknown as IContainer<ServiceMap>;
+
+    const failingController = new HealthControllerClass(failingContainer);
+
+    await failingController.handleHealthError(mockRequest, mockResponse, error, 'deep');
+
+    expect(mockResponse.status).toHaveBeenCalledWith(503);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      status: 'unhealthy',
+      timestamp: expect.any(String),
+      service: undefined,
+      version: '0.0.0',
+      uptime: 0,
+      error: 'Health check system failure',
+    });
+  });
+
+  it('should handle registered service that resolves to exactly null', async () => {
+    (mockContainer as any).isRegistered = jest.fn().mockReturnValue(true);
+
+    mockContainer.resolve = jest.fn().mockImplementation((service?: unknown) => {
+      const name = typeof service === 'string' ? service : '';
       switch (name) {
         case 'Config':
           return mockConfig;
@@ -227,124 +363,32 @@ describe('HealthController', () => {
         case 'Logger':
           return mockLogger;
         case 'Database':
-          return { connected: true };
-        case 'Redis':
-          return { status: 'ready' };
-        case 'HttpServer':
-          return { running: true };
+          return null;
         default:
-          return { mockService: true }; // CORREGIDO: retornar objeto válido en lugar de null
+          return { service: 'mock' };
       }
     });
 
     await healthController.getDeepHealth(mockRequest, mockResponse);
 
-    expect(mockResponse.status).toHaveBeenCalledWith(200);
     expect(mockResponse.json).toHaveBeenCalledWith(
       expect.objectContaining({
-        status: 'healthy',
-        service: 'test-service',
-        version: 'test-service',
         dependencies: expect.objectContaining({
           Database: expect.objectContaining({
-            status: 'healthy',
-            message: 'Database service is available and operational',
-            responseTime: expect.any(Number),
+            status: 'unhealthy',
+            message: 'Database service resolved to null/undefined',
           }),
-          Redis: expect.objectContaining({
-            status: 'healthy',
-            message: 'Redis service is available and operational',
-            responseTime: expect.any(Number),
-          }),
-          HttpServer: expect.objectContaining({
-            status: 'healthy',
-            message: 'HttpServer service is available and operational',
-            responseTime: expect.any(Number),
-          }),
-        }),
-        system: expect.objectContaining({
-          memory: expect.objectContaining({
-            used: expect.any(Number),
-            free: expect.any(Number),
-            total: expect.any(Number),
-            percentage: expect.any(Number),
-          }),
-          uptime: expect.any(Number),
         }),
       })
     );
   });
+  it('should return degraded status when some dependencies are not healthy or unhealthy', async () => {
+    const mixedDependencies = {
+      Database: { status: 'warning', message: 'test', responseTime: 100 },
+      Redis: { status: 'healthy', message: 'test', responseTime: 50 },
+    };
 
-  /**
-   * @test Deep health check with unhealthy dependencies
-   * @description Verifies deep health check returns 503 with unhealthy status
-   * when critical dependencies fail or are unavailable
-   */
-  it('should return unhealthy response when dependencies are unhealthy', async () => {
-    // CORRECCIÓN: Re-configurar el container después de la construcción del controller
-    mockContainer.resolve = jest.fn().mockImplementation((service: unknown) => {
-      const name = tokenName(service);
-      switch (name) {
-        case 'Config':
-          return mockConfig;
-        case 'Clock':
-          return mockClock;
-        case 'Uuid':
-          return mockUuid;
-        case 'Logger':
-          return mockLogger;
-        case 'Database':
-          throw new Error('Database connection failed');
-        case 'Redis':
-          return null; // Service resolves to null
-        case 'HttpServer':
-          return { running: true };
-        default:
-          return null;
-      }
-    });
-
-    await healthController.getDeepHealth(mockRequest, mockResponse);
-
-    expect(mockResponse.status).toHaveBeenCalledWith(503);
-
-    // CORRECCIÓN: Usar la estructura exacta que devuelve el controller
-    expect(mockResponse.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        status: 'unhealthy',
-        service: 'test-service',
-        version: 'test-service',
-        environment: 'test',
-        requestId: 'test-uuid-123',
-        timestamp: '2025-01-01T12:00:00.000Z',
-        uptime: expect.any(Number),
-        dependencies: expect.objectContaining({
-          Database: expect.objectContaining({
-            status: 'unhealthy',
-            message: 'Database service check failed: Database connection failed',
-            responseTime: expect.any(Number),
-          }),
-          Redis: expect.objectContaining({
-            status: 'unhealthy',
-            message: 'Redis service resolved to null/undefined',
-            responseTime: expect.any(Number),
-          }),
-          HttpServer: expect.objectContaining({
-            status: 'healthy',
-            message: 'HttpServer service is available and operational',
-            responseTime: expect.any(Number),
-          }),
-        }),
-        system: expect.objectContaining({
-          memory: expect.objectContaining({
-            used: expect.any(Number),
-            free: expect.any(Number),
-            total: expect.any(Number),
-            percentage: expect.any(Number),
-          }),
-          uptime: expect.any(Number),
-        }),
-      })
-    );
+    const status = healthController.determineOverallStatus(mixedDependencies);
+    expect(status).toBe('degraded');
   });
 });

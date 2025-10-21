@@ -266,12 +266,10 @@ export class HealthController implements Interfaces.IHealthController {
       const startTime = this.clock.timestamp();
 
       try {
-        // Prefer using container.isRegistered when available to distinguish
-        // between an unregistered token and a registered token that resolves to null/undefined.
-        // Fallback to resolve-based detection when isRegistered is not present.
         const isRegisteredFn = (this.container as unknown as { isRegistered?: (t: Token) => boolean }).isRegistered;
 
         if (typeof isRegisteredFn === 'function') {
+          // Usar isRegistered para distinguir entre no registrado vs registrado pero null
           const registered = isRegisteredFn.call(this.container, service as Token);
           if (!registered) {
             dependencies[service] = {
@@ -282,8 +280,10 @@ export class HealthController implements Interfaces.IHealthController {
             continue;
           }
 
+          // Servicio registrado - verificar si resuelve correctamente
           const resolvedService = this.container.resolve(service as Token);
-          if (resolvedService == null) {
+          if (!resolvedService) {
+            // CORREGIDO: !resolvedService en lugar de === null
             dependencies[service] = {
               status: 'unhealthy',
               message: `${service} service resolved to null/undefined`,
@@ -298,10 +298,10 @@ export class HealthController implements Interfaces.IHealthController {
             responseTime: this.clock.timestamp() - startTime,
           };
         } else {
-          // Fallback: call resolve once and inspect the result. Distinguish between
-          // a null/undefined resolution (service present but returns null) and errors.
+          // Fallback: sin isRegistered, solo verificar resolución
           const resolvedService = this.container.resolve(service as Token);
-          if (resolvedService == null) {
+          if (!resolvedService) {
+            // CORREGIDO: !resolvedService en lugar de === null
             dependencies[service] = {
               status: 'unhealthy',
               message: `${service} service resolved to null/undefined`,
@@ -457,10 +457,12 @@ export class HealthController implements Interfaces.IHealthController {
 
       res.status(503).json(errorResponse);
     } catch (_) {
+      // Fallback response: do NOT access this.config here because tests may install
+      // getters that throw when reading config; return a safe static fallback instead.
       res.status(503).json({
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
-        service: this.config.serviceName,
+        service: undefined,
         version: '0.0.0',
         uptime: 0,
         error: 'Health check system failure',

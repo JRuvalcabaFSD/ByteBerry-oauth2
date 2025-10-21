@@ -102,7 +102,7 @@ describe('GracefulShutdown', () => {
     expect(sigTermHandler).toBeDefined();
     expect(sigIntHandler).toBeDefined();
 
-    jest.spyOn(gracefulShutdown, 'shutDown').mockResolvedValue();
+    jest.spyOn(gracefulShutdown, 'shutDown').mockResolvedValue(undefined);
 
     await sigTermHandler();
 
@@ -112,7 +112,7 @@ describe('GracefulShutdown', () => {
     expect(processExitSpy).toHaveBeenCalledWith(0);
 
     jest.clearAllMocks();
-    jest.spyOn(gracefulShutdown, 'shutDown').mockResolvedValue();
+    jest.spyOn(gracefulShutdown, 'shutDown').mockResolvedValue(undefined);
 
     await sigIntHandler();
 
