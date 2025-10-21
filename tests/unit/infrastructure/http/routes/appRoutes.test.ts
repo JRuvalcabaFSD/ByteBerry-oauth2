@@ -11,17 +11,15 @@ import type { Request, Response, Router } from 'express';
 import { IContainer, IConfig, IClock } from '@/interfaces';
 import { ServiceMap } from '@/container';
 
-// Mock Express Router
-const mockRouter = {
-  get: jest.fn(),
-  use: jest.fn(),
-} as unknown as Router;
+// Mock Express Router - recreated per test to avoid cross-test pollution
+let mockRouter: any;
 
 jest.mock('express', () => ({
   Router: jest.fn(() => mockRouter),
 }));
 
-import { createAppRoutes } from '@/infrastructure/http/routes/app.routes';
+// We'll load createAppRoutes after setting up mocks in beforeEach to ensure isolation
+let createAppRoutes: (container: IContainer<ServiceMap>) => Router;
 
 // Mock implementations
 const mockConfig = {
@@ -50,8 +48,20 @@ const mockResponse = {
 } as unknown as Response;
 
 describe('App Routes', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    jest.resetModules();
     jest.clearAllMocks();
+
+    // recreate mockRouter for each test so handlers are isolated
+    mockRouter = {
+      get: jest.fn(),
+      use: jest.fn(),
+      route: jest.fn(),
+    } as unknown as Router;
+
+    // dynamically import module after mock express is set up
+    const mod = await import('@/infrastructure/http/routes/app.routes');
+    createAppRoutes = mod.createAppRoutes as typeof createAppRoutes;
 
     // Setup container mocks
     mockContainer.resolve = jest.fn().mockImplementation((service: string) => {

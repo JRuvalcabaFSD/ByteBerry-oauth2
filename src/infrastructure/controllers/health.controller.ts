@@ -266,31 +266,56 @@ export class HealthController implements Interfaces.IHealthController {
       const startTime = this.clock.timestamp();
 
       try {
-        if (!this.container.resolve(service as Token)) {
+        // Prefer using container.isRegistered when available to distinguish
+        // between an unregistered token and a registered token that resolves to null/undefined.
+        // Fallback to resolve-based detection when isRegistered is not present.
+        const isRegisteredFn = (this.container as unknown as { isRegistered?: (t: Token) => boolean }).isRegistered;
+
+        if (typeof isRegisteredFn === 'function') {
+          const registered = isRegisteredFn.call(this.container, service as Token);
+          if (!registered) {
+            dependencies[service] = {
+              status: 'unhealthy',
+              message: `${service} service is not registered in container`,
+              responseTime: this.clock.timestamp() - startTime,
+            };
+            continue;
+          }
+
+          const resolvedService = this.container.resolve(service as Token);
+          if (resolvedService == null) {
+            dependencies[service] = {
+              status: 'unhealthy',
+              message: `${service} service resolved to null/undefined`,
+              responseTime: this.clock.timestamp() - startTime,
+            };
+            continue;
+          }
+
           dependencies[service] = {
-            status: 'unhealthy',
-            message: `${service} service is not registered in container`,
+            status: 'healthy',
+            message: `${service} service is available and operational`,
             responseTime: this.clock.timestamp() - startTime,
           };
-          continue;
-        }
+        } else {
+          // Fallback: call resolve once and inspect the result. Distinguish between
+          // a null/undefined resolution (service present but returns null) and errors.
+          const resolvedService = this.container.resolve(service as Token);
+          if (resolvedService == null) {
+            dependencies[service] = {
+              status: 'unhealthy',
+              message: `${service} service resolved to null/undefined`,
+              responseTime: this.clock.timestamp() - startTime,
+            };
+            continue;
+          }
 
-        const resolvedService = this.container.resolve(service as Token);
-
-        if (!resolvedService) {
           dependencies[service] = {
-            status: 'unhealthy',
-            message: `${service} service resolved to null/undefined`,
+            status: 'healthy',
+            message: `${service} service is available and operational`,
             responseTime: this.clock.timestamp() - startTime,
           };
-          continue;
         }
-
-        dependencies[service] = {
-          status: 'healthy',
-          message: `${service} service is available and operational`,
-          responseTime: this.clock.timestamp() - startTime,
-        };
       } catch (error) {
         dependencies[service] = {
           status: 'unhealthy',
