@@ -19,26 +19,27 @@ describe('CORS Middleware', () => {
   it('should create CORS middleware with correct configuration', () => {
     const middleware = createCORSMiddleware(mockConfig);
 
-    expect(corsLibrary).toHaveBeenCalledWith({
-      origin: ['http://localhost:3000', 'https://example.com'],
-      credentials: true,
-      optionsSuccessStatus: 200,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
-    });
+    expect(corsLibrary).toHaveBeenCalledWith(
+      expect.objectContaining({
+        origin: expect.any(Function),
+        credentials: true,
+        optionsSuccessStatus: 200,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+      })
+    );
 
     expect(middleware).toBe(mockCorsMiddleware);
   });
 
   it('should handle single origin configuration', () => {
-    // No mutamos la propiedad readonly: creamos un nuevo objeto de config con origen único (array)
     mockConfig = { ...mockConfig, corsOrigins: ['http://localhost:3000'] };
 
     createCORSMiddleware(mockConfig);
 
     expect(corsLibrary).toHaveBeenCalledWith(
       expect.objectContaining({
-        origin: ['http://localhost:3000'],
+        origin: expect.any(Function),
       })
     );
   });

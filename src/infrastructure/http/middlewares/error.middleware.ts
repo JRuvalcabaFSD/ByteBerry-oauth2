@@ -52,9 +52,12 @@ export function createErrorMiddleware(logger: ILogger, config: IConfig) {
   return (error: Error, req: Request, res: Response, _next: NextFunction): void => {
     const requestId = req.requestId || 'unknown';
 
-    ctxLogger.error(`${error.name || 'Unhandled'} error in request`, {
+    const errorName = error.name === 'Error' ? 'Unhandled' : error.name;
+
+    ctxLogger.error(`${errorName} error in request`, {
       requestId,
-      message: error.message,
+      error: error.message,
+      stack: error.stack === '' ? undefined : error.stack,
       method: req.method,
       url: req.originalUrl || req.url,
     });
