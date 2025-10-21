@@ -1,3 +1,15 @@
+# [1.1.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.0.0...v1.1.0) (2025-10-21)
+
+
+### Bug Fixes
+
+* **middleware:** improve error logging in error handler ([8c0d9a1](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/8c0d9a1f1427079ef1fdf654b5369aa5857703d0))
+
+
+### Features
+
+* **cors:** enhance CORS middleware with error handling ([f321f29](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/f321f29ad24be4705c7a1561596d0cdf26d5f912))
+
 # 1.0.0 (2025-10-21)
 
 
