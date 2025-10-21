@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ServiceMap, Token } from '@/container';
+import { Token } from '@/container';
 
 /**
  * Specifies how a dependency is managed by the IoC container.

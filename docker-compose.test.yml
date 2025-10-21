@@ -1,0 +1,74 @@
+
+
+# Docker Compose for testing ByteBerry OAuth2 Service
+# Optimized for local development and testing
+
+services:
+  oauth2-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: byteberry-oauth2:dev
+    container_name: oauth2-service-dev
+
+    # Environment variables
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173,http://localhost:4002,http://localhost:4003}
+      - LOG_LEVEL=info
+
+    # Port mapping
+    ports:
+      - "4000:4000"
+
+    # Resource limits (Raspberry Pi 5 constraints)
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "scripts/healthCheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+
+    # Read-only root filesystem (with tmpfs for writable areas)
+    read_only: true
+    tmpfs:
+      - /tmp:size=100M,noexec,nosuid,nodev
+      - /app/logs:size=50M,noexec,nosuid,nodev,uid=1001,gid=1001
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,environment"
+
+# Networks
+networks:
+  default:
+    name: byteberry-dev
+    driver: bridge
+
+# Volumes for development
+volumes:
+  expenses_logs:
+    driver: local

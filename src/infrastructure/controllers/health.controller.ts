@@ -203,7 +203,7 @@ export class HealthController implements Interfaces.IHealthController {
         status: overallStatus,
         timestamp: this.clock.isoString(),
         service: this.config.serviceName,
-        version: this.config.serviceName,
+        version: this.config.version,
         uptime: Math.floor(process.uptime() * 1000),
         requestId,
         environment: this.config.nodeEnv,

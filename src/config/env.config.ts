@@ -78,7 +78,9 @@ export class Config implements IConfig {
 
       this.logLevel = get('LOG_LEVEL').default('info').asEnum(['debug', 'info', 'warn', 'error']) as LogLevel;
       this.serviceName = get('SERVICE_NAME').default('ByteBerry-OAuth2').asString();
-      this.corsOrigins = this.normalizeUrls(get('CORS_ALLOWED_ORIGINS').default('http://localhost:4001,http://localhost:4002').asArray());
+      this.corsOrigins = this.normalizeUrls(
+        get('CORS_ALLOWED_ORIGINS').default('http://localhost:5173,http://localhost:4002,http://localhost:4003').asArray()
+      );
       this.port = get('PORT').default(4000).asPortNumber();
       this.version = pkg.version || '0.0.0';
     } catch (error) {
