@@ -56,7 +56,7 @@ const config: Config = {
   roots: ['<rootDir>/src', '<rootDir>/tests'],
 
   // The glob patterns Jest uses to detect test files
-  testMatch: ['**/tests/**/*.{ts,js}'],
+  testMatch: ['**/tests/**/*.{ts,js}', '!**/tests/setup.ts'],
 
   // A map from regular expressions to paths to transformers
   transform: {
@@ -77,7 +77,7 @@ const config: Config = {
   }),
 
   // Setup files after environment
-  setupFilesAfterEnv: [],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
 
   // Verbose output
   verbose: true,

@@ -4,8 +4,7 @@ import { get } from 'env-var';
 import pkg from '../../package.json';
 
 import { IConfig, LogLevel, NodeEnv } from '@/interfaces';
-import { getErrorMessage } from '@/shared/functions/general';
-import { ConfigError } from '@/shared';
+import { ConfigError, getErrorMessage } from '@/shared';
 
 /**
  * Singleton configuration manager that loads, validates, and exposes application settings
@@ -69,9 +68,19 @@ export class Config implements IConfig {
       dotenv.config({ override: false });
 
       this.nodeEnv = get('NODE_ENV').default('development').asEnum(['development', 'production', 'test']) as NodeEnv;
+
+      if (this.nodeEnv === 'production' && process.env.LOG_LEVEL === 'debug') {
+        throw new ConfigError('You cannot assign the log level as "debug" when in production', {
+          providedNodeEnv: process.env.NODE_ENV,
+          providedLogLevel: process.env.LOG_LEVEL,
+        });
+      }
+
       this.logLevel = get('LOG_LEVEL').default('info').asEnum(['debug', 'info', 'warn', 'error']) as LogLevel;
       this.serviceName = get('SERVICE_NAME').default('ByteBerry-OAuth2').asString();
-      this.corsOrigins = this.normalizeUrls(get('CORS_ALLOWED_ORIGINS').default('http://localhost:4001,http://localhost:4002').asArray());
+      this.corsOrigins = this.normalizeUrls(
+        get('CORS_ALLOWED_ORIGINS').default('http://localhost:5173,http://localhost:4002,http://localhost:4003').asArray()
+      );
       this.port = get('PORT').default(4000).asPortNumber();
       this.version = pkg.version || '0.0.0';
     } catch (error) {
@@ -255,3 +264,21 @@ export class Config implements IConfig {
     return this.instance;
   }
 }
+
+/**
+ * Retrieves the application's configuration by delegating to the underlying Config provider.
+ *
+ * This function acts as a small factory/forwarder for obtaining the runtime configuration object.
+ * It does not modify the configuration; whether it returns a cached singleton or a fresh instance
+ * depends on the implementation of Config.getConfig().
+ *
+ * @returns The current application configuration object (as provided by Config.getConfig()).
+ *
+ * @throws May throw an error if the configuration cannot be loaded or validated by the Config provider.
+ *
+ * @example
+ * const config = createConfig();
+ * console.log(config.port);
+ */
+
+export const createConfig = () => Config.getConfig();

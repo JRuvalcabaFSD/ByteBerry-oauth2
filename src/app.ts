@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-import { Config } from '@/config';
-import { getErrorMessage } from '@/shared/functions/general';
+import { bootstrap } from '@/bootstrap';
+import { getErrorMessage, withLoggerContext } from '@/shared';
 
 (() => {
   main().catch(error => {
@@ -10,7 +10,9 @@ import { getErrorMessage } from '@/shared/functions/general';
 })();
 
 async function main(): Promise<void> {
-  const config = Config.getConfig();
+  const { container } = await bootstrap();
 
-  console.log({ config });
+  const ctxLogger = withLoggerContext(container.resolve('Logger'), 'main');
+
+  ctxLogger.info('Service initialized successfully');
 }

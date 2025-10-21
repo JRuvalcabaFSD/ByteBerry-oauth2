@@ -35,14 +35,14 @@ describe('Config', () => {
       expect(config.port).toBe(4000);
       expect(config.logLevel).toBe('info');
       expect(config.serviceName).toBe('ByteBerry-OAuth2');
-      expect(config.corsOrigins).toEqual(['http://localhost:4001', 'http://localhost:4002']);
+      expect(config.corsOrigins).toEqual(['http://localhost:5173', 'http://localhost:4002', 'http://localhost:4003']);
       expect(config.version).toEqual('1.0.0 test');
     });
     it('should load custom configuration when valid environment variables provided', async () => {
       process.env = {
         NODE_ENV: 'production',
         PORT: '8080',
-        LOG_LEVEL: 'debug',
+        LOG_LEVEL: 'warn',
         SERVICE_NAME: 'Custom Oauth2',
         CORS_ALLOWED_ORIGINS: 'http://example.com',
       };
@@ -52,7 +52,7 @@ describe('Config', () => {
 
       expect(config.nodeEnv).toBe('production');
       expect(config.port).toBe(8080);
-      expect(config.logLevel).toBe('debug');
+      expect(config.logLevel).toBe('warn');
       expect(config.serviceName).toBe('Custom Oauth2');
       expect(config.corsOrigins).toEqual(['http://example.com']);
     });
@@ -312,6 +312,16 @@ describe('Config', () => {
     it('should throw error when port out of range', async () => {
       // Arrange
       process.env.PORT = '65536';
+      const { Config } = await import('@config');
+      const { ConfigError } = await import('@shared');
+
+      // Act & Assert
+      expect(() => Config.getConfig()).toThrow(ConfigError);
+    });
+    it('should throw error when the env is production and logLevel as debug', async () => {
+      // Arrange
+      process.env.NODE_ENV = 'production';
+      process.env.LOG_LEVEL = 'debug';
       const { Config } = await import('@config');
       const { ConfigError } = await import('@shared');
 
