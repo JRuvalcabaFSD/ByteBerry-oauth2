@@ -110,10 +110,8 @@ describe('WinstonLoggerService', () => {
   });
   describe('Interface Compliance', () => {
     it('should implement i logger when service created', () => {
-      // Act & Assert
       expect(loggerService).toBeInstanceOf(WinstonLoggerService);
 
-      // Verify interface methods exist
       expect(typeof loggerService.info).toBe('function');
       expect(typeof loggerService.debug).toBe('function');
       expect(typeof loggerService.warn).toBe('function');
@@ -123,10 +121,8 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should be assignable to i logger when service created', () => {
-      // Act
       const logger: ILogger = loggerService;
 
-      // Assert
       expect(logger).toBeDefined();
       expect(logger.info).toBeDefined();
       expect(logger.debug).toBeDefined();
@@ -139,72 +135,57 @@ describe('WinstonLoggerService', () => {
   describe('Logging Methods', () => {
     describe('info() method', () => {
       it('should call log with info level when info called', () => {
-        // Arrange
         const message = 'Test info message';
         const context = { userId: '123' };
         const logSpy = jest.spyOn(loggerService, 'log');
 
-        // Act
         loggerService.info(message, context);
 
-        // Assert
         expect(logSpy).toHaveBeenCalledWith('info', message, context);
       });
 
       it('should call log without context when info calle pd without context', () => {
-        // Arrange
         const message = 'Test info message';
         const logSpy = jest.spyOn(loggerService, 'log');
 
-        // Act
         loggerService.info(message);
 
-        // Assert
         expect(logSpy).toHaveBeenCalledWith('info', message, undefined);
       });
     });
 
     describe('debug() method', () => {
       it('should call log with debug level when debug called', () => {
-        // Arrange
         const message = 'Test debug message';
         const context = { traceId: 'abc123' };
         const logSpy = jest.spyOn(loggerService, 'log');
 
-        // Act
         loggerService.debug(message, context);
 
-        // Assert
         expect(logSpy).toHaveBeenCalledWith('debug', message, context);
       });
     });
 
     describe('warn() method', () => {
       it('should call log with warn level when warn called', () => {
-        // Arrange
         const message = 'Test warning message';
         const context = { deprecated: true };
         const logSpy = jest.spyOn(loggerService, 'log');
 
-        // Act
         loggerService.warn(message, context);
 
-        // Assert
         expect(logSpy).toHaveBeenCalledWith('warn', message, context);
       });
     });
 
     describe('error() method', () => {
       it('should call log with error level when error called', () => {
-        // Arrange
         const message = 'Test error message';
         const context = { errorCode: 'E001' };
         const logSpy = jest.spyOn(loggerService, 'log');
 
-        // Act
         loggerService.error(message, context);
 
-        // Assert
         expect(logSpy).toHaveBeenCalledWith('error', message, context);
       });
     });
@@ -225,14 +206,11 @@ describe('WinstonLoggerService', () => {
       });
     });
     it('should create log entry with basic fields when log called', () => {
-      // Arrange
       const level: LogLevel = 'info';
       const message = 'Test message';
 
-      // Act
       loggerService.log(level, message);
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith(level, {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
@@ -242,13 +220,10 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should include request id when context contains request id', () => {
-      // Arrange
       const context = { requestId: 'req-123', userId: '456' };
 
-      // Act
       loggerService.log('info', 'Test message', context);
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
@@ -259,13 +234,10 @@ describe('WinstonLoggerService', () => {
       });
     });
     it('dddd', () => {
-      // Arrange
       const context = { requestId: 'req-123', userId: '456', service: null };
 
-      // Act
       loggerService.log('info', 'Test message', context);
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
@@ -277,15 +249,12 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should merge default and provided context when both contexts provided', () => {
-      // Arrange
       const defaultContext = { module: 'auth', version: '1.0.0' };
       const logger = new WinstonLoggerService(mockConfig, mockClock, defaultContext);
       const providedContext = { userId: '123', action: 'login' };
 
-      // Act
       logger.log('info', 'User action', providedContext);
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
@@ -301,22 +270,19 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should override default context with provided context when keys collide', () => {
-      // Arrange
       const defaultContext = { module: 'auth', environment: 'dev' };
       const logger = new WinstonLoggerService(mockConfig, mockClock, defaultContext);
       const providedContext = { module: 'payments', userId: '123' };
 
-      // Act
       logger.log('info', 'Test message', providedContext);
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
         service: 'test-service',
         message: 'Test message',
         context: {
-          module: 'payments', // Overridden
+          module: 'payments',
           environment: 'dev',
           userId: '123',
         },
@@ -324,47 +290,37 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should exclude service from context when service in context', () => {
-      // Arrange
       const context = { service: 'custom-service', userId: '123' };
 
-      // Act
       loggerService.log('info', 'Test message', context);
 
-      // Assert
-      expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
-        timestamp: 'Tue Jan 15 2025',
-        level: 'info',
-        service: 'custom-service', // Service from context
-        message: 'Test message',
-        context: { userId: '123' }, // Service excluded from context
-      });
-    });
-
-    it('should omit context field when no context after filtering', () => {
-      // Arrange
-      const context = { service: 'custom-service' }; // Only service field
-
-      // Act
-      loggerService.log('info', 'Test message', context);
-
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
         service: 'custom-service',
         message: 'Test message',
-        // No context field should be present
+        context: { userId: '123' },
+      });
+    });
+
+    it('should omit context field when no context after filtering', () => {
+      const context = { service: 'custom-service' };
+
+      loggerService.log('info', 'Test message', context);
+
+      expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
+        timestamp: 'Tue Jan 15 2025',
+        level: 'info',
+        service: 'custom-service',
+        message: 'Test message',
       });
     });
 
     it('should use clock for timestamp when log called', () => {
-      // Arrange
       mockClock.isoString.mockReturnValue('Custom timestamp');
 
-      // Act
       loggerService.log('info', 'Test message');
 
-      // Assert
       expect(mockClock.isoString).toHaveBeenCalled();
       expect(mockWinstonLogger.log).toHaveBeenCalledWith(
         'info',
@@ -375,31 +331,24 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should handle undefined request id when request id is undefined', () => {
-      // Arrange
       const context = { requestId: undefined, userId: '123' };
 
-      // Act
       loggerService.log('info', 'Test message', context);
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
         service: 'test-service',
         message: 'Test message',
         context: { userId: '123' },
-        // requestId should not be present
       });
     });
 
     it('should handle null request id when request id is null', () => {
-      // Arrange
       const context = { requestId: null, userId: '123' };
 
-      // Act
       loggerService.log('info', 'Test message', context);
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
@@ -413,41 +362,32 @@ describe('WinstonLoggerService', () => {
 
   describe('child() method', () => {
     it('should return new logger instance when child called', () => {
-      // Arrange
       const childContext = { requestId: 'req-123', module: 'auth' };
 
-      // Act
       const childLogger = loggerService.child(childContext);
 
-      // Assert
       expect(childLogger).toBeInstanceOf(WinstonLoggerService);
       expect(childLogger).not.toBe(loggerService);
     });
 
     it('should inherit config and clock when child created', () => {
-      // Arrange
       const childContext = { requestId: 'req-123' };
 
-      // Act
       const childLogger = loggerService.child(childContext);
 
-      // Assert
       expect(childLogger).toBeInstanceOf(WinstonLoggerService);
-      // We can verify this by checking that winston.createLogger was called again
+
       expect(winston.createLogger).toHaveBeenCalledTimes(2);
     });
 
     it('should merge context with parent when child logs message', () => {
-      // Arrange
       const parentContext = { module: 'auth', version: '1.0.0' };
       const parentLogger = new WinstonLoggerService(mockConfig, mockClock, parentContext);
       const childContext = { requestId: 'req-123', userId: '456' };
 
-      // Act
       const childLogger = parentLogger.child(childContext);
       childLogger.info('Child log message');
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenLastCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
@@ -463,41 +403,35 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should override parent context when child context has same keys', () => {
-      // Arrange
       const parentContext = { module: 'auth', requestId: 'parent-req' };
       const parentLogger = new WinstonLoggerService(mockConfig, mockClock, parentContext);
       const childContext = { module: 'payments', requestId: 'child-req' };
 
-      // Act
       const childLogger = parentLogger.child(childContext);
       childLogger.info('Override test');
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenLastCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
         service: 'test-service',
         message: 'Override test',
-        requestId: 'child-req', // Child overrides parent
+        requestId: 'child-req',
         context: {
-          module: 'payments', // Child overrides parent
+          module: 'payments',
         },
       });
     });
 
     it('should allow multiple levels of children when children create children', () => {
-      // Arrange
       const level1Context = { level: '1', shared: 'original' };
       const level2Context = { level: '2', shared: 'overridden' };
       const level3Context = { level: '3', final: 'value' };
 
-      // Act
       const level1Logger = loggerService.child(level1Context);
       const level2Logger = level1Logger.child(level2Context);
       const level3Logger = level2Logger.child(level3Context);
       level3Logger.info('Multi-level test');
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenLastCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
@@ -514,25 +448,19 @@ describe('WinstonLoggerService', () => {
   describe('Format Creation', () => {
     describe('Development Format', () => {
       it('should_FormatDevelopmentLogCorrectly_When_PrintfFormatterCalled', () => {
-        // Arrange
         mockConfig.isProduction.mockReturnValue(false);
         let capturedFormatter: ((info: any) => string) | undefined;
 
-        // Capture the printf formatter function
         (winston.format.printf as jest.Mock).mockImplementation((formatter: (info: any) => string) => {
           capturedFormatter = formatter;
           return { printf: formatter };
         });
 
-        // Act
         new WinstonLoggerService(mockConfig, mockClock);
 
-        // Assert
         expect(capturedFormatter).toBeDefined();
 
-        // Test the formatter with various scenarios
         if (capturedFormatter) {
-          // Test basic log entry
           const basicInfo = {
             timestamp: '12:34:56.789',
             level: 'info',
@@ -542,7 +470,6 @@ describe('WinstonLoggerService', () => {
           const basicResult = capturedFormatter(basicInfo);
           expect(basicResult).toBe('12:34:56.789 [test-service] info : Test message ');
 
-          // Test with requestId (should be truncated to 8 chars)
           const infoWithRequestId = {
             timestamp: '12:34:56.789',
             level: 'error',
@@ -553,7 +480,6 @@ describe('WinstonLoggerService', () => {
           const requestIdResult = capturedFormatter(infoWithRequestId);
           expect(requestIdResult).toBe('12:34:56.789 [auth-service] error [very-lon]: Error message ');
 
-          // Test with context (should be pretty-printed)
           const infoWithContext = {
             timestamp: '12:34:56.789',
             level: 'debug',
@@ -566,7 +492,6 @@ describe('WinstonLoggerService', () => {
           expect(contextResult).toContain('12:34:56.789 [payment-service] debug [req123]: Debug message');
           expect(contextResult).toContain('{\n  "userId": "456",\n  "action": "payment"\n}');
 
-          // Test with meta (additional fields)
           const infoWithMeta = {
             timestamp: '12:34:56.789',
             level: 'warn',
@@ -579,29 +504,25 @@ describe('WinstonLoggerService', () => {
           expect(metaResult).toContain('12:34:56.789 [notification-service] warn : Warning message');
           expect(metaResult).toContain('{\n  "duration": 1500,\n  "statusCode": 429\n}');
 
-          // Test with non-string requestId (should not show brackets)
           const infoWithNonStringRequestId = {
             timestamp: '12:34:56.789',
             level: 'info',
             message: 'Test message',
             service: 'test-service',
-            requestId: 12345, // number instead of string
+            requestId: 12345,
           };
           const nonStringResult = capturedFormatter(infoWithNonStringRequestId);
           expect(nonStringResult).toBe('12:34:56.789 [test-service] info : Test message ');
         }
       });
       it('should_UseDevelopmentFormat_When_NotProduction', () => {
-        // Arrange
         mockConfig.isProduction.mockReturnValue(false);
         const formatSpy = jest.spyOn(winston.format, 'combine');
 
-        // Act
         new WinstonLoggerService(mockConfig, mockClock);
 
-        // Assert
         expect(formatSpy).toHaveBeenCalled();
-        // Verify development format components
+
         expect(winston.format.timestamp).toHaveBeenCalledWith({ format: 'HH:mm:ss.SSS' });
         expect(winston.format.errors).toHaveBeenCalledWith({ stack: true });
         expect(winston.format.colorize).toHaveBeenCalledWith({
@@ -614,16 +535,13 @@ describe('WinstonLoggerService', () => {
 
     describe('Production Format', () => {
       it('should_UseProductionFormat_When_Production', () => {
-        // Arrange
         mockConfig.isProduction.mockReturnValue(true);
         const formatSpy = jest.spyOn(winston.format, 'combine');
 
-        // Act
         new WinstonLoggerService(mockConfig, mockClock);
 
-        // Assert
         expect(formatSpy).toHaveBeenCalled();
-        // Verify production format components
+
         expect(winston.format.timestamp).toHaveBeenCalledWith({ format: 'YYYY-MM-DDTHH:mm:ss.SSSZ' });
         expect(winston.format.errors).toHaveBeenCalledWith({ stack: true });
         expect(winston.format.json).toHaveBeenCalled();
@@ -633,10 +551,8 @@ describe('WinstonLoggerService', () => {
 
   describe('Transport Creation', () => {
     it('should_CreateConsoleTransport_When_ServiceCreated', () => {
-      // Act
       new WinstonLoggerService(mockConfig, mockClock);
 
-      // Assert
       expect(winston.transports.Console).toHaveBeenCalledWith({
         handleExceptions: false,
         handleRejections: false,
@@ -644,10 +560,8 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should_CreateCombinedLogTransport_When_ServiceCreated', () => {
-      // Act
       new WinstonLoggerService(mockConfig, mockClock);
 
-      // Assert
       expect(DailyRotateFile).toHaveBeenCalledWith({
         filename: 'logs/combined-%DATE%.log',
         datePattern: 'YYYY-MM-DD',
@@ -659,13 +573,10 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should_CreateErrorTransport_When_Production', () => {
-      // Arrange
       mockConfig.isProduction.mockReturnValue(true);
 
-      // Act
       new WinstonLoggerService(mockConfig, mockClock);
 
-      // Assert
       expect(DailyRotateFile).toHaveBeenCalledWith({
         filename: 'logs/error-%DATE%.log',
         datePattern: 'YYYY-MM-DD',
@@ -678,14 +589,10 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should_NotCreateErrorTransport_When_Development', () => {
-      // Arrange
       mockConfig.isProduction.mockReturnValue(false);
 
-      // Act
       new WinstonLoggerService(mockConfig, mockClock);
 
-      // Assert
-      // Should be called twice: once for combined, once for console, but not for error
       expect(DailyRotateFile).toHaveBeenCalledTimes(2);
       expect(DailyRotateFile).not.toHaveBeenCalledWith(
         expect.objectContaining({
@@ -697,45 +604,36 @@ describe('WinstonLoggerService', () => {
 
   describe('Error Handling and Edge Cases', () => {
     it('should_HandleEmptyContext_When_EmptyObjectProvided', () => {
-      // Act
       loggerService.log('info', 'Test message', {});
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
         service: 'test-service',
         message: 'Test message',
-        // No context field should be present
       });
     });
 
     it('should_HandleNullContext_When_NullProvided', () => {
-      // Act
       loggerService.log('info', 'Test message', null as any);
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
         service: 'test-service',
         message: 'Test message',
-        // No context field should be present
       });
     });
 
     it('should_HandleComplexContextValues_When_NestedObjectsProvided', () => {
-      // Arrange
       const complexContext = {
         user: { id: '123', roles: ['admin', 'user'] },
         metadata: { source: 'api', version: 1 },
         array: [1, 2, 3],
       };
 
-      // Act
       loggerService.log('info', 'Complex context test', complexContext);
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
@@ -746,15 +644,12 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should_HandleAllLogLevels_When_DifferentLevelsCalled', () => {
-      // Arrange
       const levels: LogLevel[] = ['debug', 'info', 'warn', 'error'];
 
-      // Act
       levels.forEach(level => {
         loggerService.log(level, `Test ${level} message`);
       });
 
-      // Assert
       levels.forEach(level => {
         expect(mockWinstonLogger.log).toHaveBeenCalledWith(
           level,
@@ -767,13 +662,10 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should_PreserveSpecialCharacters_When_MessageHasSpecialChars', () => {
-      // Arrange
       const message = 'Test message with special chars: ñáéíóú 中文 🚀 "quotes" \'apostrophes\'';
 
-      // Act
       loggerService.log('info', message);
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith(
         'info',
         expect.objectContaining({
@@ -785,45 +677,36 @@ describe('WinstonLoggerService', () => {
 
   describe('Performance and Memory', () => {
     it('should_NotLeakMemory_When_CalledManyTimes', () => {
-      // Arrange
       const iterations = 100;
 
-      // Act
       for (let i = 0; i < iterations; i++) {
         loggerService.info(`Test message ${i}`, { iteration: i });
       }
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledTimes(iterations);
-      // Memory leaks would be detected by Jest or external tools
     });
 
     it('should_ExecuteQuickly_When_LoggingManyMessages', () => {
-      // Arrange
       const iterations = 1000;
       const startTime = Date.now();
 
-      // Act
       for (let i = 0; i < iterations; i++) {
         loggerService.info(`Message ${i}`);
       }
 
       const endTime = Date.now();
 
-      // Assert
       const executionTime = endTime - startTime;
-      expect(executionTime).toBeLessThan(100); // Should be very fast
+      expect(executionTime).toBeLessThan(100);
       expect(mockWinstonLogger.log).toHaveBeenCalledTimes(iterations);
     });
 
     it('should_HandleLargeContext_When_BigObjectProvided', () => {
-      // Arrange
       const largeContext: Record<string, any> = {};
       for (let i = 0; i < 100; i++) {
         largeContext[`key${i}`] = `value${i}`.repeat(10);
       }
 
-      // Act & Assert
       expect(() => loggerService.info('Large context test', largeContext)).not.toThrow();
       expect(mockWinstonLogger.log).toHaveBeenCalledWith(
         'info',
@@ -836,20 +719,16 @@ describe('WinstonLoggerService', () => {
 
   describe('Integration Scenarios', () => {
     it('should_WorkWithRealRequestFlow_When_SimulatingMicroserviceRequest', () => {
-      // Arrange
       const requestId = 'req-550e8400-e29b-41d4-a716-446655440000';
       const requestLogger = loggerService.child({ requestId, module: 'auth' });
 
-      // Act - Simulate a request flow
       requestLogger.info('Request started', { method: 'POST', path: '/auth/login' });
       requestLogger.debug('Validating credentials', { userId: 'user123' });
       requestLogger.warn('Rate limit approaching', { remainingAttempts: 2 });
       requestLogger.info('Request completed', { statusCode: 200, duration: 150 });
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledTimes(4);
 
-      // Check first call
       expect(mockWinstonLogger.log).toHaveBeenNthCalledWith(1, 'info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
@@ -863,7 +742,6 @@ describe('WinstonLoggerService', () => {
         },
       });
 
-      // Check last call
       expect(mockWinstonLogger.log).toHaveBeenLastCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
@@ -879,18 +757,15 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should_SupportErrorObjectLogging_When_ErrorOccurs', () => {
-      // Arrange
       const error = new Error('Database connection failed');
       error.stack = 'Error: Database connection failed\n    at Object.<anonymous>';
 
-      // Act
       loggerService.error('Database error occurred', {
         error: error.message,
         stack: error.stack,
         errorCode: 'DB_CONN_FAILED',
       });
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('error', {
         timestamp: 'Tue Jan 15 2025',
         level: 'error',
@@ -905,18 +780,15 @@ describe('WinstonLoggerService', () => {
     });
 
     it('should_SupportMultipleServiceInstances_When_DifferentServices', () => {
-      // Arrange
       const authConfig = { ...mockConfig, serviceName: 'auth-service' };
       const paymentConfig = { ...mockConfig, serviceName: 'payment-service' };
 
       const authLogger = new WinstonLoggerService(authConfig, mockClock);
       const paymentLogger = new WinstonLoggerService(paymentConfig, mockClock);
 
-      // Act
       authLogger.info('Auth operation', { operation: 'login' });
       paymentLogger.info('Payment operation', { operation: 'charge' });
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
         timestamp: 'Tue Jan 15 2025',
         level: 'info',
@@ -937,7 +809,6 @@ describe('WinstonLoggerService', () => {
 
   describe('Testability and Mocking Support', () => {
     it('should_BeMockableForTesting_When_UsedInOtherComponents', () => {
-      // Arrange
       const mockLogger: jest.Mocked<ILogger> = {
         info: jest.fn(),
         debug: jest.fn(),
@@ -947,19 +818,14 @@ describe('WinstonLoggerService', () => {
         child: jest.fn(),
       };
 
-      // Act
       mockLogger.info('Mock test', { testing: true });
       mockLogger.child({ module: 'test' });
 
-      // Assert
       expect(mockLogger.info).toHaveBeenCalledWith('Mock test', { testing: true });
       expect(mockLogger.child).toHaveBeenCalledWith({ module: 'test' });
     });
 
     it('should_AllowDependencyInjection_When_UsedInServices', () => {
-      // This test verifies that the logger can be easily injected into other services
-
-      // Arrange
       class TestService {
         constructor(private logger: ILogger) {}
 
@@ -968,11 +834,9 @@ describe('WinstonLoggerService', () => {
         }
       }
 
-      // Act
       const service = new TestService(loggerService);
       service.doSomething();
 
-      // Assert
       expect(mockWinstonLogger.log).toHaveBeenCalledWith(
         'info',
         expect.objectContaining({

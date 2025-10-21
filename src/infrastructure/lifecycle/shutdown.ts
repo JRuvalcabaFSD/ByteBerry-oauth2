@@ -76,8 +76,8 @@ export type CleanupFunction = () => Promise<void> | void;
 @LogContextClass()
 export class GracefulShutdown {
   private readonly cleanupFunctions: CleanupFunction[] = [];
-  private isShuttingDown = false;
-  private shutdownPromise: Promise<void> | null = null;
+  // Guardar la promesa de shutdown para garantizar idempotencia por referencia
+  private shutdownPromise?: Promise<void>;
   public registerCleanupsCount: number = 0;
 
   constructor(private readonly logger: ILogger) {
@@ -89,13 +89,19 @@ export class GracefulShutdown {
     this.cleanupFunctions.push(cleanup);
   }
 
-  public async shutDown(): Promise<void> {
-    if (this.isShuttingDown) {
-      return this.shutdownPromise || Promise.resolve();
-    }
+  public shutDown(): Promise<void> {
+    // Si ya hay un shutdown en curso (o completado), devolver la misma promesa
+    if (this.shutdownPromise) return this.shutdownPromise;
 
-    this.isShuttingDown = true;
-    this.shutdownPromise = this.performShutdown();
+    this.shutdownPromise = (async () => {
+      try {
+        await this.performShutdown();
+      } finally {
+        // Opcional: si quieres permitir re-shutdown en el futuro, descomenta la línea siguiente
+        // this.shutdownPromise = undefined;
+      }
+    })();
+
     return this.shutdownPromise;
   }
 
@@ -120,7 +126,8 @@ export class GracefulShutdown {
   private async performShutdown(): Promise<void> {
     this.logger.info('Starting cleanup process...', { cleanupFunctions: this.cleanupFunctions.length });
 
-    const cleanupPromises = this.cleanupFunctions.map(async (cleanup, index) => {
+    // Run each cleanup function, catching and logging individual errors.
+    const promises = this.cleanupFunctions.map(async (cleanup, index) => {
       try {
         this.logger.debug(`Running cleanup function ${index + 1}`);
         await cleanup();
@@ -128,10 +135,12 @@ export class GracefulShutdown {
       } catch (error) {
         this.logger.error(`Cleanup function ${index + 1} failed`, { error: getErrorMessage(error) });
       }
-
-      await Promise.allSettled(cleanupPromises);
-      this.logger.info('Cleanup process completed');
     });
+
+    // Wait for all cleanup functions to settle, but do not throw because we want
+    // to attempt all cleanups and then finish the shutdown sequence.
+    await Promise.allSettled(promises);
+    this.logger.info('Cleanup process completed');
   }
 
   /**
