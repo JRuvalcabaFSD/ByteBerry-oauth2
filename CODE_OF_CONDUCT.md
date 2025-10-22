@@ -80,7 +80,7 @@ Este Código de Conducta aplica tanto en espacios del proyecto como en espacios 
 
 Los casos de comportamiento abusivo, acosador o inaceptable pueden ser reportados a los líderes de la comunidad responsables del cumplimiento en:
 
-- **Email**: conduct@jrmdev.org
+- **Email**: support@jrmdev.org
 - **GitHub**: Reportar directamente en el repositorio
 - **Formulario Anónimo**: [Próximamente]
 
@@ -211,7 +211,7 @@ Los mantenedores del proyecto son responsables de:
 El acoso incluye pero no se limita a comentarios despectivos sistemáticos, intimidación, acoso por fotografía/grabación, interrupción sostenida de discusiones, contacto físico inapropiado, y atención sexual no deseada.
 
 ### ¿Cómo reporto un incidente?
-Envía un email a conduct@jrmdev.org con todos los detalles relevantes. Todos los reportes son tratados con confidencialidad.
+Envía un email a support@jrmdev.org con todos los detalles relevantes. Todos los reportes son tratados con confidencialidad.
 
 ### ¿Qué pasa después de reportar?
 Recibirás una confirmación en 24 horas. Se realizará una investigación y se tomarán medidas apropiadas según la gravedad del incidente.
@@ -223,7 +223,7 @@ Sí, aceptamos reportes anónimos, aunque pueden limitar nuestra capacidad de in
 
 ## 📞 Contacto
 
-- **Email del Código de Conducta**: conduct@jrmdev.org
+- **Email del Código de Conducta**: support@jrmdev.org
 - **Mantenedor Principal**: [JRuvalcabaFSD](https://github.com/JRuvalcabaFSD)
 - **Proyecto**: [ByteBerry OAuth2 Service](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2)
 

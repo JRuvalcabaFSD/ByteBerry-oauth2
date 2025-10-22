@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ByteBerry OAuth2 - Service - Release Testing Script
+# ByteBerry Expenses Api - Service - Release Testing Script
 # Tests semantic-release configuration and Docker build locally
 
 set -e
@@ -28,20 +28,19 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Show stylized progress bar
-show_progress_bar() {
-    local duration=$1
-    local message=$2
-    local width=50
+# Show spinner for ongoing processes
+show_progress_spinner() {
+    local message=$1
+    local pid=$2
+    local spin_chars="/-\\|"
     print_info "$message"
-    for ((i=0; i<=$duration; i++)); do
-        sleep 1
-        percent=$((i * 100 / duration))
-        bar_width=$((i * width / duration))
-        printf "\r  [%-${width}s] %d%%" "$(printf '=%.0s' $(seq 1 $bar_width))" "$percent"
+    while kill -0 $pid 2>/dev/null; do
+        for ((i=0; i<${#spin_chars}; i++)); do
+            printf "\r  [${spin_chars:$i:1}]"
+            sleep 0.1
+        done
     done
-    echo -e "\r  [${GREEN}%-${width}s${NC}] 100%" "$(printf '=%.0s' $(seq 1 $width))"
-    echo ""
+    printf "\r  [${GREEN}✓${NC}] Done\n"
 }
 
 # Check prerequisites
@@ -112,7 +111,7 @@ test_conventional_commits() {
     fi
 
     print_info "Conventional commit examples:"
-    echo "  feat(oauth2): add CRUD operations"
+    echo "  feat(expenses): add CRUD operations"
     echo "  fix(health): resolve deep health check"
     echo "  feat(api)!: breaking change in API"
 }
@@ -127,9 +126,9 @@ test_docker_build() {
     fi
 
     print_info "Starting Docker build process..."
-    docker build -t byteberry-oauth2:test-release . >/dev/null 2>&1 &
+    docker build -t byteberry-expenses:test-release . >/dev/null 2>&1 &
     local build_pid=$!
-    show_progress_bar 5 "Building Docker image"
+    show_progress_spinner "Building Docker image" $build_pid
     wait $build_pid || {
         print_error "Docker build failed"
         return 1
@@ -137,9 +136,9 @@ test_docker_build() {
     print_success "Docker build completed successfully"
 
     print_info "Testing Docker image..."
-    docker run --rm byteberry-oauth2:test-release node --version >/dev/null 2>&1 &
+    docker run --rm byteberry-expenses:test-release node --version >/dev/null 2>&1 &
     local test_pid=$!
-    show_progress_bar 3 "Verifying Node.js version in container"
+    show_progress_spinner "Verifying Node.js version in container" $test_pid
     wait $test_pid || {
         print_error "Docker image test failed"
         return 1
@@ -147,7 +146,7 @@ test_docker_build() {
     print_success "Docker image test passed"
 
     print_info "Cleaning up test image..."
-    docker rmi byteberry-oauth2:test-release >/dev/null 2>&1 || true
+    docker rmi byteberry-expenses:test-release >/dev/null 2>&1 || true
     print_success "Docker cleanup completed"
 }
 
@@ -191,7 +190,7 @@ test_ci_environment() {
     print_info "Running quality checks..."
     pnpm quality >/dev/null 2>&1 &
     local quality_pid=$!
-    show_progress_bar 4 "Executing pnpm quality command"
+    show_progress_spinner "Executing pnpm quality command" $quality_pid
     wait $quality_pid || {
         print_error "CI pipeline quality checks failed"
         unset CI NODE_ENV
@@ -211,7 +210,7 @@ simulate_release() {
 
     pnpm release --dry-run >/dev/null 2>&1 &
     local release_pid=$!
-    show_progress_bar 5 "Running semantic-release dry run"
+    show_progress_spinner "Running semantic-release dry run" $release_pid
     wait $release_pid && {
         print_success "Semantic-release dry run completed"
         print_info "Check output above for release preview"
@@ -304,7 +303,7 @@ generate_report() {
 
 # Main execution
 main() {
-    echo "🧪 ByteBerry OAuth2 - Service - Release Testing"
+    echo "🧪 ByteBerry Expenses Api - Service - Release Testing"
     echo "=========================================="
     echo ""
 
