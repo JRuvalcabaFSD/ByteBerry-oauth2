@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.1.0...v1.2.0) (2025-10-22)
+
+
+### Bug Fixes
+
+* **docs:** update contact email in code of conduct ([1aa31ed](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/1aa31ed2600fbc07ad221e48ba802d20a222aba3))
+
 # [1.1.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.0.0...v1.1.0) (2025-10-21)
 
 
