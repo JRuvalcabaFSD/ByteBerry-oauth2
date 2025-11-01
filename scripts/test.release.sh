@@ -188,14 +188,11 @@ test_ci_environment() {
     export NODE_ENV=test
 
     print_info "Running quality checks..."
-    pnpm quality >/dev/null 2>&1 &
-    local quality_pid=$!
-    show_progress_spinner "Executing pnpm quality command" $quality_pid
-    wait $quality_pid || {
+    if ! pnpm quality; then
         print_error "CI pipeline quality checks failed"
         unset CI NODE_ENV
         return 1
-    }
+    fi
     print_success "CI pipeline quality checks passed"
 
     print_info "CI environment test completed"
