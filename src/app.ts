@@ -13,6 +13,8 @@ async function main() {
   const container = bootstrapContainer();
 
   const ctxLogger = withLoggerContext(container.resolve('Logger'), 'main');
+  const httpServer = container.resolve('HttpServer');
 
+  await httpServer.start();
   ctxLogger.info('Service initialized successfully');
 }
