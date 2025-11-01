@@ -1,12 +1,20 @@
 # 🔐 ByteBerry OAuth2 Service
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JRuvalcabaFSD/ByteBerry-oauth2/tests.yml?logo=jest&logoColor=white&label=Tests)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/actions/workflows/tests.yml)
+[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg?logo=gitbook&logoColor=white)](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)
+[![GitHub Pages](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/workflows/📚%20Generate%20Documentation/badge.svg)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/actions)
 [![Node Engine](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FJRuvalcabaFSD%2FByteBerry-oauth2%2Fmain%2Fpackage.json&query=%24.engines.node&label=Node&logo=node.js&logoColor=white&color=339933)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/blob/main/package.json)
 [![GitHub Release](https://img.shields.io/github/v/release/JRuvalcabaFSD/ByteBerry-oauth2?sort=semver&display_name=release&logo=semanticrelease&logoColor=white&label=Version)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/releases)
 [![Docker Image Version](https://img.shields.io/docker/v/jruvalcabafsd/byteberry-oauth2?sort=semver&logo=docker&logoColor=white&label=Image%20version)](https://hub.docker.com/r/jruvalcabafsd/byteberry-oauth2)
 [![GitHub License](https://img.shields.io/github/license/JRuvalcabaFSD/ByteBerry-oauth2)](./LICENSE)
 
 Servidor OAuth2 con **Authorization Code + PKCE**, **JWT RS256**, **refresh tokens** y **JWKS** para el sistema de gestión de gastos ByteBerry.
+
+## 📖 **Live Documentation**
+
+🌐 **[https://jruvalcabafsd.github.io/ByteBerry-oauth2/](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)**
+
+---
 
 ## 📋 Tabla de Contenidos
 
@@ -30,6 +38,7 @@ Servidor OAuth2 con **Authorization Code + PKCE**, **JWT RS256**, **refresh toke
 ## 🎯 Características
 
 ### ✨ OAuth2 Features (F1+)
+
 - 🔐 **Authorization Code + PKCE** flow
 - 🎫 **JWT RS256** tokens con rotación de claves
 - 🔄 **Refresh tokens** seguros
@@ -37,6 +46,7 @@ Servidor OAuth2 con **Authorization Code + PKCE**, **JWT RS256**, **refresh toke
 - 🚪 **Logout** con invalidación de tokens
 
 ### 🏗️ Arquitectura Técnica
+
 - 🧱 **Clean Architecture** (7 capas)
 - 💉 **Dependency Injection Container** custom
 - 🔒 **Principios SOLID** + **POO**
@@ -44,12 +54,13 @@ Servidor OAuth2 con **Authorization Code + PKCE**, **JWT RS256**, **refresh toke
 - 🏥 **Health checks** básicos y profundos
 
 ### 🛠️ Stack Tecnológico
+
 - ⚡ **Node.js 22.x** + **TypeScript 5.9.2**
 - 🚀 **Express.js 5.1.0** + **Helmet** + **CORS**
 - 📝 **Winston 3.18.3** (logging estructurado)
 - 🧪 **Jest 30.1.3** (98.64% coverage)
 - 🐳 **Docker** multi-arch (ARM64 + AMD64)
-- 📦 **pnpm@10.18.3** package manager
+- 📦 **pnpm@10.20.0** package manager
 
 ---
 
@@ -60,7 +71,7 @@ Servidor OAuth2 con **Authorization Code + PKCE**, **JWT RS256**, **refresh toke
 ```
 src/
 ├── 🔧 config/          # Configuración centralizada
-├── 📋 interfaces/      # Contratos compartidos  
+├── 📋 interfaces/      # Contratos compartidos
 ├── 🏛️ domain/         # Entities, Value Objects, Domain Services
 ├── 📱 application/     # Use Cases, DTOs
 ├── 🏗️ infrastructure/ # Database, Repositories, External Services
@@ -89,7 +100,7 @@ graph TB
 ### 📋 Prerequisitos
 
 - **Node.js 22.x** o superior
-- **pnpm 10.15.1+** (recomendado)
+- **pnpm 10.20.0+** (recomendado)
 - **Docker** (opcional, para containers)
 - **Git** para control de versiones
 
@@ -116,7 +127,7 @@ pnpm dev
 # Health check básico
 curl http://localhost:4000/health
 
-# Health check profundo  
+# Health check profundo
 curl http://localhost:4000/health/deep
 
 # Info del servicio
@@ -135,7 +146,7 @@ git clone https://github.com/JRuvalcabaFSD/ByteBerry-oauth2.git
 cd ByteBerry-oauth2
 
 # 2. Instalar pnpm si no lo tienes
-npm install -g pnpm@10.18.3
+npm install -g pnpm@10.20.0
 
 # 3. Instalar dependencias
 pnpm install
@@ -176,7 +187,7 @@ NODE_ENV=development
 PORT=4000
 LOG_LEVEL=info
 SERVICE_NAME=ByteBerry-OAuth2
-CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:4002,http://localhost:4003
+CORS_ORIGINS=http://localhost:5173,http://localhost:4002,http://localhost:4003
 
 # OAuth2 Configuration (F1+)
 # JWT_PRIVATE_KEY=...
@@ -187,6 +198,7 @@ CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:4002,http://localhos
 ### 📋 Configuración por Entorno
 
 #### 🔧 Development
+
 ```bash
 NODE_ENV=development
 LOG_LEVEL=debug
@@ -194,6 +206,7 @@ PORT=4000
 ```
 
 #### 🚀 Production
+
 ```bash
 NODE_ENV=production
 LOG_LEVEL=info
@@ -201,6 +214,7 @@ PORT=4000
 ```
 
 #### 🧪 Test
+
 ```bash
 NODE_ENV=test
 LOG_LEVEL=warn
@@ -262,14 +276,6 @@ pnpm type-check && pnpm lint && pnpm audit && pnpm build && pnpm test:coverage
 
 ---
 
-## 🧪 Testing
-
-### 📊 Estado de Testing
-
-- ✅ **296 tests** pasando
-- ✅ **98.64% coverage** general
-- ✅ **Unit, Integration & E2E** tests
-
 ### 🚀 Comandos de Testing
 
 ```bash
@@ -289,6 +295,7 @@ pnpm test:verbose
 ### 📋 Tipos de Tests
 
 #### 🔬 Unit Tests
+
 ```bash
 # Tests de lógica de negocio
 pnpm test src/domain
@@ -296,7 +303,8 @@ pnpm test src/application
 pnpm test src/shared
 ```
 
-#### 🔗 Integration Tests  
+#### 🔗 Integration Tests
+
 ```bash
 # Tests de infraestructura
 pnpm test src/infrastructure
@@ -304,6 +312,7 @@ pnpm test src/container
 ```
 
 #### 🌐 E2E Tests
+
 ```bash
 # Tests end-to-end completos
 pnpm test src/e2e
@@ -351,80 +360,61 @@ pnpm docker:run
 # Inspeccionar manifest multi-arch
 ./scripts/docker-build.sh inspect
 
-# Test completo de imagen
-./scripts/docker-test.sh test
-
-# Ver logs de testing
-./scripts/docker-test.sh logs
+# Clean build cache
+./scripts/docker-build.sh clean
 ```
 
-### 📋 Docker Compose
+### 📋 Multi-Platform Support
 
 ```bash
-# Desarrollo local
+# Arquitecturas soportadas
+linux/amd64    # Desarrollo y producción x86_64
+linux/arm64    # Raspberry Pi 5 (target production)
+```
+
+### 🐳 Docker Compose
+
+```bash
+# Levantar todos los servicios
 docker-compose up -d
 
-# Testing environment
-docker-compose -f docker-compose.test.yml up
-
 # Ver logs
-docker-compose logs -f oauth2-service
-```
+docker-compose logs -f oauth2
 
-### 🏗️ Multi-arch Build
-
-```bash
-# Verificar plataformas soportadas
-docker buildx ls
-
-# Build para múltiples arquitecturas
-docker buildx build \
-  --platform linux/amd64,linux/arm64 \
-  --tag jruvalcabafsd/byteberry-oauth2:latest \
-  --push .
+# Status de servicios
+docker-compose ps
 ```
 
 ---
 
 ## 📊 API Endpoints
 
-### 🏠 Endpoints Principales
+### 🏠 Service Info
 
-| Método | Ruta | Descripción | Estado |
-|--------|------|-------------|--------|
-| `GET` | `/` | Información del servicio | ✅ |
-| `GET` | `/health` | Health check básico | ✅ |
-| `GET` | `/health/deep` | Health check profundo | ✅ |
+#### Root Endpoint
 
-### 🔐 OAuth2 Endpoints (F1+)
-
-| Método | Ruta | Descripción | Estado |
-|--------|------|-------------|--------|
-| `GET` | `/authorize` | Authorization endpoint | 🟡 F1 |
-| `POST` | `/token` | Token endpoint | 🟡 F1 |
-| `GET` | `/.well-known/jwks.json` | JWKS endpoint | 🟡 F1 |
-| `POST` | `/logout` | Logout endpoint | 🟡 F1 |
-
-### 📋 Ejemplos de Respuesta
-
-#### Health Check Básico
 ```bash
-curl http://localhost:4000/health
+curl http://localhost:4000/
 ```
 
 ```json
 {
-  "status": "healthy",
-  "timestamp": "2025-10-21T12:34:56.789Z",
   "service": "ByteBerry-OAuth2",
   "version": "1.1.0",
-  "uptime": 86400000,
+  "status": "running",
+  "timestamp": "2025-10-21T12:34:56.789Z",
   "requestId": "req-1234567890",
-  "environment": "development"
+  "environment": "development",
+  "endpoints": {
+    "home": "/",
+    "health": "/health",
+    "deepHealth": "/health/deep"
+  }
 }
 ```
 
 #### Health Check Profundo
+
 ```bash
 curl http://localhost:4000/health/deep
 ```
@@ -446,7 +436,7 @@ curl http://localhost:4000/health/deep
     },
     "Logger": {
       "status": "healthy",
-      "message": "Logger service is available and operational", 
+      "message": "Logger service is available and operational",
       "responseTime": 2
     }
   },
@@ -469,6 +459,7 @@ curl http://localhost:4000/health/deep
 ### 🏥 Health Endpoints
 
 #### Basic Health Check
+
 ```bash
 # Rápido, para load balancers
 curl http://localhost:4000/health
@@ -478,6 +469,7 @@ curl http://localhost:4000/health
 ```
 
 #### Deep Health Check
+
 ```bash
 # Completo, para diagnósticos
 curl http://localhost:4000/health/deep
@@ -509,57 +501,68 @@ docker logs oauth2-container | grep -i health
 
 ### 🔧 Development Scripts
 
-| Script | Comando | Descripción |
-|--------|---------|-------------|
-| **Desarrollo** | `pnpm dev` | Servidor con hot reload |
-| **Build** | `pnpm build` | Compilar TypeScript |
-| **Start** | `pnpm start` | Iniciar en producción |
-| **Clean** | `pnpm clean` | Limpiar artefactos |
+| Script         | Comando      | Descripción             |
+| -------------- | ------------ | ----------------------- |
+| **Desarrollo** | `pnpm dev`   | Servidor con hot reload |
+| **Build**      | `pnpm build` | Compilar TypeScript     |
+| **Start**      | `pnpm start` | Iniciar en producción   |
+| **Clean**      | `pnpm clean` | Limpiar artefactos      |
 
 ### 🧪 Testing Scripts
 
-| Script | Comando | Descripción |
-|--------|---------|-------------|
-| **Test** | `pnpm test` | Ejecutar todos los tests |
-| **Coverage** | `pnpm test:coverage` | Tests con coverage |
-| **Watch** | `pnpm test:watch` | Tests en modo watch |
-| **Verbose** | `pnpm test:verbose` | Tests con output detallado |
+| Script       | Comando              | Descripción                |
+| ------------ | -------------------- | -------------------------- |
+| **Test**     | `pnpm test`          | Ejecutar todos los tests   |
+| **Coverage** | `pnpm test:coverage` | Tests con coverage         |
+| **Watch**    | `pnpm test:watch`    | Tests en modo watch        |
+| **Verbose**  | `pnpm test:verbose`  | Tests con output detallado |
 
 ### 🔍 Quality Scripts
 
-| Script | Comando | Descripción |
-|--------|---------|-------------|
-| **Lint** | `pnpm lint` | Verificar código con ESLint |
-| **Lint Fix** | `pnpm lint:fix` | Corregir issues de ESLint |
-| **Type Check** | `pnpm type-check` | Verificar tipos TypeScript |
-| **Quality** | `pnpm quality` | Ejecutar todas las validaciones |
-| **Audit** | `pnpm audit` | Verificar vulnerabilidades |
+| Script         | Comando           | Descripción                     |
+| -------------- | ----------------- | ------------------------------- |
+| **Lint**       | `pnpm lint`       | Verificar código con ESLint     |
+| **Lint Fix**   | `pnpm lint:fix`   | Corregir issues de ESLint       |
+| **Type Check** | `pnpm type-check` | Verificar tipos TypeScript      |
+| **Quality**    | `pnpm quality`    | Ejecutar todas las validaciones |
+| **Audit**      | `pnpm audit`      | Verificar vulnerabilidades      |
+
+### 📖 Documentation Scripts
+
+| Script            | Comando              | Descripción                       |
+| ----------------- | -------------------- | --------------------------------- |
+| **Generate Docs** | `pnpm docs:generate` | Generar documentación JSDoc       |
+| **Serve Docs**    | `pnpm docs:serve`    | Servir documentación localmente   |
+| **Build Docs**    | `pnpm docs:build`    | Limpiar y generar documentación   |
+| **Dev Docs**      | `pnpm docs:dev`      | Build y servir en modo desarrollo |
+| **Watch Docs**    | `pnpm docs:watch`    | Regenerar docs en cambios         |
+| **Clean Docs**    | `pnpm docs:clean`    | Limpiar documentación generada    |
 
 ### 🐳 Docker Scripts
 
-| Script | Comando | Descripción |
-|--------|---------|-------------|
+| Script           | Comando             | Descripción         |
+| ---------------- | ------------------- | ------------------- |
 | **Docker Build** | `pnpm docker:build` | Build imagen Docker |
-| **Docker Run** | `pnpm docker:run` | Ejecutar contenedor |
-| **Docker Test** | `pnpm docker:test` | Test imagen Docker |
+| **Docker Run**   | `pnpm docker:run`   | Ejecutar contenedor |
+| **Docker Test**  | `pnpm docker:test`  | Test imagen Docker  |
 
 ### 🚀 Release Scripts
 
-| Script | Comando | Descripción |
-|--------|---------|-------------|
-| **Commit** | `pnpm commit` | Commit interactivo (Commitizen) |
-| **Release** | `pnpm release` | Semantic release |
-| **CI All** | `pnpm ci:all` | Validación completa CI |
+| Script      | Comando        | Descripción                     |
+| ----------- | -------------- | ------------------------------- |
+| **Commit**  | `pnpm commit`  | Commit interactivo (Commitizen) |
+| **Release** | `pnpm release` | Semantic release                |
+| **CI All**  | `pnpm ci:all`  | Validación completa CI          |
 
 ### 🔧 Utility Scripts
 
-| Script | Path | Descripción |
-|--------|------|-------------|
-| **Docker Build** | `./scripts/docker-build.sh` | Build multi-arch avanzado |
-| **Docker Test** | `./scripts/docker-test.sh` | Testing completo Docker |
-| **Health Check** | `./scripts/healthCheck.js` | Health check para Docker |
-| **Test Release** | `./scripts/test.release.sh` | Test configuración release |
-| **Update Version** | `./scripts/update-version.sh` | Actualizar versión |
+| Script             | Path                          | Descripción                |
+| ------------------ | ----------------------------- | -------------------------- |
+| **Docker Build**   | `./scripts/docker-build.sh`   | Build multi-arch avanzado  |
+| **Docker Test**    | `./scripts/docker-test.sh`    | Testing completo Docker    |
+| **Health Check**   | `./scripts/healthCheck.js`    | Health check para Docker   |
+| **Test Release**   | `./scripts/test.release.sh`   | Test configuración release |
+| **Update Version** | `./scripts/update-version.sh` | Actualizar versión         |
 
 ---
 
@@ -568,16 +571,17 @@ docker logs oauth2-container | grep -i health
 ### 🔄 GitHub Actions
 
 #### 🔍 PR-CI Workflow
+
 ```yaml
 name: 🔍 PR CI
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   validate:
     - ✅ Checkout code
-    - ✅ Setup pnpm@10.18.3
+    - ✅ Setup pnpm@10.20.0
     - ✅ Setup Node.js 22.x
     - ✅ Install dependencies
     - ✅ Type check
@@ -590,17 +594,34 @@ jobs:
 ```
 
 #### 🚀 Release-CI Workflow
+
 ```yaml
 name: 🚀 Release CI
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   - ✅ Full validation
   - ✅ Multi-arch Docker build & push
   - ✅ Semantic release
   - ✅ Sync develop branch
+```
+
+#### 📚 Documentation Workflow
+
+```yaml
+name: 📚 Generate Documentation
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  - ✅ Generate JSDoc documentation
+  - ✅ Deploy to GitHub Pages (main only)
+  - ✅ Verify documentation links
 ```
 
 ### 📋 Branch Protection
@@ -617,46 +638,95 @@ jobs:
 git commit -m "feat(auth): add JWT validation"
 
 # 2. PR to main
-# 3. CI validates automatically  
+# 3. CI validates automatically
 # 4. Merge → automatic release
 # 5. Docker images published
 # 6. GitHub release created
+# 7. Documentation deployed
 ```
 
 ### 🏷️ Semantic Versioning
 
 - `fix:` → **PATCH** (v1.0.1)
-- `feat:` → **MINOR** (v1.1.0)  
+- `feat:` → **MINOR** (v1.1.0)
 - `feat!:` → **MAJOR** (v2.0.0)
 
 ---
 
 ## 📖 Documentación
 
+### 🌐 **Documentación en Vivo**
+
+**📖 [https://jruvalcabafsd.github.io/ByteBerry-oauth2/](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)**
+
 ### 📋 Documentos Disponibles
 
 - 📖 **README.md** - Este archivo
+- 🌐 **[Live Docs](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)** - Documentación JSDoc en vivo
 - 🏗️ **ARCHITECTURE.md** - Decisiones arquitectónicas
 - 🤝 **CONTRIBUTING.md** - Guía de contribución
 - 🔄 **CHANGELOG.md** - Historial de cambios
 - 📊 **API.md** - Documentación de endpoints
 
-### 📚 JSDoc
+### 📚 JSDoc - Desarrollo Local
 
 ```bash
 # Generar documentación JSDoc
 pnpm docs:generate
 
-# Ver documentación
-open docs/index.html
+# Servir documentación localmente
+pnpm docs:serve
+
+# Desarrollo con hot-reload
+pnpm docs:dev
+
+# Watch mode para cambios
+pnpm docs:watch
+
+# Ver documentación local
+open http://localhost:8080
 ```
+
+### 🔧 Configuración JSDoc
+
+La documentación se genera automáticamente usando:
+
+- **JSDoc 4.x** con plugin TypeScript
+- **better-docs** para mejor formato
+- **Deployment automático** a GitHub Pages
+- **Hot-reload** en desarrollo
+
+```bash
+# Configuración en jsdoc.json
+{
+  "source": {
+    "include": ["./src"],
+    "exclude": ["**/*.test.ts", "**/*.spec.ts"]
+  },
+  "plugins": ["better-docs/typescript"],
+  "templates": {
+    "better-docs": {
+      "name": "ByteBerry OAuth2 Service Documentation"
+    }
+  }
+}
+```
+
+### 🚀 Deploy Automático
+
+La documentación se actualiza automáticamente:
+
+- **Push a main** → Deploy a GitHub Pages
+- **PR** → Build de validación
+- **URL estable** → Siempre la última versión
 
 ### 🔗 Enlaces Útiles
 
-- 📦 [Docker Hub](https://hub.docker.com/r/jruvalcabafsd/byteberry-oauth2)
-- 🐙 [GitHub Repository](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2)
-- 🚀 [CI/CD Status](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/actions)
-- 📊 [Releases](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/releases)
+- 🌐 **[Live Documentation](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)** - Documentación completa
+- 📦 **[Docker Hub](https://hub.docker.com/r/jruvalcabafsd/byteberry-oauth2)** - Imágenes Docker
+- 🐙 **[GitHub Repository](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2)** - Código fuente
+- 🚀 **[CI/CD Status](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/actions)** - Workflows
+- 📊 **[Releases](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/releases)** - Versiones
 
 ---
 
@@ -678,10 +748,13 @@ git checkout -b feature/amazing-feature
 # 5. Hacer cambios y validar
 pnpm quality
 
-# 6. Commit con conventional commits
+# 6. Generar documentación
+pnpm docs:build
+
+# 7. Commit con conventional commits
 pnpm commit
 
-# 7. Push y crear PR
+# 8. Push y crear PR
 git push origin feature/amazing-feature
 ```
 
@@ -691,7 +764,7 @@ git push origin feature/amazing-feature
 # Features
 git commit -m "feat(auth): add JWT validation middleware"
 
-# Bug fixes  
+# Bug fixes
 git commit -m "fix(health): resolve deep health check timeout"
 
 # Documentation
@@ -707,8 +780,9 @@ git commit -m "feat(api)!: change authentication flow"
 - [x] Coverage maintained (>95%)
 - [x] Linting passing (`pnpm lint`)
 - [x] Type checking passing (`pnpm type-check`)
-- [x] Documentation updated
+- [x] Documentation updated (`pnpm docs:build`)
 - [x] Conventional commits used
+- [x] JSDoc comments added/updated
 
 ### 🐛 Reportar Issues
 
@@ -730,6 +804,7 @@ git commit -m "feat(api)!: change authentication flow"
 - [x] 🧪 **Testing** (98.64% coverage)
 - [x] 🐳 **Docker** multi-arch
 - [x] 🚀 **CI/CD** completo
+- [x] 📖 **JSDoc + GitHub Pages** documentación
 
 ### 🟡 F1 - OAuth2 (Próximo)
 
@@ -751,19 +826,19 @@ git commit -m "feat(api)!: change authentication flow"
 
 - 📧 **Email:** support@jrmdev.org
 - 🐙 **GitHub Issues:** [Crear Issue](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues)
-- 📖 **Documentación:** [Wiki](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/wiki)
+- 📖 **Documentación:** [Live Docs](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)
 
 ---
 
 ## 🏆 Contributors
 
-- **JRuvalcabaFSD** - *Autor principal* - [@JRuvalcabaFSD](https://github.com/JRuvalcabaFSD)
+- **JRuvalcabaFSD** - _Autor principal_ - [@JRuvalcabaFSD](https://github.com/JRuvalcabaFSD)
 
 ---
 
 <div align="center">
 
-**🔐 ByteBerry OAuth2 Service** - *Sistema de Gestión de Gastos*
+**🔐 ByteBerry OAuth2 Service** - _Sistema de Gestión de Gastos_
 
 [![Made with ❤️](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
