@@ -12,7 +12,7 @@ export class Config implements IConfig {
   public readonly logLevel: LogLevel;
   public readonly serviceName: string;
   public readonly corsOrigins: string[];
-  public readonly version: string = version;
+  public readonly version: string = version || '0.0.0';
   private static instance: Config | null = null;
 
   private constructor() {
