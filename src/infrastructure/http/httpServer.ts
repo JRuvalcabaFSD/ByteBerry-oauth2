@@ -80,7 +80,7 @@ export class HttpServer implements IHttpServer {
    */
 
   @LogContextMethod()
-  public start(): Promise<void> {
+  public async start(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         this.server = this.app.listen(this.config.port, () => {
@@ -115,7 +115,7 @@ export class HttpServer implements IHttpServer {
    */
 
   @LogContextMethod()
-  public stop(): Promise<void> {
+  public async stop(): Promise<void> {
     if (!this.server) {
       this.logger.warn('Http Server stop called but server is not running');
       return Promise.resolve();
