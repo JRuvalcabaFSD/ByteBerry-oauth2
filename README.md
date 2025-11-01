@@ -1,6 +1,6 @@
 # 🔐 ByteBerry OAuth2 Service
 
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JRuvalcabaFSD/ByteBerry-oauth2/tests.yml?logo=jest&logoColor=white&label=Tests)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/actions/workflows/tests.yml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JRuvalcabaFSD/ByteBerry-oauth2/pr-ci.yml?logo=jest&logoColor=white&label=Tests)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/actions/workflows/pr-ci.yml)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg?logo=gitbook&logoColor=white)](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)
 [![GitHub Pages](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/workflows/📚%20Generate%20Documentation/badge.svg)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/actions)
 [![Node Engine](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FJRuvalcabaFSD%2FByteBerry-oauth2%2Fmain%2Fpackage.json&query=%24.engines.node&label=Node&logo=node.js&logoColor=white&color=339933)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/blob/main/package.json)
