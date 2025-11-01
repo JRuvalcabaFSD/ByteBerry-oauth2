@@ -1,4 +1,4 @@
-import { bootstrapContainer } from '@/container/bootstrap.container';
+import { bootstrap } from '@/bootstrap';
 import { getErrMsg, withLoggerContext } from '@/shared';
 
 (() => {
@@ -10,11 +10,9 @@ import { getErrMsg, withLoggerContext } from '@/shared';
 })();
 
 async function main() {
-  const container = bootstrapContainer();
+  const { container } = await bootstrap();
 
   const ctxLogger = withLoggerContext(container.resolve('Logger'), 'main');
-  const httpServer = container.resolve('HttpServer');
 
-  await httpServer.start();
   ctxLogger.info('Service initialized successfully');
 }
