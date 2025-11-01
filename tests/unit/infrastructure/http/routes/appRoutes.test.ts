@@ -142,7 +142,7 @@ describe('App Routes', () => {
       timestamp: '2025-01-01T00:00:00.000Z',
       requestId: 'test-request-id',
       environment: 'test',
-      endpoints: { home: '/' },
+      endpoints: { home: '/', health: '/health', deepHealth: '/health/deep' },
     });
   });
 
@@ -169,7 +169,7 @@ describe('App Routes', () => {
       message: 'Route GET /test not found',
       requestId: 'test-request-id',
       timestamp: '2025-01-01T00:00:00.000Z',
-      endpoints: { home: '/' },
+      endpoints: { home: '/', health: '/health', deepHealth: '/health/deep' },
     });
   });
 });

@@ -1,5 +1,13 @@
 import { createConfig } from '@/config';
-import { Container, createGracefulShutdown, createHttpServer, createWinstonLoggerService, criticalServices, Token } from '@/container';
+import {
+  Container,
+  createGracefulShutdown,
+  createHealthController,
+  createHttpServer,
+  createWinstonLoggerService,
+  criticalServices,
+  Token,
+} from '@/container';
 import { createClockService, createUuidService } from '@/infrastructure';
 import { IContainer } from '@/interfaces';
 import { ContainerCreationError } from '@/shared';
@@ -13,6 +21,7 @@ export function bootstrapContainer(): IContainer {
   container.registerSingleton('Logger', createWinstonLoggerService);
   container.registerSingleton('GracefulShutdown', createGracefulShutdown);
   container.registerSingleton('HttpServer', createHttpServer);
+  container.registerSingleton('HealthController', createHealthController);
 
   validate(container, criticalServices);
 

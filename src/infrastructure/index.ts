@@ -1,3 +1,6 @@
+//Controllers
+export * from './controllers/health.controller';
+
 // Http - middlewares
 export * from './http/middlewares/cors.middleware';
 export * from './http/middlewares/error.middleware';

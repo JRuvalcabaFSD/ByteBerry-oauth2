@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { IContainer } from '@/interfaces';
 import { Router } from 'express';
+import { createHealthRoutes } from '@/infrastructure/http/routes/health.routes';
 
 //TODO documentar
 export function createAppRoutes(container: IContainer): Router {
@@ -8,6 +9,9 @@ export function createAppRoutes(container: IContainer): Router {
 
   const config = container.resolve('Config');
   const clock = container.resolve('Clock');
+
+  //Health routes
+  router.use('/health', createHealthRoutes(container.resolve('HealthController')));
 
   //Home route
   router.get('/', (req: Request, res: Response) => {
@@ -58,8 +62,8 @@ export function createAppRoutes(container: IContainer): Router {
 function getRoutesList(type: 'json' | 'text'): Record<string, unknown> | string[] {
   const routes = [
     { name: 'home', value: '/', text: 'GET /' },
-    // { name: 'health', value: '/health', text: 'GET /health' },
-    // { name: 'deepHealth', value: '/health/deep', text: 'GET /health/deep' },
+    { name: 'health', value: '/health', text: 'GET /health' },
+    { name: 'deepHealth', value: '/health/deep', text: 'GET /health/deep' },
   ];
 
   if (type === 'json') {

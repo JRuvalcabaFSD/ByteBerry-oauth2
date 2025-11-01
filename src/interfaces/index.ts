@@ -5,6 +5,9 @@ export * from './config/envConfig.interface';
 export * from './container/container.interface';
 
 //Infrastructure - Http
+export * from './infrastructure/controllers/healthController.interface';
+
+//Infrastructure - Http
 export * from './infrastructure/http/httpServer.interface';
 
 //Infrastructure - Services

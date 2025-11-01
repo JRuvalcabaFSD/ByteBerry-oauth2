@@ -1,4 +1,4 @@
-import { GracefulShutdown, HttpServer, WinstonLoggerService } from '@/infrastructure';
+import { GracefulShutdown, HealthController, HttpServer, WinstonLoggerService } from '@/infrastructure';
 import { IContainer } from '@/interfaces';
 
 /**
@@ -43,4 +43,15 @@ export function createGracefulShutdown(c: IContainer): GracefulShutdown {
 
 export function createHttpServer(c: IContainer): HttpServer {
   return new HttpServer(c);
+}
+
+/**
+ * Creates and returns a new instance of the HealthController.
+ *
+ * @param c - The dependency injection container that provides required dependencies
+ * @returns A new HealthController instance initialized with the provided container
+ */
+
+export function createHealthController(c: IContainer): HealthController {
+  return new HealthController(c);
 }

@@ -1,8 +1,8 @@
 import { GracefulShutdown } from '@/infrastructure';
-import { IClock, IConfig, IHttpServer, ILogger, IUuid } from '@/interfaces';
+import { IClock, IConfig, IHealthController, IHttpServer, ILogger, IUuid } from '@/interfaces';
 
 //TODO documentar
-export type Token = 'Config' | 'Clock' | 'Uuid' | 'Logger' | 'GracefulShutdown' | 'HttpServer';
+export type Token = 'Config' | 'Clock' | 'Uuid' | 'Logger' | 'GracefulShutdown' | 'HttpServer' | 'HealthController';
 
 export interface ServiceMap {
   Config: IConfig;
@@ -11,6 +11,7 @@ export interface ServiceMap {
   Logger: ILogger;
   GracefulShutdown: GracefulShutdown;
   HttpServer: IHttpServer;
+  HealthController: IHealthController;
 }
 
-export const criticalServices = ['Config', 'Clock', 'Uuid', 'Logger', 'GracefulShutdown', 'HttpServer'];
+export const criticalServices = ['Config', 'Clock', 'Uuid', 'Logger', 'GracefulShutdown', 'HttpServer', 'HealthController'];
