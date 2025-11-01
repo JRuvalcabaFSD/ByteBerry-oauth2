@@ -1,5 +1,5 @@
 import { createConfig } from '@/config';
-import { Container, criticalServices, Token } from '@/container';
+import { Container, createWinstonLoggerService, criticalServices, Token } from '@/container';
 import { createClockService, createUuidService } from '@/infrastructure';
 import { IContainer } from '@/interfaces';
 import { ContainerCreationError } from '@/shared';
@@ -10,6 +10,7 @@ export function bootstrapContainer(): IContainer {
   container.registerSingleton('Config', createConfig);
   container.registerSingleton('Clock', createClockService);
   container.registerSingleton('Uuid', createUuidService);
+  container.registerSingleton('Logger', createWinstonLoggerService);
 
   validate(container, criticalServices);
 

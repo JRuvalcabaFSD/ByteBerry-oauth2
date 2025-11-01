@@ -1,5 +1,5 @@
 import { bootstrapContainer } from '@/container/bootstrap.container';
-import { getErrMsg } from '@/shared';
+import { getErrMsg, withLoggerContext } from '@/shared';
 
 (() => {
   main().catch(error => {
@@ -12,9 +12,7 @@ import { getErrMsg } from '@/shared';
 async function main() {
   const container = bootstrapContainer();
 
-  const config = container.resolve('Config');
-  const clock = container.resolve('Clock');
-  const uuid = container.resolve('Uuid');
+  const ctxLogger = withLoggerContext(container.resolve('Logger'), 'main');
 
-  console.log({ config, timestamp: clock.timestamp(), uuid: uuid.generate() });
+  ctxLogger.info('Service initialized successfully');
 }
