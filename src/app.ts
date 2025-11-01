@@ -1,4 +1,4 @@
-import { createConfig } from '@/config';
+import { bootstrapContainer } from '@/container/bootstrap.container';
 import { getErrMsg } from '@/shared';
 
 (() => {
@@ -10,7 +10,9 @@ import { getErrMsg } from '@/shared';
 })();
 
 async function main() {
-  const config = createConfig();
+  const container = bootstrapContainer();
+
+  const config = container.resolve('Config');
 
   console.log({ config });
 }
