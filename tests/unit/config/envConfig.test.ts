@@ -36,7 +36,7 @@ describe('Config', () => {
       expect(config.logLevel).toBe('info');
       expect(config.serviceName).toBe('ByteBerry-OAuth2');
       expect(config.corsOrigins).toEqual(['http://localhost:5173', 'http://localhost:4002', 'http://localhost:4003']);
-      expect(config.version).toEqual('1.0.0-test');
+      expect(config.version).toEqual('0.0.0');
     });
     it('should load custom configuration when valid environment variables provided', async () => {
       process.env = {

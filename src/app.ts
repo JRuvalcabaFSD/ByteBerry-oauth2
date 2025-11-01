@@ -13,6 +13,8 @@ async function main() {
   const container = bootstrapContainer();
 
   const config = container.resolve('Config');
+  const clock = container.resolve('Clock');
+  const uuid = container.resolve('Uuid');
 
-  console.log({ config });
+  console.log({ config, timestamp: clock.timestamp(), uuid: uuid.generate() });
 }
