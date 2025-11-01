@@ -1,12 +1,12 @@
 {
-   "name": "oauth2",
+  "name": "oauth2",
   "version": "0.0.0",
   "description": "Servidor OAuth2 con Authorization Code + PKCE, JWT RS256, refresh tokens y JWKS",
   "main": "dist/app.js",
-	"engines": {
-		"node": "22.18.0",
-		"pnpm": "10.20.0"
-	},
+  "engines": {
+    "node": "22.18.0",
+    "pnpm": "10.20.0"
+  },
   "scripts": {
     "audit:fix": "pnpm audit --fix",
     "audit": "pnpm audit",
@@ -29,13 +29,20 @@
     "test:verbose": "jest --verbose",
     "test:watch": "jest --watch",
     "test": "jest",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "docs:generate": "jsdoc -c jsdoc.json",
+    "docs:serve": "http-server docs -p 8080 -o -c-1",
+    "docs:clean": "rimraf docs",
+    "docs:build": "pnpm run docs:clean && pnpm run docs:generate",
+    "docs:dev": "pnpm run docs:build && pnpm run docs:serve",
+    "docs:watch": "nodemon --watch src --ext ts --exec \"pnpm run docs:build\"",
+    "docs:ci": "pnpm run docs:build && echo 'Documentation generated successfully'"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.20.0",
-	"devDependencies": {
+  "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@eslint/js": "^9.36.0",
@@ -48,16 +55,20 @@
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.44.1",
     "@typescript-eslint/parser": "^8.44.1",
+    "better-docs": "^2.7.3",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.4.0",
+    "http-server": "^14.1.1",
     "jest": "^30.1.3",
     "jest-watch-typeahead": "^2.2.2",
     "jiti": "^2.6.0",
+    "jsdoc": "^4.0.5",
     "prettier": "^3.6.2",
+    "rimraf": "^6.1.0",
     "semantic-release": "^24.2.9",
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.4",
@@ -66,6 +77,7 @@
     "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.20.6",
+    "typedoc": "^0.28.14",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.44.1"
   },

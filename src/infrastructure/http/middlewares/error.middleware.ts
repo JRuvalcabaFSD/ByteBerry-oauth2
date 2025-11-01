@@ -12,7 +12,7 @@ type ErrorHandler = (error: Error, req: Request, res: Response, config: IConfig)
  * @returns An Express error-handling middleware (error, req, res, next) that:
  *   - creates a contextual logger with withLoggerContext(logger, 'createErrorMiddleware'),
  *   - logs the unhandled error including requestId, error message, stack, HTTP method, and request URL,
- *   - responds with HTTP 500 and a JSON payload: { error: 'Internal Server Error', message, requestId, timestamp }.
+ *   - responds with HTTP 500 and a JSON payload: {object} containing error, message, requestId, and timestamp.
  *
  * @remarks
  * - If req.requestId is falsy, the middleware logs and returns 'unknown' as the requestId.

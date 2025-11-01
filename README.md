@@ -1,12 +1,20 @@
 # 🔐 ByteBerry OAuth2 Service
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JRuvalcabaFSD/ByteBerry-oauth2/tests.yml?logo=jest&logoColor=white&label=Tests)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/actions/workflows/tests.yml)
+[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg?logo=gitbook&logoColor=white)](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)
+[![GitHub Pages](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/workflows/📚%20Generate%20Documentation/badge.svg)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/actions)
 [![Node Engine](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FJRuvalcabaFSD%2FByteBerry-oauth2%2Fmain%2Fpackage.json&query=%24.engines.node&label=Node&logo=node.js&logoColor=white&color=339933)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/blob/main/package.json)
 [![GitHub Release](https://img.shields.io/github/v/release/JRuvalcabaFSD/ByteBerry-oauth2?sort=semver&display_name=release&logo=semanticrelease&logoColor=white&label=Version)](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/releases)
 [![Docker Image Version](https://img.shields.io/docker/v/jruvalcabafsd/byteberry-oauth2?sort=semver&logo=docker&logoColor=white&label=Image%20version)](https://hub.docker.com/r/jruvalcabafsd/byteberry-oauth2)
 [![GitHub License](https://img.shields.io/github/license/JRuvalcabaFSD/ByteBerry-oauth2)](./LICENSE)
 
 Servidor OAuth2 con **Authorization Code + PKCE**, **JWT RS256**, **refresh tokens** y **JWKS** para el sistema de gestión de gastos ByteBerry.
+
+## 📖 **Live Documentation**
+
+🌐 **[https://jruvalcabafsd.github.io/ByteBerry-oauth2/](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)**
+
+---
 
 ## 📋 Tabla de Contenidos
 
@@ -352,77 +360,56 @@ pnpm docker:run
 # Inspeccionar manifest multi-arch
 ./scripts/docker-build.sh inspect
 
-# Test completo de imagen
-./scripts/docker-test.sh test
-
-# Ver logs de testing
-./scripts/docker-test.sh logs
+# Clean build cache
+./scripts/docker-build.sh clean
 ```
 
-### 📋 Docker Compose
+### 📋 Multi-Platform Support
 
 ```bash
-# Desarrollo local
+# Arquitecturas soportadas
+linux/amd64    # Desarrollo y producción x86_64
+linux/arm64    # Raspberry Pi 5 (target production)
+```
+
+### 🐳 Docker Compose
+
+```bash
+# Levantar todos los servicios
 docker-compose up -d
 
-# Testing environment
-docker-compose -f docker-compose.test.yml up
-
 # Ver logs
-docker-compose logs -f oauth2-service
-```
+docker-compose logs -f oauth2
 
-### 🏗️ Multi-arch Build
-
-```bash
-# Verificar plataformas soportadas
-docker buildx ls
-
-# Build para múltiples arquitecturas
-docker buildx build \
-  --platform linux/amd64,linux/arm64 \
-  --tag jruvalcabafsd/byteberry-oauth2:latest \
-  --push .
+# Status de servicios
+docker-compose ps
 ```
 
 ---
 
 ## 📊 API Endpoints
 
-### 🏠 Endpoints Principales
+### 🏠 Service Info
 
-| Método | Ruta           | Descripción              | Estado |
-| ------ | -------------- | ------------------------ | ------ |
-| `GET`  | `/`            | Información del servicio | ✅     |
-| `GET`  | `/health`      | Health check básico      | ✅     |
-| `GET`  | `/health/deep` | Health check profundo    | ✅     |
-
-### 🔐 OAuth2 Endpoints (F1+)
-
-| Método | Ruta                     | Descripción            | Estado |
-| ------ | ------------------------ | ---------------------- | ------ |
-| `GET`  | `/authorize`             | Authorization endpoint | 🟡 F1  |
-| `POST` | `/token`                 | Token endpoint         | 🟡 F1  |
-| `GET`  | `/.well-known/jwks.json` | JWKS endpoint          | 🟡 F1  |
-| `POST` | `/logout`                | Logout endpoint        | 🟡 F1  |
-
-### 📋 Ejemplos de Respuesta
-
-#### Health Check Básico
+#### Root Endpoint
 
 ```bash
-curl http://localhost:4000/health
+curl http://localhost:4000/
 ```
 
 ```json
 {
-  "status": "healthy",
-  "timestamp": "2025-10-21T12:34:56.789Z",
   "service": "ByteBerry-OAuth2",
   "version": "1.1.0",
-  "uptime": 86400000,
+  "status": "running",
+  "timestamp": "2025-10-21T12:34:56.789Z",
   "requestId": "req-1234567890",
-  "environment": "development"
+  "environment": "development",
+  "endpoints": {
+    "home": "/",
+    "health": "/health",
+    "deepHealth": "/health/deep"
+  }
 }
 ```
 
@@ -540,6 +527,17 @@ docker logs oauth2-container | grep -i health
 | **Quality**    | `pnpm quality`    | Ejecutar todas las validaciones |
 | **Audit**      | `pnpm audit`      | Verificar vulnerabilidades      |
 
+### 📖 Documentation Scripts
+
+| Script            | Comando              | Descripción                       |
+| ----------------- | -------------------- | --------------------------------- |
+| **Generate Docs** | `pnpm docs:generate` | Generar documentación JSDoc       |
+| **Serve Docs**    | `pnpm docs:serve`    | Servir documentación localmente   |
+| **Build Docs**    | `pnpm docs:build`    | Limpiar y generar documentación   |
+| **Dev Docs**      | `pnpm docs:dev`      | Build y servir en modo desarrollo |
+| **Watch Docs**    | `pnpm docs:watch`    | Regenerar docs en cambios         |
+| **Clean Docs**    | `pnpm docs:clean`    | Limpiar documentación generada    |
+
 ### 🐳 Docker Scripts
 
 | Script           | Comando             | Descripción         |
@@ -610,6 +608,22 @@ jobs:
   - ✅ Sync develop branch
 ```
 
+#### 📚 Documentation Workflow
+
+```yaml
+name: 📚 Generate Documentation
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  - ✅ Generate JSDoc documentation
+  - ✅ Deploy to GitHub Pages (main only)
+  - ✅ Verify documentation links
+```
+
 ### 📋 Branch Protection
 
 - ✅ **Main branch** protegido
@@ -628,6 +642,7 @@ git commit -m "feat(auth): add JWT validation"
 # 4. Merge → automatic release
 # 5. Docker images published
 # 6. GitHub release created
+# 7. Documentation deployed
 ```
 
 ### 🏷️ Semantic Versioning
@@ -640,30 +655,78 @@ git commit -m "feat(auth): add JWT validation"
 
 ## 📖 Documentación
 
+### 🌐 **Documentación en Vivo**
+
+**📖 [https://jruvalcabafsd.github.io/ByteBerry-oauth2/](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)**
+
 ### 📋 Documentos Disponibles
 
 - 📖 **README.md** - Este archivo
+- 🌐 **[Live Docs](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)** - Documentación JSDoc en vivo
 - 🏗️ **ARCHITECTURE.md** - Decisiones arquitectónicas
 - 🤝 **CONTRIBUTING.md** - Guía de contribución
 - 🔄 **CHANGELOG.md** - Historial de cambios
 - 📊 **API.md** - Documentación de endpoints
 
-### 📚 JSDoc
+### 📚 JSDoc - Desarrollo Local
 
 ```bash
 # Generar documentación JSDoc
 pnpm docs:generate
 
-# Ver documentación
-open docs/index.html
+# Servir documentación localmente
+pnpm docs:serve
+
+# Desarrollo con hot-reload
+pnpm docs:dev
+
+# Watch mode para cambios
+pnpm docs:watch
+
+# Ver documentación local
+open http://localhost:8080
 ```
+
+### 🔧 Configuración JSDoc
+
+La documentación se genera automáticamente usando:
+
+- **JSDoc 4.x** con plugin TypeScript
+- **better-docs** para mejor formato
+- **Deployment automático** a GitHub Pages
+- **Hot-reload** en desarrollo
+
+```bash
+# Configuración en jsdoc.json
+{
+  "source": {
+    "include": ["./src"],
+    "exclude": ["**/*.test.ts", "**/*.spec.ts"]
+  },
+  "plugins": ["better-docs/typescript"],
+  "templates": {
+    "better-docs": {
+      "name": "ByteBerry OAuth2 Service Documentation"
+    }
+  }
+}
+```
+
+### 🚀 Deploy Automático
+
+La documentación se actualiza automáticamente:
+
+- **Push a main** → Deploy a GitHub Pages
+- **PR** → Build de validación
+- **URL estable** → Siempre la última versión
 
 ### 🔗 Enlaces Útiles
 
-- 📦 [Docker Hub](https://hub.docker.com/r/jruvalcabafsd/byteberry-oauth2)
-- 🐙 [GitHub Repository](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2)
-- 🚀 [CI/CD Status](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/actions)
-- 📊 [Releases](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/releases)
+- 🌐 **[Live Documentation](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)** - Documentación completa
+- 📦 **[Docker Hub](https://hub.docker.com/r/jruvalcabafsd/byteberry-oauth2)** - Imágenes Docker
+- 🐙 **[GitHub Repository](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2)** - Código fuente
+- 🚀 **[CI/CD Status](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/actions)** - Workflows
+- 📊 **[Releases](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/releases)** - Versiones
 
 ---
 
@@ -685,10 +748,13 @@ git checkout -b feature/amazing-feature
 # 5. Hacer cambios y validar
 pnpm quality
 
-# 6. Commit con conventional commits
+# 6. Generar documentación
+pnpm docs:build
+
+# 7. Commit con conventional commits
 pnpm commit
 
-# 7. Push y crear PR
+# 8. Push y crear PR
 git push origin feature/amazing-feature
 ```
 
@@ -714,8 +780,9 @@ git commit -m "feat(api)!: change authentication flow"
 - [x] Coverage maintained (>95%)
 - [x] Linting passing (`pnpm lint`)
 - [x] Type checking passing (`pnpm type-check`)
-- [x] Documentation updated
+- [x] Documentation updated (`pnpm docs:build`)
 - [x] Conventional commits used
+- [x] JSDoc comments added/updated
 
 ### 🐛 Reportar Issues
 
@@ -737,6 +804,7 @@ git commit -m "feat(api)!: change authentication flow"
 - [x] 🧪 **Testing** (98.64% coverage)
 - [x] 🐳 **Docker** multi-arch
 - [x] 🚀 **CI/CD** completo
+- [x] 📖 **JSDoc + GitHub Pages** documentación
 
 ### 🟡 F1 - OAuth2 (Próximo)
 
@@ -758,7 +826,7 @@ git commit -m "feat(api)!: change authentication flow"
 
 - 📧 **Email:** support@jrmdev.org
 - 🐙 **GitHub Issues:** [Crear Issue](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues)
-- 📖 **Documentación:** [Wiki](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/wiki)
+- 📖 **Documentación:** [Live Docs](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)
 
 ---
 

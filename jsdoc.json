@@ -1,0 +1,51 @@
+{
+  "source": {
+    "include": ["./src"],
+    "exclude": ["./src/**/*.test.ts", "./src/**/*.spec.ts", "./src/**/__tests__/**", "./src/**/__mocks__/**"],
+    "includePattern": "\\.(js|ts)$",
+    "excludePattern": "(node_modules|dist|logs)/"
+  },
+  "opts": {
+    "destination": "./docs/",
+    "recurse": true,
+    "readme": "./README.md"
+  },
+  "plugins": ["plugins/markdown", "node_modules/better-docs/typescript"],
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false,
+    "better-docs": {
+      "name": "ByteBerry OAuth2 Service Documentation",
+      "title": "ByteBerry OAuth2 API Documentation",
+      "hideGenerator": true,
+      "navigation": [
+        {
+          "label": "API Reference",
+          "href": "/docs/"
+        },
+        {
+          "label": "Architecture",
+          "href": "#architecture"
+        }
+      ],
+      "navLinks": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/JRuvalcabaFSD/ByteBerry-oauth2"
+        },
+        {
+          "label": "Docker Hub",
+          "href": "https://hub.docker.com/r/jruvalcabafsd/byteberry-oauth2"
+        },
+        {
+          "label": "Soporte",
+          "href": "mailto:support@jrmdev.org"
+        }
+      ],
+      "favicon": "./favicon.ico"
+    }
+  },
+  "typescript": {
+    "moduleRoot": "./src"
+  }
+}

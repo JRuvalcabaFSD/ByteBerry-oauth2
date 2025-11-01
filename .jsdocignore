@@ -1,0 +1,11 @@
+node_modules/
+dist/
+logs/
+coverage/
+*.test.ts
+*.spec.ts
+__tests__/
+__mocks__/
+.env*
+docker-compose.yml
+Dockerfile

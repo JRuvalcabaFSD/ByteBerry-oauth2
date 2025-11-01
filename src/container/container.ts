@@ -7,10 +7,10 @@ import { CircularDependencyError, ContainerError, getErrMsg, TokenAlreadyRegiste
  *
  * @template K - The key type that extends the keys of ServiceMap, defaults to any key from ServiceMap
  *
- * @property {function(IContainer): ServiceMap[K]} factory - A factory function that creates an instance of the service.
+ * @property {function(IContainer): ServiceMap<K>} factory - A factory function that creates an instance of the service.
  *   The factory receives the container instance as a parameter and returns the service instance.
  * @property {lifecycle} lifecycle - Defines the lifecycle behavior of the service (e.g., singleton, transient).
- * @property {ServiceMap[K]} [instance] - Optional cached instance of the service.
+ * @property {ServiceMap<K>} [instance] - Optional cached instance of the service.
  *   Typically used for singleton services to store the created instance.
  */
 
@@ -61,7 +61,7 @@ export class Container implements IContainer {
    *
    * @template K - The service token type, constrained to keys of ServiceMap
    * @param {K} token - The unique identifier for the service to register
-   * @param {(container: IContainer) => ServiceMap[K]} factory - A factory function that creates an instance of the service
+   * @param {function(IContainer): ServiceMap<K>} factory - A factory function that creates an instance of the service
    * @throws {TokenAlreadyRegisteredError} Throws if a service with the same token is already registered
    * @returns {void}
    *
@@ -84,7 +84,7 @@ export class Container implements IContainer {
    *
    * @template K - The service token type, constrained to keys of ServiceMap
    * @param token - The unique identifier for the service to be registered
-   * @param factory - A factory function that creates the service instance, receiving the container as parameter
+   * @param {function(IContainer): ServiceMap<K>} factory - A factory function that creates the service instance, receiving the container as parameter
    * @throws {TokenAlreadyRegisteredError} When the token is already registered in the container
    * @returns {void}
    *
@@ -128,7 +128,7 @@ export class Container implements IContainer {
    *
    * @template K - The service token type extending keyof ServiceMap
    * @param {K} token - The unique identifier for the service to resolve
-   * @returns {ServiceMap[K]} The resolved service instance
+   * @returns {ServiceMap<K>} The resolved service instance
    *
    * @throws {TokenNotRegisteredError} When the token is not registered in the container
    * @throws {CircularDependencyError} When a circular dependency is detected during resolution
