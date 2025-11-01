@@ -20,20 +20,23 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Verify pnpm installation
-        run: pnpm --version
-
-      - name: Install dependencies
-        run: pnpm install
+      - name: 💾 Cache node_modules
+        uses: actions/cache/save@v3
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: 🏗️ Generate documentation
         run: pnpm run docs:ci
