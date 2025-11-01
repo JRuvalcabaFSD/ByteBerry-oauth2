@@ -1,8 +1,13 @@
 name: 📚 Generate Documentation
 
 on:
-  pull_request:
+  push: # ✅ Deploy en push a main
     branches: [main]
+  pull_request: # ✅ Build en PRs (sin deploy)
+    branches: [main]
+
+env:
+  NODE_VERSION: '22.18.0'
 
 jobs:
   docs:

@@ -41,8 +41,7 @@
           "label": "Soporte",
           "href": "mailto:support@jrmdev.org"
         }
-      ],
-      "favicon": "./favicon.ico"
+      ]
     }
   },
   "typescript": {
