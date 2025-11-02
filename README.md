@@ -72,13 +72,13 @@ Servidor OAuth2 con **Authorization Code + PKCE**, **JWT RS256**, **refresh toke
 src/
 ├── 🔧 config/          # Configuración centralizada
 ├── 📋 interfaces/      # Contratos compartidos
-├── 🏛️ domain/         # Entities, Value Objects, Domain Services
+├── 🏛️ domain/          # Entities, Value Objects, Domain Services
 ├── 📱 application/     # Use Cases, DTOs
-├── 🏗️ infrastructure/ # Database, Repositories, External Services
+├── 🏗️ infrastructure/  # Database, Repositories, External Services
 ├── 🎨 presentation/    # Controllers, Routes, Middleware
-├── 🤝 shared/         # Errors, Utils, Constants
-├── 📦 container/      # Dependency Injection Container
-└── 🚀 bootstrap/      # Application Bootstrap
+├── 🤝 shared/          # Errors, Utils, Constants
+├── 📦 container/       # Dependency Injection Container
+└── 🚀 bootstrap/       # Application Bootstrap
 ```
 
 ### 🔄 Dependency Flow
@@ -203,6 +203,7 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:4002,http://localhost:4003
 NODE_ENV=development
 LOG_LEVEL=debug
 PORT=4000
+CORS_ORIGINS=http://localhost:5173,http://localhost:4002,http://localhost:4003
 ```
 
 #### 🚀 Production
@@ -211,6 +212,7 @@ PORT=4000
 NODE_ENV=production
 LOG_LEVEL=info
 PORT=4000
+CORS_ORIGINS=http://localhost:5173,http://localhost:4002,http://localhost:4003
 ```
 
 #### 🧪 Test
@@ -219,6 +221,7 @@ PORT=4000
 NODE_ENV=test
 LOG_LEVEL=warn
 PORT=0
+CORS_ORIGINS=http://localhost:5173,http://localhost:4002,http://localhost:4003
 ```
 
 ---
@@ -237,9 +240,6 @@ pnpm type-check
 # Linting
 pnpm lint
 pnpm lint:fix
-
-# Formateo de código
-pnpm format
 
 # Build para producción
 pnpm build
@@ -290,32 +290,6 @@ pnpm test:watch
 
 # Tests verbosos
 pnpm test:verbose
-```
-
-### 📋 Tipos de Tests
-
-#### 🔬 Unit Tests
-
-```bash
-# Tests de lógica de negocio
-pnpm test src/domain
-pnpm test src/application
-pnpm test src/shared
-```
-
-#### 🔗 Integration Tests
-
-```bash
-# Tests de infraestructura
-pnpm test src/infrastructure
-pnpm test src/container
-```
-
-#### 🌐 E2E Tests
-
-```bash
-# Tests end-to-end completos
-pnpm test src/e2e
 ```
 
 ### 📊 Coverage Report
@@ -624,13 +598,6 @@ jobs:
   - ✅ Verify documentation links
 ```
 
-### 📋 Branch Protection
-
-- ✅ **Main branch** protegido
-- ✅ **Require PR** + CI passing
-- ✅ **No force push**
-- ✅ **Require reviews** (1 approval)
-
 ### 📦 Release Process
 
 ```bash
@@ -663,10 +630,8 @@ git commit -m "feat(auth): add JWT validation"
 
 - 📖 **README.md** - Este archivo
 - 🌐 **[Live Docs](https://jruvalcabafsd.github.io/ByteBerry-oauth2/)** - Documentación JSDoc en vivo
-- 🏗️ **ARCHITECTURE.md** - Decisiones arquitectónicas
 - 🤝 **CONTRIBUTING.md** - Guía de contribución
 - 🔄 **CHANGELOG.md** - Historial de cambios
-- 📊 **API.md** - Documentación de endpoints
 
 ### 📚 JSDoc - Desarrollo Local
 
