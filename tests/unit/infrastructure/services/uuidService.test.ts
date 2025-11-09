@@ -271,7 +271,7 @@ describe('UuidService', () => {
         expect(result).toBe(false);
       });
 
-      it('should_HandleUnicodeCharacters_When_UnicodeProvided', () => {
+      it('should handle unicode characters when unicode provided', () => {
         const unicodeUuid = '550e8400-e29b-41d4-a716-44665544000🙂';
 
         const result = uuidService.isValid(unicodeUuid);

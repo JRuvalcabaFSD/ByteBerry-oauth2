@@ -33,7 +33,7 @@ type ErrorHandler = (error: Error, req: Request, res: Response, config: IConfig)
 const HANDLERS = new Map<string, ErrorHandler>([
   [
     'oauth',
-    (error, req, res, config) => {
+    (error, req, res, _config) => {
       const e = error as OAuth2Error;
       const requestId = req.requestId || 'unknown';
       if (e.statusCode === 401) res.setHeader('WWW-Authenticate', 'Bearer');
@@ -114,8 +114,6 @@ const HANDLERS = new Map<string, ErrorHandler>([
 export function createErrorMiddleware(logger: ILogger, config: IConfig) {
   const ctxLogger = withLoggerContext(logger, 'createErrorMiddleware');
 
-  console.log('Debug');
-
   const defaultHandler: ErrorHandler = (error, req, res) => {
     const requestId = req.requestId || 'unknown';
     res.status(500).json({
@@ -130,7 +128,8 @@ export function createErrorMiddleware(logger: ILogger, config: IConfig) {
     const requestId = req.requestId || 'unknown';
     const err = error as any;
 
-    ctxLogger.error(`${error.name} error in request`, {
+    const errorName = error.name && error.name !== 'Error' ? error.name : 'Unhandled';
+    ctxLogger.error(`${errorName} error in request`, {
       requestId,
       error: error.message,
       stack: error.stack === '' ? undefined : error.stack,

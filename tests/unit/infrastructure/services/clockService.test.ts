@@ -262,7 +262,7 @@ describe('ClockService', () => {
   });
 
   describe('Error Handling', () => {
-    it('should_HandleDateConstructorErrors_When_DateIsInvalid', () => {
+    it('should handle date constructor errors when date is invalid', () => {
       expect(() => clockService.now()).not.toThrow();
       expect(() => clockService.timestamp()).not.toThrow();
       expect(() => clockService.isoString()).not.toThrow();
@@ -270,7 +270,7 @@ describe('ClockService', () => {
   });
 
   describe('Performance', () => {
-    it('should_ExecuteQuickly_When_CalledManyTimes', () => {
+    it('should execute quickly when called many times', () => {
       const iterations = 1000;
       const startTime = Date.now();
 
@@ -289,7 +289,7 @@ describe('ClockService', () => {
 });
 
 describe('createClockService factory', () => {
-  it('should_ReturnClockServiceInstance_When_FactoryCalled', () => {
+  it('should return clock service instance when factory called', () => {
     const clockService = createClockService();
 
     expect(clockService).toBeInstanceOf(ClockService);
@@ -298,7 +298,7 @@ describe('createClockService factory', () => {
     expect(clockService).toHaveProperty('isoString');
   });
 
-  it('should_ReturnNewInstance_When_CalledMultipleTimes', () => {
+  it('should return new instance when called multiple times', () => {
     const service1 = createClockService();
     const service2 = createClockService();
 
@@ -307,7 +307,7 @@ describe('createClockService factory', () => {
     expect(service2).toBeInstanceOf(ClockService);
   });
 
-  it('should_ReturnFunctionalService_When_FactoryCalled', () => {
+  it('should return functional service when factory called', () => {
     const clockService = createClockService();
 
     expect(typeof clockService.now()).toBe('object');
@@ -315,7 +315,7 @@ describe('createClockService factory', () => {
     expect(typeof clockService.isoString()).toBe('string');
   });
 
-  it('should_BeUsableInDIContainer_When_FactoryProvided', () => {
+  it('should be usable in di container when factory provided', () => {
     const mockContainer = {
       registerSingleton: jest.fn(),
     };

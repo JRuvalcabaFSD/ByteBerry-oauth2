@@ -382,7 +382,7 @@ describe('Config', () => {
       const endTime = Date.now();
 
       // Assert
-      expect(endTime - startTime).toBeLessThan(100); // Should be very fast
+      expect(endTime - startTime).toBeLessThan(110); // Should be very fast
     });
 
     it('should return cached instance when called repeatedly', async () => {

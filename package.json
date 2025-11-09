@@ -36,7 +36,9 @@
 		"docs:build": "pnpm run docs:clean && pnpm run docs:generate",
 		"docs:dev": "pnpm run docs:build && pnpm run docs:serve",
 		"docs:watch": "nodemon --watch src --ext ts --exec \"pnpm run docs:build\"",
-		"docs:ci": "pnpm run docs:build && echo 'Documentation generated successfully'"
+		"docs:ci": "pnpm run docs:build && echo 'Documentation generated successfully'",
+		"generate:pkce":" node ./scripts/generate-pkce.js"
+
 	},
 	"keywords": [],
 	"author": "",

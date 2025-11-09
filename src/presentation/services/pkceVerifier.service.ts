@@ -1,5 +1,6 @@
 import { CodeChallenge } from '@/domain';
-import { IHashService, IPKceVerifierService } from '@/interfaces';
+import { IHashService, ILogger, IPKceVerifierService } from '@/interfaces';
+import { LogContextClass, LogContextMethod } from '@/shared';
 
 /**
  * Service for verifying PKCE (Proof Key for Code Exchange) code challenges.
@@ -15,13 +16,18 @@ import { IHashService, IPKceVerifierService } from '@/interfaces';
  * @see {@link CodeChallenge}
  */
 
+@LogContextClass()
 export class PkceVerifierService implements IPKceVerifierService {
   /**
-   * Creates an instance of the service with the provided hash service dependency.
-   * @param hashService An implementation of the IHashService interface used for hashing operations.
+   * Creates an instance of the service.
+   * @param hashService - Service responsible for hashing operations.
+   * @param logger - Logger instance for logging messages and errors.
    */
 
-  constructor(private readonly hashService: IHashService) {}
+  constructor(
+    private readonly hashService: IHashService,
+    private readonly logger: ILogger
+  ) {}
 
   /**
    * Verifies a PKCE code challenge against a provided verifier.
@@ -35,7 +41,14 @@ export class PkceVerifierService implements IPKceVerifierService {
    * @returns `true` if the verifier matches the challenge according to the method; otherwise, `false`.
    */
 
+  @LogContextMethod()
   public verify(challenge: CodeChallenge, verifier: string): boolean {
+    this.logger.debug('PKCE Verification Start', {
+      method: challenge.getMethod(),
+      challengeValue: challenge.getChallenge(),
+      verifierLength: verifier.length,
+    });
+
     if (challenge.isPlainMethod()) {
       // Plain method: direct comparison (no hashing)
       return challenge.verifyPlain(verifier);
@@ -43,6 +56,24 @@ export class PkceVerifierService implements IPKceVerifierService {
 
     // S256 method: hash verifier and compare
     const computedHash = this.hashService.sha256(verifier);
-    return computedHash === challenge.getChallenge();
+
+    this.logger.debug('PKCE S256 Verification', {
+      expectedChallenge: challenge.getChallenge(),
+      computedHash: computedHash,
+      match: computedHash === challenge.getChallenge(),
+      expectedLength: challenge.getChallenge().length,
+      computedLength: computedHash.length,
+    });
+
+    const result = computedHash === challenge.getChallenge();
+
+    if (!result) {
+      this.logger.warn('PKCE Verification Failed - Hash Mismatch', {
+        expected: challenge.getChallenge(),
+        computed: computedHash,
+      });
+    }
+
+    return result;
   }
 }

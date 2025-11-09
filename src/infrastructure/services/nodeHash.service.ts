@@ -27,7 +27,7 @@ export class NodeHashService implements IHashService {
    */
 
   public sha256(value: string): string {
-    return crypto.createHash('sha256').update(value).digest('base64');
+    return crypto.createHash('sha256').update(value).digest('base64url');
   }
   /**
    * Verifies whether the SHA-256 hash of a given value matches a provided hash.

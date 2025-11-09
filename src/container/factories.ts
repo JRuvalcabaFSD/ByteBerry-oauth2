@@ -1,7 +1,7 @@
 import { ExchangeCodeForTokenUseCase, GenerateAuthorizationCodeUseCase } from '@/application';
 import * as infrastructure from '@/infrastructure';
 import { ICodeStore, IContainer, IExchangeCodeForTokenUseCase, IGenerateAuthorizationCodeUseCase } from '@/interfaces';
-import { AuthorizeController, JWksController, TokenController } from '@/presentation';
+import { AuthorizeController, JWksController, PkceVerifierService, TokenController } from '@/presentation';
 
 /**
  * Factory function to create a WinstonLoggerService instance.
@@ -101,7 +101,7 @@ export function createGenerateAuthorizationCodeUseCase(c: IContainer): IGenerate
  */
 
 export function createExchangeCodeForTokenUseCase(c: IContainer): IExchangeCodeForTokenUseCase {
-  return new ExchangeCodeForTokenUseCase(c.resolve('CodeStore'), c.resolve('Logger'));
+  return new ExchangeCodeForTokenUseCase(c.resolve('CodeStore'), c.resolve('Logger'), c.resolve('PkceVerifierService'));
 }
 
 /**
@@ -151,6 +151,6 @@ export function createJwksController(): JWksController {
  * @returns A new instance of {@link PkceVerifierService} initialized with the resolved 'Hash' service.
  */
 
-export function createPkceVerifierService(c: IContainer): infrastructure.PkceVerifierService {
-  return new infrastructure.PkceVerifierService(c.resolve('Hash'));
+export function createPkceVerifierService(c: IContainer): PkceVerifierService {
+  return new PkceVerifierService(c.resolve('Hash'), c.resolve('Logger'));
 }
