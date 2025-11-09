@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 
 import { IGenerateAuthorizationCodeUseCase } from '@/interfaces';
 import { AuthorizeRequestDto } from '@/application';
+import { InvalidRequestError } from '@/shared';
 
 /**
  * Controller responsible for handling OAuth2 authorization requests.
@@ -70,7 +71,14 @@ export class AuthorizeController {
       const result = await this.generateUseCase.execute(requestDto);
 
       // Build redirect URL with code
-      const redirectUrl = new URL(requestDto.redirect_uri);
+      let redirectUrl: URL;
+      try {
+        redirectUrl = new URL(requestDto.redirect_uri);
+      } catch {
+        const message = 'Invalid redirect_uri: must be a valid absolute URL';
+        throw new InvalidRequestError(message);
+      }
+
       redirectUrl.searchParams.set('code', result.code);
       if (result.state) {
         redirectUrl.searchParams.set('state', result.state);

@@ -20,7 +20,7 @@
  */
 
 export class OAuth2Error extends Error {
-  public readonly __isOAuth2Error = true;
+  public readonly errorType = 'oauth';
 
   /**
    * Creates an instance of OAuth2Error.

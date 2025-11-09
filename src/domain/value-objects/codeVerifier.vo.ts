@@ -19,6 +19,8 @@
  * @see {@link https://datatracker.ietf.org/doc/html/rfc7636 | RFC 7636 - PKCE}
  */
 
+import { InvalidValueObjectError } from '@/shared';
+
 export class CodeVerifier {
   /**
    * Creates a new CodeVerifier instance.
@@ -30,24 +32,23 @@ export class CodeVerifier {
   private constructor(private readonly value: string) {}
 
   /**
-   * Creates a new CodeVerifier instance from the provided string value.
+   * Creates a new `CodeVerifier` instance after validating the provided value.
    *
-   * @param value - The code verifier string to validate and create from. Must be a base64url encoded string.
-   * @returns A new CodeVerifier instance.
-   * @throws {Error} If the value is empty or contains only whitespace.
-   * @throws {Error} If the value length is not between 43 and 128 characters (inclusive).
-   * @throws {Error} If the value is not base64url encoded (contains characters other than A-Z, a-z, 0-9, underscore, or hyphen).
+   * Validates that the value:
+   * - Is not empty or only whitespace.
+   * - Has a length between 43 and 128 characters.
+   * - Contains only base64url-encoded characters (A-Z, a-z, 0-9, '-', '_').
    *
-   * @example
-   * ```typescript
-   * const verifier = CodeVerifier.create('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk');
-   * ```
+   * @param value - The code verifier string to validate and encapsulate.
+   * @returns A new `CodeVerifier` instance if validation passes.
+   * @throws {InvalidValueObjectError} If the value is empty, has invalid length, or contains invalid characters.
    */
 
   static create(value: string): CodeVerifier {
-    if (!value || value.trim().length === 0) throw new Error('Code verifier cannot be empty');
-    if (value.length < 43 || value.length > 128) throw new Error('Code verifier must be between 43 and 128 characters');
-    if (!/^[A-Za-z0-9_-]+$/.test(value)) throw new Error('Code verifier must be base64url encoded');
+    if (!value || value.trim().length === 0) throw new InvalidValueObjectError('Code verifier', 'cannot be empty');
+    if (value.length < 43 || value.length > 128)
+      throw new InvalidValueObjectError('Code verifier', 'must be between 43 and 128 characters');
+    if (!/^[A-Za-z0-9_-]+$/.test(value)) throw new InvalidValueObjectError('Code verifier', 'must be base64url encoded');
 
     return new CodeVerifier(value);
   }

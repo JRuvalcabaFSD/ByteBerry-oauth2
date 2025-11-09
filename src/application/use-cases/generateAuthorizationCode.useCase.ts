@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 
-import { InvalidRequestError, LogContextClass, LogContextMethod } from '@/shared';
+import { InvalidRequestError, InvalidValueObjectError, LogContextClass, LogContextMethod, UnauthorizedClientError } from '@/shared';
 import { ICodeStore, IGenerateAuthorizationCodeUseCase, ILogger } from '@/interfaces';
 import { AuthorizeRequestDto, AuthorizeResponseDto } from '@/application';
 import { AuthorizationCodeEntity, ClientId, CodeChallenge } from '@/domain';
@@ -51,56 +51,77 @@ export class GenerateAuthorizationCodeUseCase implements IGenerateAuthorizationC
   ) {}
 
   /**
-   * Generates an authorization code for OAuth2 PKCE flow.
+   * Generates an OAuth2 authorization code for the given authorization request.
    *
-   * @param request - The authorization request containing client credentials and PKCE parameters
-   * @returns A promise that resolves to an object containing the generated authorization code and state
-   * @throws {InvalidRequestError} When response_type is not 'code' or PKCE parameters are missing
+   * Validates the request parameters, including response type and PKCE requirements.
+   * Creates and stores an authorization code entity with the provided client ID, redirect URI,
+   * code challenge, scope, and state. Handles errors related to invalid request parameters
+   * and logs relevant debug and error information.
    *
-   * @remarks
-   * This method implements the OAuth2 authorization code flow with PKCE (Proof Key for Code Exchange).
-   * The generated authorization code is stored temporarily with a 5-minute expiration period.
-   *
-   * @example
-   * ```typescript
-   * const response = await useCase.execute({
-   *   response_type: 'code',
-   *   client_id: 'my-client-id',
-   *   redirect_uri: 'https://example.com/callback',
-   *   code_challenge: 'challenge-string',
-   *   code_challenge_method: 'S256',
-   *   scope: 'read write',
-   *   state: 'random-state'
-   * });
-   * ```
+   * @param request - The authorization request DTO containing client ID, redirect URI, code challenge, code challenge method, scope, and state.
+   * @returns A promise that resolves to an object containing the generated authorization code and state.
+   * @throws {InvalidRequestError} If the request parameters are invalid or missing required PKCE fields.
+   * @throws {UnauthorizedClientError} If the client is not authorized.
+   * @throws {Error} For unexpected errors during authorization code generation.
    */
 
   @LogContextMethod()
   public async execute(request: AuthorizeRequestDto): Promise<AuthorizeResponseDto> {
     this.logger.debug('Generating authorization code', { client_id: request.client_id });
 
-    if (request.response_type !== 'code') throw new InvalidRequestError('Only response_type=code is supported');
-    if (!request.code_challenge || !request.code_challenge_method)
-      throw new InvalidRequestError('code_challenge and code_challenge_method are required (PKCE)');
+    try {
+      if (request.response_type !== 'code') throw new InvalidRequestError('Only response_type=code is supported');
+      if (!request.code_challenge || !request.code_challenge_method)
+        throw new InvalidRequestError('code_challenge and code_challenge_method are required (PKCE)');
 
-    const clientId = ClientId.create(request.client_id);
-    const codeChallenge = CodeChallenge.create(request.code_challenge, request.code_challenge_method);
+      if (!request.redirect_uri) throw new InvalidRequestError('redirect_uri are required (PKCE)');
 
-    const code = crypto.randomBytes(32).toString('base64');
+      let clientId: ClientId;
+      let codeChallenge: CodeChallenge;
 
-    const authCode = AuthorizationCodeEntity.create({
-      code,
-      clientId,
-      redirectUri: request.redirect_uri,
-      codeChallenge,
-      expirationMinutes: 5,
-      scope: request.scope,
-      state: request.state,
-    });
+      try {
+        clientId = ClientId.create(request.client_id);
+      } catch (error) {
+        if (error instanceof InvalidValueObjectError) {
+          throw new InvalidRequestError(error.message);
+        }
+        throw error;
+      }
 
-    this.codeStore.set(code, authCode);
-    this.logger.debug('Authorization code generated successfully', { client_id: request.client_id, code_length: code.length });
+      try {
+        codeChallenge = CodeChallenge.create(request.code_challenge, request.code_challenge_method);
+      } catch (error) {
+        if (error instanceof InvalidValueObjectError) {
+          throw new InvalidRequestError(error.message);
+        }
+        throw error;
+      }
+      const code = crypto.randomBytes(32).toString('base64');
 
-    return { code, state: request.state };
+      const authCode = AuthorizationCodeEntity.create({
+        code,
+        clientId,
+        redirectUri: request.redirect_uri,
+        codeChallenge,
+        expirationMinutes: 5,
+        scope: request.scope,
+        state: request.state,
+      });
+
+      this.codeStore.set(code, authCode);
+      this.logger.debug('Authorization code generated successfully', { client_id: request.client_id, code_length: code.length });
+
+      return { code, state: request.state };
+    } catch (error) {
+      if (error instanceof InvalidRequestError || error instanceof UnauthorizedClientError) {
+        throw error;
+      }
+
+      this.logger.error('Unexpected error generating authorization code', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        client_id: request.client_id,
+      });
+      throw error;
+    }
   }
 }

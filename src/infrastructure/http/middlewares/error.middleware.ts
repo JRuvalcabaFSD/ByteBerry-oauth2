@@ -3,93 +3,134 @@ import { NextFunction, Request, Response } from 'express';
 import { IConfig, ILogger } from '@/interfaces';
 import { OAuth2Error, withLoggerContext } from '@/shared';
 
+/**
+ * Handles errors that occur during HTTP request processing.
+ *
+ * @param error - The error object thrown during request handling.
+ * @param req - The Express request object.
+ * @param res - The Express response object.
+ * @param config - The application configuration object.
+ */
+
 type ErrorHandler = (error: Error, req: Request, res: Response, config: IConfig) => void;
 
 /**
- * Creates an Express error-handling middleware that logs unhandled errors and returns a standardized 500 JSON response.
+ * A map of error handler functions keyed by error type.
  *
- * @param logger - ILogger used for structured logging.
- * @param config - IConfig used to determine whether detailed error messages should be exposed (via isDevelopment()).
- * @returns An Express error-handling middleware (error, req, res, next) that:
- *   - creates a contextual logger with withLoggerContext(logger, 'createErrorMiddleware'),
- *   - logs the unhandled error including requestId, error message, stack, HTTP method, and request URL,
- *   - responds with HTTP 500 and a JSON payload: {object} containing error, message, requestId, and timestamp.
+ * Each handler is responsible for formatting and sending an appropriate HTTP response
+ * based on the error type and context. The supported error types include:
  *
- * @remarks
- * - If req.requestId is falsy, the middleware logs and returns 'unknown' as the requestId.
- * - When config.isDevelopment() returns true the response includes the actual error message; otherwise a generic message is returned.
+ * - `'oauth2'`: Handles OAuth2 errors, sets `WWW-Authenticate` header for 401 responses,
+ *   and includes stack trace in development mode.
+ * - `'bootstrap'`: Handles bootstrap initialization errors, returns a 500 status with context.
+ * - `'container'`: Handles dependency injection container errors, returns a 500 status with token info.
+ * - `'config'`: Handles configuration errors, returns a 500 status with context.
+ * - `'cors'`: Handles CORS errors, returns a 403 status and hides error details in production.
  *
- * @example
- * // Register as the last middleware in an Express app:
- * // app.use(createErrorMiddleware(appLogger, config));
+ * All handlers include a `requestId` and a timestamp in the response for traceability.
+ */
+
+const HANDLERS = new Map<string, ErrorHandler>([
+  [
+    'oauth',
+    (error, req, res, config) => {
+      const e = error as OAuth2Error;
+      const requestId = req.requestId || 'unknown';
+      if (e.statusCode === 401) res.setHeader('WWW-Authenticate', 'Bearer');
+      res.status(e.statusCode).json({
+        ...e.toJSON(),
+        requestId,
+        timestamp: new Date().toISOString(),
+      });
+    },
+  ],
+  [
+    'bootstrap',
+    (error, req, res, _config) => {
+      const e = error as any;
+      res.status(500).json({
+        error: 'Bootstrap Failed',
+        message: error.message,
+        context: e.context,
+        requestId: req.requestId || 'unknown',
+        timestamp: new Date().toISOString(),
+      });
+    },
+  ],
+
+  [
+    'container',
+    (error, req, res, _config) => {
+      const e = error as any;
+      res.status(500).json({
+        error: 'Container Error',
+        message: error.message,
+        token: e.token?.toString(),
+        requestId: req.requestId || 'unknown',
+        timestamp: new Date().toISOString(),
+      });
+    },
+  ],
+
+  [
+    'config',
+    (error, req, res, _config) => {
+      const e = error as any;
+      res.status(500).json({
+        error: 'Configuration Error',
+        message: error.message,
+        context: e.context,
+        requestId: req.requestId || 'unknown',
+        timestamp: new Date().toISOString(),
+      });
+    },
+  ],
+
+  [
+    'cors',
+    (error, req, res, config) => {
+      res.status(403).json({
+        error: 'Forbidden',
+        message: config.isDevelopment() ? error.message : 'Origin not allowed by CORS',
+        requestId: req.requestId || 'unknown',
+        timestamp: new Date().toISOString(),
+      });
+    },
+  ],
+]);
+
+/**
+ * Creates an Express error-handling middleware that logs errors and sends a standardized error response.
+ *
+ * The middleware logs error details using the provided logger, including request information and stack trace.
+ * It selects a custom error handler based on the error type if available, otherwise falls back to a default handler.
+ * In development mode, the error message is included in the response; otherwise, a generic message is sent.
+ *
+ * @param logger - An instance implementing the ILogger interface for logging error details.
+ * @param config - An instance implementing the IConfig interface to determine environment settings.
+ * @returns An Express-compatible error-handling middleware function.
  */
 
 export function createErrorMiddleware(logger: ILogger, config: IConfig) {
   const ctxLogger = withLoggerContext(logger, 'createErrorMiddleware');
 
-  const errorHandlers: { [key: string]: ErrorHandler } = {
-    CorsOriginsError: (error: Error, req: Request, res: Response, config: IConfig) => {
-      const requestId = req.requestId || 'unknown';
-      const message = config.isDevelopment() ? error.message : 'Origin not allowed by CORS';
-      res.status(403).json({
-        error: 'Forbidden',
-        message,
-        requestId,
-        timestamp: new Date().toISOString(),
-      });
-    },
+  console.log('Debug');
 
-    OAuth2Error: (error: Error, req: Request, res: Response, config: IConfig) => {
-      const requestId = req.requestId || 'unknown';
-      const isDev = config.isDevelopment();
-
-      // Type guard para OAuth2Error
-      if (typeof (error as any).toJSON === 'function' && typeof (error as any).statusCode === 'number') {
-        const oauth2Error = error as OAuth2Error;
-        const payload = isDev
-          ? {
-              ...oauth2Error.toJSON(),
-              error_description: oauth2Error.errorDescription,
-              stack: oauth2Error.stack,
-              requestId,
-              timestamp: new Date().toISOString(),
-            }
-          : {
-              ...oauth2Error.toJSON(),
-              requestId,
-              timestamp: new Date().toISOString(),
-            };
-
-        res.status(oauth2Error.statusCode).json(payload);
-        return;
-      }
-
-      // Si no es OAuth2Error, responde como error genérico
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: config.isDevelopment() ? error.message : 'Something went wrong',
-        requestId,
-        timestamp: new Date().toISOString(),
-      });
-    },
-    // Add more error handlers here as needed, e.g., AuthenticationError, ValidationError, etc.
-    default: (error: Error, req: Request, res: Response, config: IConfig) => {
-      const requestId = req.requestId || 'unknown';
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: config.isDevelopment() ? error.message : 'Something went wrong',
-        requestId,
-        timestamp: new Date().toISOString(),
-      });
-    },
+  const defaultHandler: ErrorHandler = (error, req, res) => {
+    const requestId = req.requestId || 'unknown';
+    res.status(500).json({
+      error: 'Internal Server Error',
+      message: config.isDevelopment() ? error.message : 'Something went wrong',
+      requestId,
+      timestamp: new Date().toISOString(),
+    });
   };
 
   return (error: Error, req: Request, res: Response, _next: NextFunction): void => {
     const requestId = req.requestId || 'unknown';
+    const err = error as any;
 
-    const errorName = error.name === 'Error' ? 'Unhandled' : error.name;
-
-    ctxLogger.error(`${errorName} error in request`, {
+    ctxLogger.error(`${error.name} error in request`, {
       requestId,
       error: error.message,
       stack: error.stack === '' ? undefined : error.stack,
@@ -97,11 +138,8 @@ export function createErrorMiddleware(logger: ILogger, config: IConfig) {
       url: req.originalUrl || req.url,
     });
 
-    const isOAuth2Error = (error as any).__isOAuth2Error === true;
+    const handler = (err.errorType && HANDLERS.get(err.errorType)) || defaultHandler;
 
-    const handlerKey = errorHandlers[error.constructor.name] ? error.constructor.name : isOAuth2Error ? 'OAuth2Error' : 'default';
-
-    const errorHandler = errorHandlers[handlerKey];
-    errorHandler(error, req, res, config);
+    handler(error, req, res, config);
   };
 }

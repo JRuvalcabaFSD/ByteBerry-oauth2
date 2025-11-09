@@ -5,6 +5,7 @@
  * @extends {Error}
  */
 export class BootstrapError extends Error {
+  public readonly errorType = 'bootstrap';
   public readonly context: Record<string, unknown>;
   /**
    * Creates an instance of BootstrapError.

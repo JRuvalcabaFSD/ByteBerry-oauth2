@@ -14,6 +14,8 @@
  * @see {@link https://datatracker.ietf.org/doc/html/rfc6749#section-2.2 | OAuth 2.0 Client Identifier}
  */
 
+import { InvalidValueObjectError } from '@/shared';
+
 export class ClientId {
   /**
    * Creates a new instance of the ClientId value object.
@@ -25,22 +27,16 @@ export class ClientId {
   private constructor(private readonly value: string) {}
 
   /**
-   * Creates a new ClientId instance from a string value.
+   * Creates a new `ClientId` instance after validating the provided value.
    *
-   * @param value - The client ID string to validate and wrap
-   * @returns A new ClientId instance
-   * @throws {Error} When the value is empty or contains only whitespace
-   * @throws {Error} When the value length is less than 8 or greater than 128 characters
-   *
-   * @example
-   * ```typescript
-   * const clientId = ClientId.create('my-client-id-123');
-   * ```
+   * @param value - The string value to be used as the client ID.
+   * @returns A new `ClientId` instance if the value is valid.
+   * @throws {InvalidValueObjectError} If the value is empty or its length is not between 8 and 128 characters.
    */
 
   static create(value: string): ClientId {
-    if (!value || value.trim().length === 0) throw new Error('Client ID cannot be empty');
-    if (value.length < 8 || value.length > 128) throw new Error('Client ID must be between 8 and 128 characters');
+    if (!value || value.trim().length === 0) throw new InvalidValueObjectError('Client ID', 'cannot be empty');
+    if (value.length < 8 || value.length > 128) throw new InvalidValueObjectError('Client ID', 'must be between 8 and 128 characters');
     return new ClientId(value);
   }
 

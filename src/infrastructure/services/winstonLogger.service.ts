@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import winston, { LogEntry, Logger as WinstonLogger } from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
@@ -246,15 +247,37 @@ export class WinstonLoggerService implements ILogger {
       errors({ stack: true }),
       colorize({ level: true, colors: winston.config.npm.colors }),
       printf(info => {
-        const { timestamp, level, message, service, requestId, context, ...meta } = info;
+        const { timestamp, level, message, service, requestId, context, stack, ...restMeta } = info;
+
+        // Extraer stack del contexto si existe y es string
+        let contextWithoutStack = context;
+        let stackToPrint = stack;
+        if (context && Object.prototype.hasOwnProperty.call(context, 'stack') && typeof (context as any).stack === 'string') {
+          stackToPrint = (context as any).stack;
+          const { stack: _stack, ...rest } = context as Record<string, unknown>;
+          contextWithoutStack = rest;
+        }
 
         const reqId = typeof requestId === 'string' ? `[${requestId.slice(0, 8)}]` : '';
+        const serviceName = service || 'unknown';
 
-        const contextStr = context ? JSON.stringify(context, null, 2) : '';
-        const metaStr = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : '';
-        const additionalInfo = contextStr || metaStr;
+        let logLine = `${timestamp} [${serviceName}] ${level} ${reqId}: ${message}`;
 
-        return `${timestamp} [${service}] ${level} ${reqId}: ${message} ${additionalInfo ? '\n' + additionalInfo : ''}`;
+        if (contextWithoutStack && Object.keys(contextWithoutStack).length > 0) {
+          logLine += `\n${JSON.stringify(contextWithoutStack, null, 2)}`;
+        }
+
+        if (Object.keys(restMeta).length > 0) {
+          logLine += `\n${JSON.stringify(restMeta, null, 2)}`;
+        }
+
+        if (stackToPrint) {
+          const stackStr =
+            typeof stackToPrint === 'string' && stackToPrint.includes('\\n') ? stackToPrint.replace(/\\n/g, '\n') : stackToPrint;
+          logLine += `\n${stackStr}`;
+        }
+
+        return logLine;
       })
     );
   }
@@ -279,9 +302,14 @@ export class WinstonLoggerService implements ILogger {
 
   private createTransports(): winston.transport[] {
     const transports: winston.transport[] = [];
-    const { combine, timestamp, errors, json } = winston.format;
+    const { combine, timestamp, json } = winston.format;
 
-    transports.push(new winston.transports.Console({ handleExceptions: false, handleRejections: false }));
+    transports.push(
+      new winston.transports.Console({
+        handleExceptions: false,
+        handleRejections: false,
+      })
+    );
 
     if (this.config.isProduction()) {
       transports.push(
@@ -292,7 +320,7 @@ export class WinstonLoggerService implements ILogger {
           handleExceptions: false,
           maxSize: '20m',
           maxFiles: '14d',
-          format: combine(timestamp(), errors({ stack: true }), json()),
+          format: combine(timestamp(), json()),
         })
       );
     }
@@ -304,7 +332,7 @@ export class WinstonLoggerService implements ILogger {
         handleExceptions: false,
         maxFiles: '14d',
         maxSize: '20m',
-        format: combine(timestamp(), errors({ stack: true }), json()),
+        format: combine(timestamp(), json()),
       })
     );
 

@@ -1,4 +1,11 @@
-import { InvalidGrantError, InvalidRequestError, LogContextClass, LogContextMethod, UnsupportedGrantTypeError } from '@/shared';
+import {
+  InvalidGrantError,
+  InvalidRequestError,
+  InvalidValueObjectError,
+  LogContextClass,
+  LogContextMethod,
+  UnsupportedGrantTypeError,
+} from '@/shared';
 import { ICodeStore, IExchangeCodeForTokenUseCase, ILogger, IPKceVerifierService } from '@/interfaces';
 import { TokenRequestDto, TokenResponseDto } from '@/application';
 import { ClientId, CodeVerifier } from '@/domain';
@@ -58,73 +65,86 @@ export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase
   ) {}
 
   /**
-   * Exchanges an authorization code for an access token using the OAuth 2.0 authorization code flow with PKCE.
+   * Exchanges an authorization code for an access token following the OAuth2 authorization code flow.
    *
-   * This method validates the authorization code, verifies the PKCE code verifier, and issues an access token
-   * if all validations pass. The authorization code is marked as used after successful validation.
+   * @param request - The token request DTO containing client credentials, authorization code, code verifier, and redirect URI.
+   * @returns A promise that resolves to a token response DTO containing the access token, token type, expiration, and optional scope.
    *
-   * @param request - The token request containing the authorization code, code verifier, client ID, and redirect URI
-   * @returns A promise that resolves to a token response containing the access token, token type, expiration time, and optional scope
-   *
-   * @throws {UnsupportedGrantTypeError} When the grant type is not 'authorization_code'
-   * @throws {InvalidRequestError} When the code or code_verifier is missing from the request
-   * @throws {InvalidGrantError} When:
-   *   - The authorization code is not found in the store
-   *   - The authorization code has already been used
-   *   - The authorization code has expired
-   *   - The client ID doesn't match the one associated with the authorization code
-   *   - The redirect URI doesn't match the one associated with the authorization code
-   *   - The PKCE code verifier is invalid
-   *
-   * @remarks
-   * The method performs the following validations:
-   * - Ensures the grant type is 'authorization_code'
-   * - Verifies the presence of required parameters (code and code_verifier)
-   * - Validates the authorization code exists and is not expired or previously used
-   * - Confirms client ID and redirect URI match the original authorization request
-   * - Verifies the PKCE code challenge using the provided code verifier
+   * @throws {UnsupportedGrantTypeError} If the grant type is not 'authorization_code'.
+   * @throws {InvalidRequestError} If required parameters are missing or invalid.
+   * @throws {InvalidGrantError} If the authorization code is not found, already used, expired, or if client ID or redirect URI mismatches.
+   * @throws {Error} For unexpected errors during the token exchange process.
    */
 
   @LogContextMethod()
   public async execute(request: TokenRequestDto): Promise<TokenResponseDto> {
     this.logger.debug('Exchanging code for token', { client_id: request.client_id });
 
-    if (request.grant_type !== 'authorization_code') throw new UnsupportedGrantTypeError('Only authorization_code grant type is supported');
-    if (!request.code || !request.code_verifier) throw new InvalidRequestError('code and code_verifier are required');
+    try {
+      if (request.grant_type !== 'authorization_code')
+        throw new UnsupportedGrantTypeError('Only authorization_code grant type is supported');
+      if (!request.code || !request.code_verifier) throw new InvalidRequestError('code and code_verifier are required');
 
-    const authCode = this.codeStore.get(request.code);
-    if (!authCode) throw new InvalidGrantError('Authorization code not found');
+      const authCode = this.codeStore.get(request.code);
+      if (!authCode) throw new InvalidGrantError('Authorization code not found');
 
-    if (authCode.isUsed()) {
-      this.logger.warn('Attempt to reuse authorization code', { code: request.code });
-      throw new InvalidGrantError('Authorization code already used');
-    }
+      if (authCode.isUsed()) {
+        this.logger.warn('Attempt to reuse authorization code', { code: request.code });
+        throw new InvalidGrantError('Authorization code already used');
+      }
 
-    if (authCode.isExpired()) {
-      this.logger.warn('Authorization code expired', { code: request.code });
-      throw new InvalidGrantError('Authorization code expired');
-    }
+      if (authCode.isExpired()) {
+        this.logger.warn('Authorization code expired', { code: request.code });
+        throw new InvalidGrantError('Authorization code expired');
+      }
 
-    const clintId = ClientId.create(request.client_id);
-    if (!authCode.getClientId().equals(clintId)) throw new InvalidGrantError('Client ID mismatch');
-    if (authCode.getRedirectUri() !== request.redirect_uri) throw new InvalidGrantError('Redirect URI mismatch');
+      let clientId: ClientId;
+      let codeVerifier: CodeVerifier;
 
-    const codeVerifier = CodeVerifier.create(request.code_verifier);
-    const isValid = this.pkceVerifier.verify(authCode.getCodeChallenge(), codeVerifier.getValue());
+      try {
+        clientId = ClientId.create(request.client_id);
+      } catch (error) {
+        if (error instanceof InvalidValueObjectError) {
+          throw new InvalidRequestError(error.message);
+        }
+        throw error;
+      }
 
-    if (!isValid) {
-      this.logger.warn('Invalid PKCE code_verifier', {
+      try {
+        codeVerifier = CodeVerifier.create(request.code_verifier);
+      } catch (error) {
+        if (error instanceof InvalidValueObjectError) {
+          throw new InvalidRequestError(error.message);
+        }
+        throw error;
+      }
+
+      if (!authCode.getClientId().equals(clientId)) throw new InvalidGrantError('Client ID mismatch');
+      if (authCode.getRedirectUri() !== request.redirect_uri) throw new InvalidGrantError('Redirect URI mismatch');
+
+      const isValid = this.pkceVerifier.verify(authCode.getCodeChallenge(), codeVerifier.getValue());
+      if (!isValid) {
+        this.logger.warn('Invalid PKCE code_verifier', {
+          client_id: request.client_id,
+        });
+        throw new InvalidGrantError('Invalid code_verifier');
+      }
+      authCode.markAsUsed();
+      const mockToken = `mock_access_token_${Date.now()}`;
+      this.logger.debug('Token issued successfully', { client_id: request.client_id });
+
+      const scope = authCode.getScope();
+      return { access_token: mockToken, token_type: 'Bearer', expires_in: 900, ...(scope && { scope }) };
+    } catch (error) {
+      if (error instanceof InvalidRequestError || error instanceof InvalidGrantError || error instanceof UnsupportedGrantTypeError) {
+        throw error;
+      }
+
+      this.logger.error('Unexpected error exchanging code for token', {
+        error: error instanceof Error ? error.message : 'Unknown error',
         client_id: request.client_id,
       });
-      throw new InvalidGrantError('Invalid code_verifier');
+      throw error;
     }
-
-    authCode.markAsUsed();
-
-    const mockToken = `mock_access_token_${Date.now()}`;
-    this.logger.debug('Token issued successfully', { client_id: request.client_id });
-
-    const scope = authCode.getScope();
-    return { access_token: mockToken, token_type: 'Bearer', expires_in: 900, ...(scope && { scope }) };
   }
 }

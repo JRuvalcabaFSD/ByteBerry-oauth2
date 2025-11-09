@@ -12,6 +12,8 @@
  * ```
  */
 
+import { InvalidValueObjectError } from '@/shared';
+
 export class CodeChallenge {
   /**
    * Creates a new CodeChallenge instance.
@@ -27,21 +29,19 @@ export class CodeChallenge {
   ) {}
 
   /**
-   * Creates a new CodeChallenge instance with validation.
+   * Creates a new `CodeChallenge` value object after validating the provided challenge and method.
    *
-   * @param challenge - The code challenge string, must be at least 43 characters long and base64url encoded
-   * @param method - The code challenge method, either 'S256' (SHA-256) or 'plain'
-   * @returns A new CodeChallenge instance
-   * @throws {Error} If the challenge is less than 43 characters or empty
-   * @throws {Error} If the challenge is not base64url encoded (contains invalid characters)
-   * @throws {Error} If the method is not 'S256' or 'plain'
+   * @param challenge - The code challenge string, which must be base64url encoded, non-empty, and at least 43 characters long.
+   * @param method - The code challenge method, which must be either `'S256'` or `'plain'`.
+   * @returns A new instance of `CodeChallenge` if validation passes.
+   * @throws {InvalidValueObjectError} If the challenge is empty, too short, not base64url encoded, or if the method is invalid.
    */
 
   static create(challenge: string, method: 'S256' | 'plain'): CodeChallenge {
-    if (!challenge || !method) throw new Error('Code challenge cannot be empty');
-    if (challenge.length < 43 || challenge.trim().length === 0) throw new Error('Code challenge cannot be empty');
-    if (!/^[A-Za-z0-9_-]+$/.test(challenge)) throw new Error('Code challenge must be base64url encoded');
-    if (method !== 'S256' && method !== 'plain') throw new Error('Code challenge method must be S256 or plain');
+    if (!challenge || !method) throw new InvalidValueObjectError('Code challenge ', 'cannot be empty');
+    if (challenge.length < 43 || challenge.trim().length === 0) throw new InvalidValueObjectError('Code challenge', 'cannot be empty');
+    if (!/^[A-Za-z0-9_-]+$/.test(challenge)) throw new InvalidValueObjectError('Code challenge', 'must be base64url encoded');
+    if (method !== 'S256' && method !== 'plain') throw new InvalidValueObjectError('Code challenge', 'method must be S256 or plain');
 
     return new CodeChallenge(challenge, method);
   }
