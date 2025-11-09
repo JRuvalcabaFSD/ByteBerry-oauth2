@@ -10,6 +10,8 @@ export * from './http/middlewares/security.middleware';
 
 // Http - routes
 export * from './http/routes/app.routes';
+export * from './http/routes/health.routes';
+export * from './http/routes/oauth2.routes';
 
 //Http
 export * from './http/httpServer';
@@ -22,3 +24,8 @@ export * from './lifecycle/shutdownConfig';
 export * from './services/clock.service';
 export * from './services/uuid.service';
 export * from './services/winstonLogger.service';
+export * from './services/nodeHash.service';
+export * from './services/pkceVerifier.service';
+
+//Storage
+export * from './storage/inMemoryCode.store';

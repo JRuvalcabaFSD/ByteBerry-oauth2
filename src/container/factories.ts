@@ -1,5 +1,7 @@
-import { GracefulShutdown, HealthController, HttpServer, WinstonLoggerService } from '@/infrastructure';
-import { IContainer } from '@/interfaces';
+import { ExchangeCodeForTokenUseCase, GenerateAuthorizationCodeUseCase } from '@/application';
+import * as infrastructure from '@/infrastructure';
+import { ICodeStore, IContainer, IExchangeCodeForTokenUseCase, IGenerateAuthorizationCodeUseCase } from '@/interfaces';
+import { AuthorizeController, JWksController, TokenController } from '@/presentation';
 
 /**
  * Factory function to create a WinstonLoggerService instance.
@@ -8,8 +10,8 @@ import { IContainer } from '@/interfaces';
  * @returns A new instance of WinstonLoggerService with resolved Config and Clock dependencies
  */
 
-export function createWinstonLoggerService(c: IContainer): WinstonLoggerService {
-  return new WinstonLoggerService(c.resolve('Config'), c.resolve('Clock'));
+export function createWinstonLoggerService(c: IContainer): infrastructure.WinstonLoggerService {
+  return new infrastructure.WinstonLoggerService(c.resolve('Config'), c.resolve('Clock'));
 }
 
 /**
@@ -24,8 +26,8 @@ export function createWinstonLoggerService(c: IContainer): WinstonLoggerService 
  * ```
  */
 
-export function createGracefulShutdown(c: IContainer): GracefulShutdown {
-  return new GracefulShutdown(c.resolve('Logger'));
+export function createGracefulShutdown(c: IContainer): infrastructure.GracefulShutdown {
+  return new infrastructure.GracefulShutdown(c.resolve('Logger'));
 }
 
 /**
@@ -41,8 +43,8 @@ export function createGracefulShutdown(c: IContainer): GracefulShutdown {
  * ```
  */
 
-export function createHttpServer(c: IContainer): HttpServer {
-  return new HttpServer(c);
+export function createHttpServer(c: IContainer): infrastructure.HttpServer {
+  return new infrastructure.HttpServer(c);
 }
 
 /**
@@ -52,6 +54,103 @@ export function createHttpServer(c: IContainer): HttpServer {
  * @returns A new HealthController instance initialized with the provided container
  */
 
-export function createHealthController(c: IContainer): HealthController {
-  return new HealthController(c);
+export function createHealthController(c: IContainer): infrastructure.HealthController {
+  return new infrastructure.HealthController(c);
+}
+
+/**
+ * Creates an instance of an in-memory code store.
+ *
+ * @param c - The dependency injection container used to resolve dependencies
+ * @returns An implementation of ICodeStore that stores authorization codes in memory
+ *
+ * @remarks
+ * This factory function instantiates an InMemoryCodeStore with a logger resolved from the container.
+ * The in-memory implementation is suitable for development and testing purposes, but should be
+ * replaced with a persistent storage solution for production environments.
+ */
+
+export function createCodeStore(c: IContainer): ICodeStore {
+  return new infrastructure.InMemoryCodeStore(c.resolve('Logger'));
+}
+
+/**
+ * Creates and returns an instance of the GenerateAuthorizationCodeUseCase.
+ *
+ * This factory function resolves the required dependencies from the provided container
+ * and instantiates a new GenerateAuthorizationCodeUseCase with them.
+ *
+ * @param c - The dependency injection container used to resolve dependencies
+ * @returns A new instance of IGenerateAuthorizationCodeUseCase
+ *
+ * @remarks
+ * This function resolves the following dependencies from the container:
+ * - 'CodeStore': The storage mechanism for authorization codes
+ * - 'Logger': The logging utility for the use case
+ */
+
+export function createGenerateAuthorizationCodeUseCase(c: IContainer): IGenerateAuthorizationCodeUseCase {
+  return new GenerateAuthorizationCodeUseCase(c.resolve('CodeStore'), c.resolve('Logger'));
+}
+
+/**
+ * Factory function that creates and returns an instance of ExchangeCodeForTokenUseCase.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies
+ * @returns An instance of IExchangeCodeForTokenUseCase configured with resolved CodeStore and Logger dependencies
+ */
+
+export function createExchangeCodeForTokenUseCase(c: IContainer): IExchangeCodeForTokenUseCase {
+  return new ExchangeCodeForTokenUseCase(c.resolve('CodeStore'), c.resolve('Logger'));
+}
+
+/**
+ * Factory function that creates and returns an instance of AuthorizeController.
+ *
+ * @param c - The dependency injection container used to resolve dependencies
+ * @returns A new instance of AuthorizeController with its required dependencies injected
+ *
+ * @remarks
+ * This factory function resolves the 'GenerateAuthorizationCodeUseCase' dependency
+ * from the provided container and injects it into the AuthorizeController constructor.
+ */
+
+export function createAuthorizeController(c: IContainer): AuthorizeController {
+  return new AuthorizeController(c.resolve('GenerateAuthorizationCodeUseCase'));
+}
+
+/**
+ * Creates and configures a TokenController instance with its required dependencies.
+ *
+ * @param c - The dependency injection container used to resolve the ExchangeCodeForTokenUseCase
+ * @returns A new TokenController instance with the resolved use case dependency
+ *
+ * @remarks
+ * This factory function follows the Dependency Injection pattern, using the container
+ * to resolve and inject the ExchangeCodeForTokenUseCase into the TokenController.
+ */
+
+export function createTokenController(c: IContainer): TokenController {
+  return new TokenController(c.resolve('ExchangeCodeForTokenUseCase'));
+}
+
+/**
+ * Creates and returns a new instance of the JWksController.
+ *
+ * @returns {JWksController} A new JWksController instance
+ */
+
+export function createJwksController(): JWksController {
+  return new JWksController();
+}
+
+/**
+ * Factory function to create an instance of {@link PkceVerifierService}.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies.
+ * @returns A new instance of {@link PkceVerifierService} initialized with the resolved 'Hash' service.
+ */
+
+export function createPkceVerifierService(c: IContainer): infrastructure.PkceVerifierService {
+  return new infrastructure.PkceVerifierService(c.resolve('Hash'));
 }

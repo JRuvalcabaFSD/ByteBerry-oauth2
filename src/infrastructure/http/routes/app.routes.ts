@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
+
+import { createHealthRoutes, createOAuth2Routes } from '@/infrastructure';
 import { IContainer } from '@/interfaces';
-import { Router } from 'express';
-import { createHealthRoutes } from '@/infrastructure/http/routes/health.routes';
 
 //TODO documentar
 export function createAppRoutes(container: IContainer): Router {
@@ -9,6 +9,12 @@ export function createAppRoutes(container: IContainer): Router {
 
   const config = container.resolve('Config');
   const clock = container.resolve('Clock');
+
+  //oauth2 routes
+  router.use(
+    '/',
+    createOAuth2Routes(container.resolve('AuthorizeController'), container.resolve('TokenController'), container.resolve('JwksController'))
+  );
 
   //Health routes
   router.use('/health', createHealthRoutes(container.resolve('HealthController')));
@@ -64,6 +70,9 @@ function getRoutesList(type: 'json' | 'text'): Record<string, unknown> | string[
     { name: 'home', value: '/', text: 'GET /' },
     { name: 'health', value: '/health', text: 'GET /health' },
     { name: 'deepHealth', value: '/health/deep', text: 'GET /health/deep' },
+    { name: 'authorize', value: '/authorize', text: 'GET /authorize' },
+    { name: 'token', value: '/token', text: 'GET /token' },
+    { name: 'jwks.json', value: '/.well-known/jwks.json', text: 'GET /.well-known/jwks.json' },
   ];
 
   if (type === 'json') {

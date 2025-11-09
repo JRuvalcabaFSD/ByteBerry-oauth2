@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextFunction, Request, Response } from 'express';
 import { IConfig, ILogger } from '@/interfaces';
-import { withLoggerContext } from '@/shared';
+import { OAuth2Error, withLoggerContext } from '@/shared';
 
 type ErrorHandler = (error: Error, req: Request, res: Response, config: IConfig) => void;
 
@@ -37,6 +38,40 @@ export function createErrorMiddleware(logger: ILogger, config: IConfig) {
         timestamp: new Date().toISOString(),
       });
     },
+
+    OAuth2Error: (error: Error, req: Request, res: Response, config: IConfig) => {
+      const requestId = req.requestId || 'unknown';
+      const isDev = config.isDevelopment();
+
+      // Type guard para OAuth2Error
+      if (typeof (error as any).toJSON === 'function' && typeof (error as any).statusCode === 'number') {
+        const oauth2Error = error as OAuth2Error;
+        const payload = isDev
+          ? {
+              ...oauth2Error.toJSON(),
+              error_description: oauth2Error.errorDescription,
+              stack: oauth2Error.stack,
+              requestId,
+              timestamp: new Date().toISOString(),
+            }
+          : {
+              ...oauth2Error.toJSON(),
+              requestId,
+              timestamp: new Date().toISOString(),
+            };
+
+        res.status(oauth2Error.statusCode).json(payload);
+        return;
+      }
+
+      // Si no es OAuth2Error, responde como error genérico
+      res.status(500).json({
+        error: 'Internal Server Error',
+        message: config.isDevelopment() ? error.message : 'Something went wrong',
+        requestId,
+        timestamp: new Date().toISOString(),
+      });
+    },
     // Add more error handlers here as needed, e.g., AuthenticationError, ValidationError, etc.
     default: (error: Error, req: Request, res: Response, config: IConfig) => {
       const requestId = req.requestId || 'unknown';
@@ -62,7 +97,11 @@ export function createErrorMiddleware(logger: ILogger, config: IConfig) {
       url: req.originalUrl || req.url,
     });
 
-    const errorHandler = errorHandlers[error.constructor.name] || errorHandlers['default'];
+    const isOAuth2Error = (error as any).__isOAuth2Error === true;
+
+    const handlerKey = errorHandlers[error.constructor.name] ? error.constructor.name : isOAuth2Error ? 'OAuth2Error' : 'default';
+
+    const errorHandler = errorHandlers[handlerKey];
     errorHandler(error, req, res, config);
   };
 }
