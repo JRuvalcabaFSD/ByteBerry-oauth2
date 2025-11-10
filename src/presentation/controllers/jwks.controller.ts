@@ -1,22 +1,27 @@
+import { GetJwksUseCase } from '@/application';
 import { Request, Response, NextFunction } from 'express';
 
 /**
- * Controller responsible for handling JSON Web Key Set (JWKS) endpoints.
+ * Controller responsible for handling requests to retrieve the JSON Web Key Set (JWKS).
  *
  * @remarks
- * This controller provides public keys used for verifying JWT signatures.
- * The JWKS endpoint is typically used by OAuth 2.0 and OpenID Connect clients
- * to retrieve the server's public keys for token verification.
+ * This controller exposes an endpoint that returns the public keys used for JWT signature verification.
+ * The JWKS response is cached for 1 hour to optimize performance.
  *
  * @example
- * ```typescript
- * const jwksController = new JWksController();
+ * // Usage in an Express route
  * app.get('/.well-known/jwks.json', jwksController.handle);
- * ```
+ *
+ * @public
  */
 
 export class JWksController {
-  constructor() {}
+  /**
+   * Creates an instance of the controller with the provided GetJwksUseCase dependency.
+   * @param getJwksUseCase - The use case responsible for retrieving JSON Web Key Sets (JWKS).
+   */
+
+  constructor(private readonly getJwksUseCase: GetJwksUseCase) {}
 
   /**
    * Handles HTTP requests to retrieve the JSON Web Key Set (JWKS).
@@ -38,21 +43,10 @@ export class JWksController {
 
   public handle = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const mockJWks = {
-        keys: [
-          {
-            kty: 'RSA',
-            use: 'sig',
-            kid: 'mock-key-id',
-            alg: 'RS256',
-            n: 'mock-modulus',
-            e: 'AQAB',
-          },
-        ],
-      };
+      const jwks = await this.getJwksUseCase.execute();
 
-      res.set('Cache-Control', 'public, max-age=3600');
-      res.json(mockJWks);
+      res.set({ 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600', 'X-Content-Type-Options': 'nosniff' });
+      res.json(jwks);
     } catch (error) {
       next(error);
     }

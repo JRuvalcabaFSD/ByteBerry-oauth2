@@ -1,4 +1,4 @@
-import { ExchangeCodeForTokenUseCase, GenerateAuthorizationCodeUseCase } from '@/application';
+import { ExchangeCodeForTokenUseCase, GenerateAuthorizationCodeUseCase, GetJwksUseCase } from '@/application';
 import * as infrastructure from '@/infrastructure';
 import { ICodeStore, IContainer, IExchangeCodeForTokenUseCase, IGenerateAuthorizationCodeUseCase } from '@/interfaces';
 import { AuthorizeController, JWksController, PkceVerifierService, TokenController } from '@/presentation';
@@ -145,8 +145,8 @@ export function createTokenController(c: IContainer): TokenController {
  * @returns {JWksController} A new JWksController instance
  */
 
-export function createJwksController(): JWksController {
-  return new JWksController();
+export function createJwksController(c: IContainer): JWksController {
+  return new JWksController(c.resolve('GetJwksUseCase'));
 }
 
 /**
@@ -169,4 +169,32 @@ export function createPkceVerifierService(c: IContainer): PkceVerifierService {
 
 export function createJwtService(c: IContainer): infrastructure.JwtService {
   return new infrastructure.JwtService(c.resolve('Config').serviceName, c.resolve('KeyProvider'), c.resolve('Logger'));
+}
+
+/**
+ * Creates an instance of {@link infrastructure.JwksService} using the provided container.
+ *
+ * This factory function resolves the `KeyProvider` from the given container,
+ * retrieves the public key and key ID, and constructs a new `JwksService`.
+ *
+ * @param c - The dependency injection container used to resolve required services.
+ * @returns A new instance of {@link infrastructure.JwksService} initialized with the public key and key ID.
+ */
+
+export function createJwksService(c: IContainer): infrastructure.JwksService {
+  const provider = c.resolve('KeyProvider');
+  return new infrastructure.JwksService(provider.getPublicKey(), provider.getKeyId());
+}
+
+/**
+ * Creates an instance of `GetJwksUseCase` using the provided container.
+ *
+ * Resolves the `JwksService` dependency from the container and injects it into the use case.
+ *
+ * @param c - The dependency injection container used to resolve required services.
+ * @returns A new instance of `GetJwksUseCase` initialized with the resolved `JwksService`.
+ */
+
+export function createGetJwksUseCase(c: IContainer): GetJwksUseCase {
+  return new GetJwksUseCase(c.resolve('JwksService'));
 }

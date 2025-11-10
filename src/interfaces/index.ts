@@ -24,6 +24,7 @@ export * from './infrastructure/services/uuid.interface';
 export * from './infrastructure/services/jwtService.interface';
 export * from './infrastructure/services/hashService.interface';
 export * from './infrastructure/services/pkceVerifierService.interface';
+export * from './infrastructure/services/jwksService.interface';
 
 //Infrastructure - storage
 export * from './infrastructure/storage/codeStorage.interface';

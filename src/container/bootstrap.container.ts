@@ -22,11 +22,15 @@ export function bootstrapContainer(): IContainer {
 
   //OAuth2 services
   container.registerSingleton('CodeStore', factories.createCodeStore);
-  container.register('GenerateAuthorizationCodeUseCase', factories.createGenerateAuthorizationCodeUseCase);
-  container.register('ExchangeCodeForTokenUseCase', factories.createExchangeCodeForTokenUseCase);
   container.register('PkceVerifierService', factories.createPkceVerifierService);
   container.register('KeyProvider', createKeyProvider);
   container.register('JwtService', factories.createJwtService);
+  container.register('JwksService', factories.createJwksService);
+
+  //Uses cases
+  container.register('GenerateAuthorizationCodeUseCase', factories.createGenerateAuthorizationCodeUseCase);
+  container.register('ExchangeCodeForTokenUseCase', factories.createExchangeCodeForTokenUseCase);
+  container.register('GetJwksUseCase', factories.createGetJwksUseCase);
 
   //Controllers
   container.registerSingleton('HealthController', factories.createHealthController);

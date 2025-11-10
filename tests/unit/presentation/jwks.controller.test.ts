@@ -1,14 +1,31 @@
 import { Request, Response, NextFunction } from 'express';
 import { JWksController } from '@/presentation';
+import { GetJwksUseCase } from '@/application';
 
 describe('JWksController', () => {
   let controller: JWksController;
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
+  let mockGetJwksUseCase: jest.Mocked<GetJwksUseCase>;
   let mockNext: NextFunction;
+  const mockJwksService = {}; // O usa jest.fn() si necesitas métodos
 
   beforeEach(() => {
-    controller = new JWksController();
+    mockGetJwksUseCase = {
+      execute: jest.fn().mockResolvedValue({
+        keys: [
+          {
+            kty: 'RSA',
+            use: 'sig',
+            kid: 'test-kid',
+            alg: 'RS256',
+          },
+        ],
+      }),
+      jwksService: mockJwksService,
+    } as unknown as jest.Mocked<GetJwksUseCase>;
+
+    controller = new JWksController(mockGetJwksUseCase);
 
     mockRequest = {};
 
@@ -40,7 +57,11 @@ describe('JWksController', () => {
   it('should set cache header when response sent', async () => {
     await controller.handle(mockRequest as Request, mockResponse as Response, mockNext);
 
-    expect(mockResponse.set).toHaveBeenCalledWith('Cache-Control', 'public, max-age=3600');
+    expect(mockResponse.set).toHaveBeenCalledWith({
+      'Cache-Control': 'public, max-age=3600',
+      'Content-Type': 'application/json',
+      'X-Content-Type-Options': 'nosniff',
+    });
   });
 
   it('should_CallNext_When_ErrorOccurs', async () => {
@@ -58,13 +79,7 @@ describe('JWksController', () => {
 
     expect(mockResponse.json).toHaveBeenCalledWith(
       expect.objectContaining({
-        keys: expect.arrayContaining([
-          expect.objectContaining({
-            kid: 'mock-key-id',
-            n: 'mock-modulus',
-            e: 'AQAB',
-          }),
-        ]),
+        keys: expect.arrayContaining([expect.objectContaining({ alg: 'RS256', kid: 'test-kid', kty: 'RSA', use: 'sig' })]),
       })
     );
   });

@@ -1,19 +1,6 @@
+import { GetJwksUseCase } from '@/application';
 import { GracefulShutdown } from '@/infrastructure';
-import {
-  IClock,
-  ICodeStore,
-  IConfig,
-  IExchangeCodeForTokenUseCase,
-  IGenerateAuthorizationCodeUseCase,
-  IHashService,
-  IHealthController,
-  IHttpServer,
-  IJwtService,
-  IKeyProvider,
-  ILogger,
-  IPKceVerifierService,
-  IUuid,
-} from '@/interfaces';
+import * as interfaces from '@/interfaces';
 import { AuthorizeController, JWksController, TokenController } from '@/presentation';
 
 //TODO documentar
@@ -34,26 +21,30 @@ export type Token =
   | 'TokenController'
   | 'JwksController'
   | 'KeyProvider'
-  | 'JwtService';
+  | 'JwtService'
+  | 'JwksService'
+  | 'GetJwksUseCase';
 
 export interface ServiceMap {
-  Config: IConfig;
-  Clock: IClock;
-  Uuid: IUuid;
-  Logger: ILogger;
-  Hash: IHashService;
+  Config: interfaces.IConfig;
+  Clock: interfaces.IClock;
+  Uuid: interfaces.IUuid;
+  Logger: interfaces.ILogger;
+  Hash: interfaces.IHashService;
   GracefulShutdown: GracefulShutdown;
-  HttpServer: IHttpServer;
-  HealthController: IHealthController;
-  GenerateAuthorizationCodeUseCase: IGenerateAuthorizationCodeUseCase;
+  HttpServer: interfaces.IHttpServer;
+  HealthController: interfaces.IHealthController;
+  GenerateAuthorizationCodeUseCase: interfaces.IGenerateAuthorizationCodeUseCase;
   TokenController: TokenController;
   JwksController: JWksController;
-  ExchangeCodeForTokenUseCase: IExchangeCodeForTokenUseCase;
-  CodeStore: ICodeStore;
+  ExchangeCodeForTokenUseCase: interfaces.IExchangeCodeForTokenUseCase;
+  CodeStore: interfaces.ICodeStore;
   AuthorizeController: AuthorizeController;
-  PkceVerifierService: IPKceVerifierService;
-  KeyProvider: IKeyProvider;
-  JwtService: IJwtService;
+  PkceVerifierService: interfaces.IPKceVerifierService;
+  KeyProvider: interfaces.IKeyProvider;
+  JwtService: interfaces.IJwtService;
+  JwksService: interfaces.IJwksService;
+  GetJwksUseCase: GetJwksUseCase;
 }
 
 export const criticalServices = [
@@ -74,4 +65,6 @@ export const criticalServices = [
   'JwksController',
   'KeyProvider',
   'JwtService',
+  'JwksService',
+  'GetJwksUseCase',
 ];

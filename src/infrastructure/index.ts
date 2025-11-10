@@ -29,6 +29,7 @@ export * from './services/uuid.service';
 export * from './services/winstonLogger.service';
 export * from './services/nodeHash.service';
 export * from './services/jwt.service';
+export * from './services/jwks.service';
 
 //Storage
 export * from './storage/inMemoryCode.store';
