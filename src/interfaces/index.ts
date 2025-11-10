@@ -14,6 +14,9 @@ export * from './infrastructure/controllers/healthController.interface';
 //Infrastructure - Http
 export * from './infrastructure/http/httpServer.interface';
 
+//Infrastructure - Providers
+export * from './infrastructure/providers/keyProvider.interface';
+
 //Infrastructure - Services
 export * from './infrastructure/services/clock.interface';
 export * from './infrastructure/services/logger.interface';

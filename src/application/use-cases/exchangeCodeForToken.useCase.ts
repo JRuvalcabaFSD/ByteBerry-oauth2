@@ -6,7 +6,7 @@ import {
   LogContextMethod,
   UnsupportedGrantTypeError,
 } from '@/shared';
-import { ICodeStore, IExchangeCodeForTokenUseCase, ILogger, IPKceVerifierService } from '@/interfaces';
+import { ICodeStore, IExchangeCodeForTokenUseCase, IJwtService, ILogger, IPKceVerifierService } from '@/interfaces';
 import { TokenRequestDto, TokenResponseDto } from '@/application';
 import { ClientId, CodeVerifier } from '@/domain';
 
@@ -61,6 +61,7 @@ export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase
   constructor(
     private readonly codeStore: ICodeStore,
     private readonly logger: ILogger,
+    private readonly jwtService: IJwtService,
     private pkceVerifier: IPKceVerifierService
   ) {}
 
@@ -130,11 +131,20 @@ export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase
         throw new InvalidGrantError('Invalid code_verifier');
       }
       authCode.markAsUsed();
-      const mockToken = `mock_access_token_${Date.now()}`;
-      this.logger.debug('Token issued successfully', { client_id: request.client_id });
+
+      const accessToken = this.jwtService.generateAccessToken({
+        sub: clientId.getValue(),
+        scope: authCode.getScope(),
+        client_id: clientId.getValue(),
+      });
+
+      this.logger.info('Access token issued successfully', {
+        client_id: request.client_id,
+        has_scope: !!authCode.getScope(),
+      });
 
       const scope = authCode.getScope();
-      return { access_token: mockToken, token_type: 'Bearer', expires_in: 900, ...(scope && { scope }) };
+      return { access_token: accessToken, token_type: 'Bearer', expires_in: 900, ...(scope && { scope }) };
     } catch (error) {
       if (error instanceof InvalidRequestError || error instanceof InvalidGrantError || error instanceof UnsupportedGrantTypeError) {
         throw error;

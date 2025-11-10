@@ -1,93 +1,62 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * Represents the payload structure of a JSON Web Token (JWT).
+ * Represents the payload of a JWT (JSON Web Token).
  *
- * @interface JwtPayload
- *
- * @property {string} sub - Subject identifier, typically the user ID
- * @property {string} iss - Issuer of the token, identifies who created and signed the token
- * @property {number} iat - Issued at timestamp, represents when the token was created (Unix timestamp)
- * @property {number} exp - Expiration timestamp, represents when the token expires (Unix timestamp)
- * @property {string} [email] - Optional email address associated with the token
- * @property {string[]} [roles] - Optional array of user roles or permissions
- * @property {any} [key: string] - Index signature allowing additional custom claims to be added to the payload
- *
- * @example
- * ```typescript
- * const payload: JwtPayload = {
- *   sub: '123456',
- *   iss: 'auth-service',
- *   iat: 1234567890,
- *   exp: 1234571490,
- *   email: 'user@example.com',
- *   roles: ['user', 'admin']
- * };
- * ```
+ * @property sub - Subject identifier for the JWT (usually a user ID).
+ * @property iat - Issued At timestamp (seconds since epoch).
+ * @property exp - Expiration timestamp (seconds since epoch).
+ * @property iss - Issuer of the JWT.
+ * @property aud - Audience(s) that the JWT is intended for.
+ * @property scope - Scope of access granted by the JWT.
+ * @property client_id - Identifier for the client application.
  */
 
-export interface JwtPayload {
-  sub: string; // Subject (user_id)
-  iss: string; // Issuer
-  iat: number; // Issued at
-  exp: number; // Expiration
-  email?: string;
-  roles?: string[];
-  [key: string]: any;
+export interface IJwtPayload {
+  sub: string;
+  iat: number;
+  exp: number;
+  iss: string;
+  aud?: string | string[] | undefined;
+  scope?: string | undefined;
+  client_id?: string | undefined;
 }
 
 /**
  * Interface for JWT (JSON Web Token) service operations.
  *
- * @remarks
- * This interface defines the contract for JWT token generation, verification,
- * and configuration retrieval. Implementations should handle token signing,
- * validation, and expiration time management.
- *
- * @example
- * ```typescript
- * class JwtService implements IJwtService {
- *   async sign(payload: JwtPayload): Promise<string> {
- *     // Implementation
- *   }
- *
- *   async verify(token: string): Promise<JwtPayload> {
- *     // Implementation
- *   }
- *
- *   getExpirationTime(): number {
- *     // Implementation
- *   }
- * }
- * ```
+ * Provides methods to generate, verify, and decode JWT tokens.
  */
 
 export interface IJwtService {
   /**
-   * Signs a JWT (JSON Web Token) with the given payload.
+   * Generates an access token (JWT) based on the provided payload.
    *
-   * @param {JwtPayload} payload - The payload to be included in the JWT.
-   * @return {*}  {Promise<string>} - A promise that resolves to the signed JWT as a string.
+   * @param {({ sub: string; scope?: string | undefined; client_id?: string | undefined })} payload - The payload to include in the JWT.
+   * @return {*}  {string} - The generated JWT as a string.
    * @memberof IJwtService
    */
 
-  sign(payload: JwtPayload): Promise<string>;
+  generateAccessToken(
+    payload: { sub: string; scope?: string | undefined; client_id?: string | undefined },
+    expiresIn?: number | undefined
+  ): string;
 
   /**
-   * Verifies a JWT (JSON Web Token) and returns the decoded payload.
+   * Verifies the provided JWT token and returns its payload.
    *
-   * @param {string} token - The JWT to be verified.
-   * @return {*}  {Promise<JwtPayload>} - A promise that resolves to the decoded JWT payload.
+   * @param {string} token - The JWT token to verify.
+   * @return {*}  {IJwtPayload} - The payload contained in the verified JWT.
    * @memberof IJwtService
    */
 
-  verify(token: string): Promise<JwtPayload>;
+  verifyToken(token: string): IJwtPayload;
 
   /**
-   * Gets the expiration time for the JWT (JSON Web Token).
+   * Decodes the provided JWT token without verifying its signature.
    *
-   * @return {*}  {number} - The expiration time in seconds.
+   * @param {string} token - The JWT token to decode.
+   * @return {*}  {(IJwtPayload | null)} - The decoded payload, or null if decoding fails.
    * @memberof IJwtService
    */
 
-  getExpirationTime(): number;
+  decodeToken(token: string): IJwtPayload | null;
 }

@@ -9,6 +9,7 @@ export * from './errors/http.errors';
 export * from './errors/bootstrap.errors';
 export * from './errors/oauth2.errors';
 export * from './errors/domain.errors';
+export * from './errors/jwt.errors';
 
 //Functions
 export * from './functions/general.functions';

@@ -20,11 +20,15 @@ export * from './http/httpServer';
 export * from './lifecycle/shutdown';
 export * from './lifecycle/shutdownConfig';
 
+//Providers
+export * from './providers/key.provider';
+
 //Services
 export * from './services/clock.service';
 export * from './services/uuid.service';
 export * from './services/winstonLogger.service';
 export * from './services/nodeHash.service';
+export * from './services/jwt.service';
 
 //Storage
 export * from './storage/inMemoryCode.store';
