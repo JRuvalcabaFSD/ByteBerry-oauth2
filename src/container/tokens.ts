@@ -8,6 +8,8 @@ import {
   IHashService,
   IHealthController,
   IHttpServer,
+  IJwtService,
+  IKeyProvider,
   ILogger,
   IPKceVerifierService,
   IUuid,
@@ -30,7 +32,9 @@ export type Token =
   | 'AuthorizeController'
   | 'HealthController'
   | 'TokenController'
-  | 'JwksController';
+  | 'JwksController'
+  | 'KeyProvider'
+  | 'JwtService';
 
 export interface ServiceMap {
   Config: IConfig;
@@ -48,6 +52,8 @@ export interface ServiceMap {
   CodeStore: ICodeStore;
   AuthorizeController: AuthorizeController;
   PkceVerifierService: IPKceVerifierService;
+  KeyProvider: IKeyProvider;
+  JwtService: IJwtService;
 }
 
 export const criticalServices = [
@@ -66,4 +72,6 @@ export const criticalServices = [
   'AuthorizeController',
   'TokenController',
   'JwksController',
+  'KeyProvider',
+  'JwtService',
 ];

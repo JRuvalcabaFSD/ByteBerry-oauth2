@@ -1,6 +1,6 @@
 import { ExchangeCodeForTokenUseCase } from '@/application';
 import { AuthorizationCodeEntity, ClientId, CodeChallenge } from '@/domain';
-import { ICodeStore, ILogger, IPKceVerifierService } from '@/interfaces';
+import { ICodeStore, ILogger, IPKceVerifierService, IJwtService } from '@/interfaces';
 import { InvalidGrantError, InvalidRequestError, UnsupportedGrantTypeError } from '@/shared';
 
 describe('ExchangeCodeForTokenUseCase', () => {
@@ -8,6 +8,7 @@ describe('ExchangeCodeForTokenUseCase', () => {
   let mockCodeStore: jest.Mocked<ICodeStore>;
   let mockLogger: jest.Mocked<ILogger>;
   let mockPkceVerifier: jest.Mocked<IPKceVerifierService>;
+  let mockJwtService: jest.Mocked<IJwtService>;
   let mockAuthCode: AuthorizationCodeEntity;
 
   beforeEach(() => {
@@ -30,6 +31,12 @@ describe('ExchangeCodeForTokenUseCase', () => {
       verify: jest.fn(),
     };
 
+    mockJwtService = {
+      generateAccessToken: jest.fn().mockReturnValue({ sub: 'mock-sub', scope: 'mock-scope', client_id: 'mock-client-123' }),
+      decodeToken: jest.fn(),
+      verifyToken: jest.fn(),
+    };
+
     const clientId = ClientId.create('test-client-12345');
     const codeChallenge = CodeChallenge.create('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk', 'S256');
 
@@ -42,7 +49,7 @@ describe('ExchangeCodeForTokenUseCase', () => {
       scope: 'read write',
     });
 
-    useCase = new ExchangeCodeForTokenUseCase(mockCodeStore, mockLogger, mockPkceVerifier);
+    useCase = new ExchangeCodeForTokenUseCase(mockCodeStore, mockLogger, mockJwtService, mockPkceVerifier);
   });
 
   it('should return token when valid code and verifier provided', async () => {

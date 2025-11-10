@@ -1,10 +1,11 @@
-import { createConfig } from '@/config';
+import { createClockService, createKeyProvider, createNodeHashService, createUuidService } from '@/infrastructure';
 import { Container, Token, criticalServices } from '@/container';
-import * as factories from '@/container';
-import { createClockService, createNodeHashService, createUuidService } from '@/infrastructure';
-import { IContainer } from '@/interfaces';
 import { ContainerCreationError } from '@/shared';
+import { IContainer } from '@/interfaces';
+import * as factories from '@/container';
+import { createConfig } from '@/config';
 
+//TODO documentar
 export function bootstrapContainer(): IContainer {
   const container = new Container();
 
@@ -24,6 +25,8 @@ export function bootstrapContainer(): IContainer {
   container.register('GenerateAuthorizationCodeUseCase', factories.createGenerateAuthorizationCodeUseCase);
   container.register('ExchangeCodeForTokenUseCase', factories.createExchangeCodeForTokenUseCase);
   container.register('PkceVerifierService', factories.createPkceVerifierService);
+  container.register('KeyProvider', createKeyProvider);
+  container.register('JwtService', factories.createJwtService);
 
   //Controllers
   container.registerSingleton('HealthController', factories.createHealthController);

@@ -101,7 +101,12 @@ export function createGenerateAuthorizationCodeUseCase(c: IContainer): IGenerate
  */
 
 export function createExchangeCodeForTokenUseCase(c: IContainer): IExchangeCodeForTokenUseCase {
-  return new ExchangeCodeForTokenUseCase(c.resolve('CodeStore'), c.resolve('Logger'), c.resolve('PkceVerifierService'));
+  return new ExchangeCodeForTokenUseCase(
+    c.resolve('CodeStore'),
+    c.resolve('Logger'),
+    c.resolve('JwtService'),
+    c.resolve('PkceVerifierService')
+  );
 }
 
 /**
@@ -153,4 +158,15 @@ export function createJwksController(): JWksController {
 
 export function createPkceVerifierService(c: IContainer): PkceVerifierService {
   return new PkceVerifierService(c.resolve('Hash'), c.resolve('Logger'));
+}
+
+/**
+ * Factory function to create an instance of `JwtService`.
+ *
+ * @param c - The dependency injection container used to resolve required services.
+ * @returns A new instance of `infrastructure.JwtService` initialized with the service name, key provider, and logger.
+ */
+
+export function createJwtService(c: IContainer): infrastructure.JwtService {
+  return new infrastructure.JwtService(c.resolve('Config').serviceName, c.resolve('KeyProvider'), c.resolve('Logger'));
 }
