@@ -1,3 +1,23 @@
+# [1.1.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.0.0...v1.1.0) (2025-11-11)
+
+
+### Bug Fixes
+
+* corregir formato y duplicados en la sección de configuración del README.md ([d3fe5bd](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/d3fe5bd54489f679319cb6a3077faab72abd09b6))
+
+
+### Features
+
+* **auth:** enhance OAuth2 flow with PKCE validation ([8245744](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/8245744386285a31b0568a42c383192e90fee96b))
+* **container:** add JwtService and KeyProvider to DI container ([578d1c4](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/578d1c48e2adae613b549e1c9171e5d532ae6e57))
+* **docker:** add entrypoint script for JWT key management ([b215ae3](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/b215ae3992631b8bb41236b8bb7f8b4e128c08a9)), closes [#25](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/25) [#26](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/26) [#27](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/27)
+* Implement OAuth 2.0 Authorization Code Flow with PKCE ([60a794d](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/60a794d0f935505eda995865f10b9b109347c37f))
+* **jwks:** implement JWKS retrieval and service ([2c8de54](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/2c8de5472cbdbdb5b5bd26aeef64f143e176a197)), closes [#22](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/22) [#23](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/23)
+* **jwt:** Add JWT authentication support with key management ([6d37e1a](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/6d37e1a0f63b08aa180054304566708b9cae6c8a)), closes [#21](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/21)
+* **pkce:** implement PKCE verification service and scripts ([fff3910](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/fff391034e234a805392cbbb6ab0c2897d828a0c))
+* **tests:** add unit tests for OAuth2 components ([9b39d8f](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/9b39d8fa6eff4c7c957f24d8536c44b14a9aca88)), closes [#19](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/19) [#20](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/20)
+* **tests:** enhance unit tests for CORS, error handling, JWKS, and JWT services ([576cd1b](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/576cd1bddaa86078a03457f4e96482a82598ddbc)), closes [#24](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/24)
+
 # 1.0.0 (2025-11-01)
 
 
