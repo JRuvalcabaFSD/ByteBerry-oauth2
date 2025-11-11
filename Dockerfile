@@ -103,15 +103,13 @@ USER oauth2
 
 # Copy scripts with proper ownership
 COPY --from=builder --chown=oauth2:oauth2 /app/scripts/healthCheck.js ./scripts/
+COPY --from=builder --chown=oauth2:oauth2 /app/scripts/docker-entrypoint.sh ./scripts/
+COPY --from=builder --chown=oauth2:oauth2 /app/scripts/generate-keys.js ./scripts/
 
-# TODO enable it in phase 1
-# COPY --from=builder --chown=oauth2:oauth2 /app/scripts/docker-entrypoint.sh ./scripts/
 
-
-# Make entrypoint executable
-# USER root
-# RUN chmod +x ./scripts/docker-entrypoint.sh
-# USER oauth2
+USER root
+RUN chmod +x ./scripts/docker-entrypoint.sh
+USER oauth2
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
@@ -120,9 +118,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
 # Expose port (documentation only - actual port from ENV)
 EXPOSE 4000
 
-# TODO enable it in phase 1
 # Use dumb-init with custom entrypoint for JWT key management
-# ENTRYPOINT ["/usr/bin/dumb-init", "--", "./scripts/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "./scripts/docker-entrypoint.sh"]
 
 # Start application
 CMD ["node", "dist/app.js"]
