@@ -156,7 +156,7 @@ describe('HealthController Integration Tests', () => {
       expect(response.body).toHaveProperty('status', 'unhealthy');
     });
 
-    it('should handle-invalid-routes-when-wrong-endpoint-called', async () => {
+    it('should handle invalid routes when wrong endpoint called', async () => {
       const response = await request(app).get('/health/invalid');
 
       expect(response.status).toBe(404);
@@ -164,7 +164,7 @@ describe('HealthController Integration Tests', () => {
   });
 
   describe('response format validation', () => {
-    it('should-return-consistent-format-when-health-endpoints-called', async () => {
+    it('should return consistent format when health endpoints called', async () => {
       const basicResponse = await request(app).get('/health');
       const deepResponse = await request(app).get('/health/deep');
 

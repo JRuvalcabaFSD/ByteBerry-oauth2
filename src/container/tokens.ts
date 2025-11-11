@@ -1,17 +1,70 @@
+import { GetJwksUseCase } from '@/application';
 import { GracefulShutdown } from '@/infrastructure';
-import { IClock, IConfig, IHealthController, IHttpServer, ILogger, IUuid } from '@/interfaces';
+import * as interfaces from '@/interfaces';
+import { AuthorizeController, JWksController, TokenController } from '@/presentation';
 
 //TODO documentar
-export type Token = 'Config' | 'Clock' | 'Uuid' | 'Logger' | 'GracefulShutdown' | 'HttpServer' | 'HealthController';
+export type Token =
+  | 'Config'
+  | 'Clock'
+  | 'Uuid'
+  | 'Logger'
+  | 'Hash'
+  | 'PkceVerifierService'
+  | 'GracefulShutdown'
+  | 'HttpServer'
+  | 'CodeStore'
+  | 'GenerateAuthorizationCodeUseCase'
+  | 'ExchangeCodeForTokenUseCase'
+  | 'AuthorizeController'
+  | 'HealthController'
+  | 'TokenController'
+  | 'JwksController'
+  | 'KeyProvider'
+  | 'JwtService'
+  | 'JwksService'
+  | 'GetJwksUseCase';
 
 export interface ServiceMap {
-  Config: IConfig;
-  Clock: IClock;
-  Uuid: IUuid;
-  Logger: ILogger;
+  Config: interfaces.IConfig;
+  Clock: interfaces.IClock;
+  Uuid: interfaces.IUuid;
+  Logger: interfaces.ILogger;
+  Hash: interfaces.IHashService;
   GracefulShutdown: GracefulShutdown;
-  HttpServer: IHttpServer;
-  HealthController: IHealthController;
+  HttpServer: interfaces.IHttpServer;
+  HealthController: interfaces.IHealthController;
+  GenerateAuthorizationCodeUseCase: interfaces.IGenerateAuthorizationCodeUseCase;
+  TokenController: TokenController;
+  JwksController: JWksController;
+  ExchangeCodeForTokenUseCase: interfaces.IExchangeCodeForTokenUseCase;
+  CodeStore: interfaces.ICodeStore;
+  AuthorizeController: AuthorizeController;
+  PkceVerifierService: interfaces.IPKceVerifierService;
+  KeyProvider: interfaces.IKeyProvider;
+  JwtService: interfaces.IJwtService;
+  JwksService: interfaces.IJwksService;
+  GetJwksUseCase: GetJwksUseCase;
 }
 
-export const criticalServices = ['Config', 'Clock', 'Uuid', 'Logger', 'GracefulShutdown', 'HttpServer', 'HealthController'];
+export const criticalServices = [
+  'Config',
+  'Clock',
+  'Uuid',
+  'Logger',
+  'Hash',
+  'PkceVerifierService',
+  'GracefulShutdown',
+  'HttpServer',
+  'CodeStore',
+  'GenerateAuthorizationCodeUseCase',
+  'ExchangeCodeForTokenUseCase',
+  'HealthController',
+  'AuthorizeController',
+  'TokenController',
+  'JwksController',
+  'KeyProvider',
+  'JwtService',
+  'JwksService',
+  'GetJwksUseCase',
+];

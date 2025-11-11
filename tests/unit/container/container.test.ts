@@ -165,7 +165,7 @@ describe('Container', () => {
   // ... tests existentes ...
 
   describe('circular dependency detection', () => {
-    it('should_ThrowCircularDependencyError_When_ServiceDependsOnItself', () => {
+    it('should throw circular dependency error when service depends on itself', () => {
       // Arrange
       container.registerSingleton('Config', c => {
         // Service que intenta resolverse a sí mismo
@@ -178,7 +178,7 @@ describe('Container', () => {
       expect(() => container.resolve('Config')).toThrow('Circular dependency detected: Config -> Config');
     });
 
-    it('should_ThrowCircularDependencyError_When_ComplexCircularDependency', () => {
+    it('should throw circular dependency error when complex circular dependency', () => {
       // Arrange
       // Mock temporal para simular dependencia circular más compleja
       const containerWithCircular = new Container();

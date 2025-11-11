@@ -447,7 +447,7 @@ describe('WinstonLoggerService', () => {
   });
   describe('Format Creation', () => {
     describe('Development Format', () => {
-      it('should_FormatDevelopmentLogCorrectly_When_PrintfFormatterCalled', () => {
+      it('should format development log correctly when printf formatter called', () => {
         mockConfig.isProduction.mockReturnValue(false);
         let capturedFormatter: ((info: any) => string) | undefined;
 
@@ -468,7 +468,7 @@ describe('WinstonLoggerService', () => {
             service: 'test-service',
           };
           const basicResult = capturedFormatter(basicInfo);
-          expect(basicResult).toBe('12:34:56.789 [test-service] info : Test message ');
+          expect(basicResult).toBe('12:34:56.789 [test-service] info : Test message');
 
           const infoWithRequestId = {
             timestamp: '12:34:56.789',
@@ -478,7 +478,7 @@ describe('WinstonLoggerService', () => {
             requestId: 'very-long-request-id-that-should-be-truncated',
           };
           const requestIdResult = capturedFormatter(infoWithRequestId);
-          expect(requestIdResult).toBe('12:34:56.789 [auth-service] error [very-lon]: Error message ');
+          expect(requestIdResult).toBe('12:34:56.789 [auth-service] error [very-lon]: Error message');
 
           const infoWithContext = {
             timestamp: '12:34:56.789',
@@ -512,10 +512,10 @@ describe('WinstonLoggerService', () => {
             requestId: 12345,
           };
           const nonStringResult = capturedFormatter(infoWithNonStringRequestId);
-          expect(nonStringResult).toBe('12:34:56.789 [test-service] info : Test message ');
+          expect(nonStringResult).toBe('12:34:56.789 [test-service] info : Test message');
         }
       });
-      it('should_UseDevelopmentFormat_When_NotProduction', () => {
+      it('should use development format when not production', () => {
         mockConfig.isProduction.mockReturnValue(false);
         const formatSpy = jest.spyOn(winston.format, 'combine');
 
@@ -534,7 +534,7 @@ describe('WinstonLoggerService', () => {
     });
 
     describe('Production Format', () => {
-      it('should_UseProductionFormat_When_Production', () => {
+      it('should use production format when production', () => {
         mockConfig.isProduction.mockReturnValue(true);
         const formatSpy = jest.spyOn(winston.format, 'combine');
 
@@ -550,7 +550,7 @@ describe('WinstonLoggerService', () => {
   });
 
   describe('Transport Creation', () => {
-    it('should_CreateConsoleTransport_When_ServiceCreated', () => {
+    it('should create console transport when service created', () => {
       new WinstonLoggerService(mockConfig, mockClock);
 
       expect(winston.transports.Console).toHaveBeenCalledWith({
@@ -559,7 +559,7 @@ describe('WinstonLoggerService', () => {
       });
     });
 
-    it('should_CreateCombinedLogTransport_When_ServiceCreated', () => {
+    it('should create combined log transport when service created', () => {
       new WinstonLoggerService(mockConfig, mockClock);
 
       expect(DailyRotateFile).toHaveBeenCalledWith({
@@ -572,7 +572,7 @@ describe('WinstonLoggerService', () => {
       });
     });
 
-    it('should_CreateErrorTransport_When_Production', () => {
+    it('should create error transport when production', () => {
       mockConfig.isProduction.mockReturnValue(true);
 
       new WinstonLoggerService(mockConfig, mockClock);
@@ -588,7 +588,7 @@ describe('WinstonLoggerService', () => {
       });
     });
 
-    it('should_NotCreateErrorTransport_When_Development', () => {
+    it('should not create error transport when development', () => {
       mockConfig.isProduction.mockReturnValue(false);
 
       new WinstonLoggerService(mockConfig, mockClock);
@@ -603,7 +603,7 @@ describe('WinstonLoggerService', () => {
   });
 
   describe('Error Handling and Edge Cases', () => {
-    it('should_HandleEmptyContext_When_EmptyObjectProvided', () => {
+    it('should handle empty context when empty object provided', () => {
       loggerService.log('info', 'Test message', {});
 
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
@@ -614,7 +614,7 @@ describe('WinstonLoggerService', () => {
       });
     });
 
-    it('should_HandleNullContext_When_NullProvided', () => {
+    it('should handle null context when null provided', () => {
       loggerService.log('info', 'Test message', null as any);
 
       expect(mockWinstonLogger.log).toHaveBeenCalledWith('info', {
@@ -625,7 +625,7 @@ describe('WinstonLoggerService', () => {
       });
     });
 
-    it('should_HandleComplexContextValues_When_NestedObjectsProvided', () => {
+    it('should handle complex context values when nested objects provided', () => {
       const complexContext = {
         user: { id: '123', roles: ['admin', 'user'] },
         metadata: { source: 'api', version: 1 },
@@ -643,7 +643,7 @@ describe('WinstonLoggerService', () => {
       });
     });
 
-    it('should_HandleAllLogLevels_When_DifferentLevelsCalled', () => {
+    it('should handle all log levels when different levels called', () => {
       const levels: LogLevel[] = ['debug', 'info', 'warn', 'error'];
 
       levels.forEach(level => {
@@ -661,7 +661,7 @@ describe('WinstonLoggerService', () => {
       });
     });
 
-    it('should_PreserveSpecialCharacters_When_MessageHasSpecialChars', () => {
+    it('should preserve special characters when message has special chars', () => {
       const message = 'Test message with special chars: ñáéíóú 中文 🚀 "quotes" \'apostrophes\'';
 
       loggerService.log('info', message);
@@ -676,7 +676,7 @@ describe('WinstonLoggerService', () => {
   });
 
   describe('Performance and Memory', () => {
-    it('should_NotLeakMemory_When_CalledManyTimes', () => {
+    it('should not leak memory when called many times', () => {
       const iterations = 100;
 
       for (let i = 0; i < iterations; i++) {
@@ -686,7 +686,7 @@ describe('WinstonLoggerService', () => {
       expect(mockWinstonLogger.log).toHaveBeenCalledTimes(iterations);
     });
 
-    it('should_ExecuteQuickly_When_LoggingManyMessages', () => {
+    it('should execute quickly when logging many messages', () => {
       const iterations = 1000;
       const startTime = Date.now();
 
@@ -701,7 +701,7 @@ describe('WinstonLoggerService', () => {
       expect(mockWinstonLogger.log).toHaveBeenCalledTimes(iterations);
     });
 
-    it('should_HandleLargeContext_When_BigObjectProvided', () => {
+    it('should handle large context when big object provided', () => {
       const largeContext: Record<string, any> = {};
       for (let i = 0; i < 100; i++) {
         largeContext[`key${i}`] = `value${i}`.repeat(10);
@@ -718,7 +718,7 @@ describe('WinstonLoggerService', () => {
   });
 
   describe('Integration Scenarios', () => {
-    it('should_WorkWithRealRequestFlow_When_SimulatingMicroserviceRequest', () => {
+    it('should work with real request flow when simulating microservice request', () => {
       const requestId = 'req-550e8400-e29b-41d4-a716-446655440000';
       const requestLogger = loggerService.child({ requestId, module: 'auth' });
 
@@ -756,7 +756,7 @@ describe('WinstonLoggerService', () => {
       });
     });
 
-    it('should_SupportErrorObjectLogging_When_ErrorOccurs', () => {
+    it('should support error object logging when error occurs', () => {
       const error = new Error('Database connection failed');
       error.stack = 'Error: Database connection failed\n    at Object.<anonymous>';
 
@@ -779,7 +779,7 @@ describe('WinstonLoggerService', () => {
       });
     });
 
-    it('should_SupportMultipleServiceInstances_When_DifferentServices', () => {
+    it('should support multiple service instances when different services', () => {
       const authConfig = { ...mockConfig, serviceName: 'auth-service' };
       const paymentConfig = { ...mockConfig, serviceName: 'payment-service' };
 
@@ -808,7 +808,7 @@ describe('WinstonLoggerService', () => {
   });
 
   describe('Testability and Mocking Support', () => {
-    it('should_BeMockableForTesting_When_UsedInOtherComponents', () => {
+    it('should be mockable for testing when used in other components', () => {
       const mockLogger: jest.Mocked<ILogger> = {
         info: jest.fn(),
         debug: jest.fn(),
@@ -825,7 +825,7 @@ describe('WinstonLoggerService', () => {
       expect(mockLogger.child).toHaveBeenCalledWith({ module: 'test' });
     });
 
-    it('should_AllowDependencyInjection_When_UsedInServices', () => {
+    it('should allow dependency injection when used in services', () => {
       class TestService {
         constructor(private logger: ILogger) {}
 

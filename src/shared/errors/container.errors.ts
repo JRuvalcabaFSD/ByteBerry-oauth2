@@ -24,6 +24,7 @@ import { Token } from '@/container';
  */
 
 export class ContainerError extends Error {
+  public readonly errorType = 'container';
   public readonly token: Token;
   constructor(message: string, token: Token) {
     super(message);

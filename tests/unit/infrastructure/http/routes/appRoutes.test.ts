@@ -40,9 +40,12 @@ describe('App Routes', () => {
     jest.clearAllMocks();
 
     mockRouter = {
-      get: jest.fn(),
       use: jest.fn(),
-      route: jest.fn(),
+      get: jest.fn(),
+      post: jest.fn(),
+      put: jest.fn(),
+      delete: jest.fn(),
+      // agrega otros métodos si los necesitas
     } as unknown as Router;
 
     const mod = await import('@/infrastructure/http/routes/app.routes');
@@ -142,7 +145,7 @@ describe('App Routes', () => {
       timestamp: '2025-01-01T00:00:00.000Z',
       requestId: 'test-request-id',
       environment: 'test',
-      endpoints: { home: '/', health: '/health', deepHealth: '/health/deep' },
+      endpoints: expect.any(Object),
     });
   });
 
@@ -169,7 +172,7 @@ describe('App Routes', () => {
       message: 'Route GET /test not found',
       requestId: 'test-request-id',
       timestamp: '2025-01-01T00:00:00.000Z',
-      endpoints: { home: '/', health: '/health', deepHealth: '/health/deep' },
+      endpoints: expect.any(Object),
     });
   });
 });

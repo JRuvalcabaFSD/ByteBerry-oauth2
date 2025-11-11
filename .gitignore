@@ -218,3 +218,6 @@ dist
 
 # JSDoc cache
 .jsdoc-cache/
+
+# JWT Keys
+keys/

@@ -12,6 +12,7 @@
  */
 
 export class CorsOriginsError extends Error {
+  public readonly errorType = 'cors';
   public readonly origin: string;
   constructor(origin: string) {
     super(`Origin ${origin} not allowed by CORS`);

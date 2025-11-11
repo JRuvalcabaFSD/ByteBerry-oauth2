@@ -16,6 +16,7 @@
  */
 
 export class ConfigError extends Error {
+  public readonly errorType = 'config';
   public context: Record<string, unknown>;
 
   constructor(message: string, context: Record<string, unknown>) {
