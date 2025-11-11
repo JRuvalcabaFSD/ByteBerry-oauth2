@@ -140,11 +140,16 @@ export class JwtService implements IJwtService {
     this.logger.debug('Decoding JWT token without verification');
 
     try {
-      const decoded = decode(token) as unknown as IJwtPayload;
+      const decoded = decode(token);
 
-      if (decoded) this.logger.debug('JWT token decoded successfully', { sub: decoded.sub });
+      if (!decoded || typeof decoded === 'string') {
+        this.logger.warn('JWT token decoding failed', { token });
+        return null;
+      }
 
-      return decoded;
+      this.logger.debug('JWT token decoded successfully', { sub: (decoded as IJwtPayload).sub });
+
+      return decoded as IJwtPayload;
     } catch (error) {
       this.logger.warn('JWT token decoding failed', {
         error: error instanceof Error ? error.message : 'Unknown error',

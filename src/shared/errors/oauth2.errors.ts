@@ -45,13 +45,13 @@ export class OAuth2Error extends Error {
    * @returns An object containing the error code and error description.
    * The returned object has two properties:
    * - `error`: The error code
-   * - `error_descriptor`: The human-readable error description
+   * - `error_description`: The human-readable error description
    */
 
   toJSON() {
     return {
       error: this.error,
-      error_descriptor: this.errorDescription,
+      error_description: this.errorDescription,
     };
   }
 }
