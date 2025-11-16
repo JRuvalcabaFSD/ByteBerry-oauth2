@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.1.0...v1.2.0) (2025-11-16)
+
+
+### Features
+
+* **jwt:** update JwtService constructor to include issuer, audience, and expiration ([6254e3f](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/6254e3f23e3b8f725e98f24a71c9ab83820d4225))
+
 # [1.1.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.0.0...v1.1.0) (2025-11-11)
 
 
