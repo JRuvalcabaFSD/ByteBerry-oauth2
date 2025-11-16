@@ -1,8 +1,8 @@
 import request from 'supertest';
 import express, { Application } from 'express';
 
-import { HealthController } from '@/infrastructure/controllers/health.controller';
-import { createHealthRoutes } from '@/infrastructure/http/routes/health.routes';
+import { HealthService } from '@/infrastructure/services/health.service';
+import { createHealthRoutes } from '@/presentation/routes/health.routes';
 import { IClock, IConfig, IContainer, ILogger, IUuid } from '@/interfaces';
 import { ServiceMap } from '@/container';
 
@@ -55,16 +55,16 @@ const createMockContainer = (): jest.Mocked<IContainer> => {
   return container;
 };
 
-describe('HealthController Integration Tests', () => {
+describe('HealthService Integration Tests', () => {
   let app: Application;
   let mockContainer: jest.Mocked<IContainer>;
 
   beforeEach(() => {
     mockContainer = createMockContainer();
-    const healthController = new HealthController(mockContainer);
+    const HealthService = new HealthService(mockContainer);
 
     app = express();
-    app.use('/health', createHealthRoutes(healthController));
+    app.use('/health', createHealthRoutes(HealthService));
   });
 
   describe('GET /health', () => {
@@ -126,7 +126,7 @@ describe('HealthController Integration Tests', () => {
     it('should handle container errors when service resolution fails', async () => {
       const errorContainer = createMockContainer();
 
-      class TestHealthController extends HealthController {
+      class TestHealthService extends HealthService {
         constructor(
           container: IContainer,
           private testCriticalServices: string[]
@@ -146,9 +146,9 @@ describe('HealthController Integration Tests', () => {
       });
 
       const critical = ['HttpServer'];
-      const testHealthController = new TestHealthController(errorContainer, critical);
+      const testHealthService = new TestHealthService(errorContainer, critical);
       const testApp = express();
-      testApp.use('/health', createHealthRoutes(testHealthController));
+      testApp.use('/health', createHealthRoutes(testHealthService));
 
       const response = await request(testApp).get('/health/deep');
 

@@ -15,18 +15,18 @@ import { criticalServices, Token } from '@/container';
  * The controller evaluates the health status of registered services and system resources,
  * determining an overall health status of 'healthy', 'degraded', or 'unhealthy'.
  *
- * @implements {Interfaces.IHealthController}
+ * @implements {Interfaces.IHealthService}
  *
  * @example
  * ```typescript
- * const healthController = new HealthController(container);
- * app.get('/health', healthController.getHealth);
- * app.get('/health/deep', healthController.getDeepHealth);
+ * const HealthService = new HealthService(container);
+ * app.get('/health', HealthService.getHealth);
+ * app.get('/health/deep', HealthService.getDeepHealth);
  * ```
  */
 
 @LogContextClass()
-export class HealthController implements Interfaces.IHealthController {
+export class HealthService implements Interfaces.IHealthService {
   private readonly config: Interfaces.IConfig;
   private readonly uuid: Interfaces.IUuid;
   private readonly clock: Interfaces.IClock;
@@ -73,7 +73,7 @@ export class HealthController implements Interfaces.IHealthController {
    */
 
   public getHealth = async (req: Request, res: Response): Promise<void> => {
-    const ctxLogger = withLoggerContext(this.logger, 'HealthController.getHealth');
+    const ctxLogger = withLoggerContext(this.logger, 'HealthService.getHealth');
 
     try {
       const requestId = req.requestId || this.uuid.generate();
@@ -117,7 +117,7 @@ export class HealthController implements Interfaces.IHealthController {
    */
 
   public getDeepHealth = async (req: Request, res: Response): Promise<void> => {
-    const ctxLogger = withLoggerContext(this.logger, 'HealthController.getDeepHealth');
+    const ctxLogger = withLoggerContext(this.logger, 'HealthService.getDeepHealth');
     try {
       const requestId = req.requestId || this.uuid.generate();
       const startTime = Math.floor(process.uptime() * 1000);

@@ -48,14 +48,14 @@ export function createHttpServer(c: IContainer): infrastructure.HttpServer {
 }
 
 /**
- * Creates and returns a new instance of the HealthController.
+ * Creates and returns a new instance of the HealthService.
  *
  * @param c - The dependency injection container that provides required dependencies
- * @returns A new HealthController instance initialized with the provided container
+ * @returns A new HealthService instance initialized with the provided container
  */
 
-export function createHealthController(c: IContainer): infrastructure.HealthController {
-  return new infrastructure.HealthController(c);
+export function createHealthService(c: IContainer): infrastructure.HealthService {
+  return new infrastructure.HealthService(c);
 }
 
 /**

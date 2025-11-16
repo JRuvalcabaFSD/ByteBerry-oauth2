@@ -33,7 +33,7 @@ export function bootstrapContainer(): IContainer {
   container.register('GetJwksUseCase', factories.createGetJwksUseCase);
 
   //Controllers
-  container.registerSingleton('HealthController', factories.createHealthController);
+  container.registerSingleton('HealthService', factories.createHealthService);
   container.register('AuthorizeController', factories.createAuthorizeController);
   container.register('TokenController', factories.createTokenController);
   container.register('JwksController', factories.createJwksController);

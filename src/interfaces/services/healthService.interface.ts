@@ -68,19 +68,19 @@ export interface IDeepHealthResponse extends IHealthResponse {
 /**
  * Interface for health check controller operations.
  *
- * @interface IHealthController
+ * @interface IHealthService
  * @description Defines the contract for health check endpoints that monitor the application's status.
  * Provides both basic and deep health check capabilities for system diagnostics.
  */
 
-export interface IHealthController {
+export interface IHealthService {
   /**
    * Handles the basic health check request.
    *
    * @param {Request} req - The incoming request object
    * @param {Response} res - The outgoing response object
    * @return {*}  {Promise<void>} - A promise that resolves when the response is sent
-   * @memberof IHealthController
+   * @memberof IHealthService
    */
 
   getHealth(req: Request, res: Response): Promise<void>;
@@ -91,7 +91,7 @@ export interface IHealthController {
    * @param {Request} req - The incoming request object
    * @param {Response} res - The outgoing response object
    * @return {*}  {Promise<void>} - A promise that resolves when the response is sent
-   * @memberof IHealthController
+   * @memberof IHealthService
    */
 
   getDeepHealth(req: Request, res: Response): Promise<void>;
@@ -102,7 +102,7 @@ export interface IHealthController {
    * @template T - The type of health check ('simple' or 'deep')
    * @param {T} type - The type of health check to perform
    * @return {*}  {Promise<T extends 'deep' ? IDeepHealthResponse : IHealthResponse>} - A promise that resolves to the health check response
-   * @memberof IHealthController
+   * @memberof IHealthService
    */
 
   checkHealth<T extends 'simple' | 'deep'>(

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import os from 'os';
 
 import { IContainer } from '@/interfaces';
-import { HealthController } from '@/infrastructure';
+import { HealthService } from '@/infrastructure';
 
 const mockContainer: jest.Mocked<IContainer> = {
   resolve: jest.fn(),
@@ -27,12 +27,12 @@ const createMockDependencies = () => ({
   uuid: {
     generate: jest.fn(() => 'mock uuid 123'),
     isValid: jest.fn((_uuid: string) => true),
-  } as import('@/interfaces/infrastructure/services/uuid.interface').IUuid,
+  } as import('@/interfaces/services/uuid.interface').IUuid,
   clock: {
     timestamp: jest.fn(() => 1234567890),
     isoString: jest.fn(() => '2025 01 01T12:00:00.000Z'),
     now: jest.fn(() => new Date()),
-  } as import('@/interfaces/infrastructure/services/clock.interface').IClock,
+  } as import('@/interfaces/services/clock.interface').IClock,
   logger: {
     info: jest.fn(),
     error: jest.fn(),
@@ -40,7 +40,7 @@ const createMockDependencies = () => ({
     debug: jest.fn(),
     child: jest.fn(() => this),
     log: jest.fn(),
-  } as unknown as import('@/interfaces/infrastructure/services/logger.interface').ILogger,
+  } as unknown as import('@/interfaces/services/logger.interface').ILogger,
 });
 
 const createMockRequest = (overrides: Partial<Request> = {}): Request =>
@@ -55,8 +55,8 @@ const createMockResponse = (): jest.Mocked<Response> =>
     json: jest.fn(),
   }) as unknown as jest.Mocked<Response>;
 
-describe('HealthController', () => {
-  let healthController: HealthController;
+describe('HealthService', () => {
+  let HealthService: HealthService;
   let mockDeps: ReturnType<typeof createMockDependencies>;
 
   beforeEach(() => {
@@ -86,7 +86,7 @@ describe('HealthController', () => {
       }
     });
 
-    healthController = new HealthController(mockContainer);
+    HealthService = new HealthService(mockContainer);
   });
 
   describe('getHealth', () => {
@@ -94,7 +94,7 @@ describe('HealthController', () => {
       const req = createMockRequest();
       const res = createMockResponse();
 
-      await healthController.getHealth(req, res);
+      await HealthService.getHealth(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
@@ -110,7 +110,7 @@ describe('HealthController', () => {
       const req = createMockRequest({ requestId: undefined as any });
       const res = createMockResponse();
 
-      await healthController.getHealth(req, res);
+      await HealthService.getHealth(req, res);
 
       expect(mockDeps.uuid.generate).toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith(
@@ -124,7 +124,7 @@ describe('HealthController', () => {
       const req = createMockRequest({ requestId: 'provided id' });
       const res = createMockResponse();
 
-      await healthController.getHealth(req, res);
+      await HealthService.getHealth(req, res);
 
       expect(mockDeps.uuid.generate).not.toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith(
@@ -146,7 +146,7 @@ describe('HealthController', () => {
       const req = createMockRequest();
       const res = createMockResponse();
 
-      await healthController.getDeepHealth(req, res);
+      await HealthService.getDeepHealth(req, res);
 
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -164,7 +164,7 @@ describe('HealthController', () => {
       const req = createMockRequest();
       const res = createMockResponse();
 
-      await healthController.getDeepHealth(req, res);
+      await HealthService.getDeepHealth(req, res);
 
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -184,7 +184,7 @@ describe('HealthController', () => {
       const req = createMockRequest();
       const res = createMockResponse();
 
-      await healthController.getDeepHealth(req, res);
+      await HealthService.getDeepHealth(req, res);
 
       expect(res.status).toHaveBeenCalledWith(expect.any(Number));
       const statusCall = res.status.mock.calls[0][0];
@@ -194,7 +194,7 @@ describe('HealthController', () => {
 
   describe('checkHealth', () => {
     it('should return simple response when type is simple', async () => {
-      const result = await healthController.checkHealth('simple', 'test id', ['TestService'] as any);
+      const result = await HealthService.checkHealth('simple', 'test id', ['TestService'] as any);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -209,7 +209,7 @@ describe('HealthController', () => {
     });
 
     it('should return deep response when type is deep', async () => {
-      const result = await healthController.checkHealth('deep', 'test id', ['TestService'] as any);
+      const result = await HealthService.checkHealth('deep', 'test id', ['TestService'] as any);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -223,7 +223,7 @@ describe('HealthController', () => {
     it('should check provided services when services array given', async () => {
       const services = ['Service1', 'Service2'] as any;
 
-      const result = await healthController.checkHealth('deep', 'test id', services);
+      const result = await HealthService.checkHealth('deep', 'test id', services);
 
       expect(result.dependencies).toEqual(
         expect.objectContaining({
@@ -247,7 +247,7 @@ describe('HealthController', () => {
       mockContainer.isRegistered.mockReturnValue(true);
       mockContainer.resolve.mockReturnValue({} as any);
 
-      const result = await healthController.checkHealth('deep', 'test id', ['TestService'] as any);
+      const result = await HealthService.checkHealth('deep', 'test id', ['TestService'] as any);
 
       expect(result.dependencies?.TestService).toEqual(
         expect.objectContaining({
@@ -261,7 +261,7 @@ describe('HealthController', () => {
     it('should return unhealthy status when service not registered', async () => {
       mockContainer.isRegistered.mockReturnValue(false);
 
-      const result = await healthController.checkHealth('deep', 'test id', ['UnregisteredService'] as any);
+      const result = await HealthService.checkHealth('deep', 'test id', ['UnregisteredService'] as any);
 
       expect(result.dependencies?.UnregisteredService).toEqual(
         expect.objectContaining({
@@ -276,7 +276,7 @@ describe('HealthController', () => {
       mockContainer.isRegistered.mockReturnValue(true);
       mockContainer.resolve.mockReturnValue(undefined as any);
 
-      const result = await healthController.checkHealth('deep', 'test id', ['NullService'] as any);
+      const result = await HealthService.checkHealth('deep', 'test id', ['NullService'] as any);
 
       expect(result.dependencies?.NullService).toEqual(
         expect.objectContaining({
@@ -292,7 +292,7 @@ describe('HealthController', () => {
         throw new Error('Service resolution failed');
       });
 
-      const result = await healthController.checkHealth('deep', 'test id', ['FailingService'] as any);
+      const result = await HealthService.checkHealth('deep', 'test id', ['FailingService'] as any);
 
       expect(result.dependencies?.FailingService).toEqual(
         expect.objectContaining({
@@ -310,7 +310,7 @@ describe('HealthController', () => {
       const res = createMockResponse();
       const error = new Error('Test error');
 
-      await healthController.handleHealthError(req, res, error, 'basic');
+      await HealthService.handleHealthError(req, res, error, 'basic');
 
       expect(res.status).toHaveBeenCalledWith(503);
       expect(res.json).toHaveBeenCalledWith(
@@ -326,7 +326,7 @@ describe('HealthController', () => {
       const res = createMockResponse();
       const error = new Error('Test error');
 
-      await healthController.handleHealthError(req, res, error, 'basic');
+      await HealthService.handleHealthError(req, res, error, 'basic');
 
       expect(mockDeps.logger.error).toHaveBeenCalledWith(
         expect.stringContaining('health check failed'),
@@ -345,7 +345,7 @@ describe('HealthController', () => {
         throw new Error('Container resolution failed');
       });
 
-      await healthController.handleHealthError(req, res, error, 'basic');
+      await HealthService.handleHealthError(req, res, error, 'basic');
 
       expect(res.status).toHaveBeenCalledWith(503);
 
@@ -362,11 +362,11 @@ describe('HealthController', () => {
       const res = createMockResponse();
       const mockProcessUptime = jest.spyOn(process, 'uptime').mockReturnValue(123.456);
 
-      await healthController.getDeepHealth(req, res);
+      await HealthService.getDeepHealth(req, res);
 
       expect(mockProcessUptime).toHaveBeenCalled();
       expect(mockDeps.logger.info).toHaveBeenCalledWith(
-        '[HealthController.getDeepHealth] Deep health check completed',
+        '[HealthService.getDeepHealth] Deep health check completed',
         expect.objectContaining({
           responseTime: expect.any(Number),
         })
@@ -377,7 +377,7 @@ describe('HealthController', () => {
   });
   describe('checkHealth return type casting', () => {
     it('should cast response to IHealthResponse for simple type', async () => {
-      const result = await healthController.checkHealth('simple', 'test-id', []);
+      const result = await HealthService.checkHealth('simple', 'test-id', []);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -421,7 +421,7 @@ describe('HealthController', () => {
         }
       });
 
-      const controller = new HealthController(containerWithoutIsRegistered);
+      const controller = new HealthService(containerWithoutIsRegistered);
 
       const result = await controller.checkHealth('deep', 'test-id', ['TestService', 'NullService'] as any);
 
@@ -466,16 +466,16 @@ describe('HealthController', () => {
         Service2: { status: 'warning', message: 'Slow response', responseTime: 100 },
       };
 
-      const checkDependenciesMethod = (healthController as any).checkDependencies.bind(healthController);
+      const checkDependenciesMethod = (HealthService as any).checkDependencies.bind(HealthService);
       const originalMethod = checkDependenciesMethod;
 
-      (healthController as any).checkDependencies = jest.fn().mockResolvedValue(mockDependencies);
+      (HealthService as any).checkDependencies = jest.fn().mockResolvedValue(mockDependencies);
 
-      const result = await healthController.checkHealth('deep', 'test-id', ['Service1', 'Service2'] as any);
+      const result = await HealthService.checkHealth('deep', 'test-id', ['Service1', 'Service2'] as any);
 
       expect(result.status).toBe('degraded');
 
-      (healthController as any).checkDependencies = originalMethod;
+      (HealthService as any).checkDependencies = originalMethod;
     });
   });
   describe('handleHealthError fallback response', () => {
@@ -529,7 +529,7 @@ describe('HealthController', () => {
         isRegistered: jest.fn(),
       };
 
-      const failingController = new HealthController(partialFailingContainer);
+      const failingController = new HealthService(partialFailingContainer);
 
       (partialFailingContainer.resolve as any).mockImplementation(() => {
         throw new Error('Complete container failure');
@@ -596,7 +596,7 @@ describe('HealthController', () => {
         isRegistered: jest.fn(),
       };
 
-      const failingController = new HealthController(partialFailingContainer);
+      const failingController = new HealthService(partialFailingContainer);
 
       (partialFailingContainer.resolve as any).mockImplementation(() => {
         throw new Error('Total system failure');
