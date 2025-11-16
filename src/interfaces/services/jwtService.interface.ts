@@ -30,7 +30,7 @@ export interface IJwtService {
   /**
    * Generates an access token (JWT) based on the provided payload.
    *
-   * @param {({ sub: string; scope?: string | undefined; client_id?: string | undefined })} payload - The payload to include in the JWT.
+   * @param {({ sub: string; audience: string | string[]; scope?: string | undefined; client_id?: string | undefined })} payload - The payload to include in the JWT.
    * @return {*}  {string} - The generated JWT as a string.
    * @memberof IJwtService
    */
@@ -48,7 +48,7 @@ export interface IJwtService {
    * @memberof IJwtService
    */
 
-  verifyToken(token: string): IJwtPayload;
+  verifyToken(token: string, expectedAudience?: string): IJwtPayload;
 
   /**
    * Decodes the provided JWT token without verifying its signature.

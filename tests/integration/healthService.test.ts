@@ -1,10 +1,9 @@
 import request from 'supertest';
 import express, { Application } from 'express';
-
-import { HealthService } from '@/infrastructure/services/health.service';
-import { createHealthRoutes } from '@/presentation/routes/health.routes';
 import { IClock, IConfig, IContainer, ILogger, IUuid } from '@/interfaces';
 import { ServiceMap } from '@/container';
+import { HealthService } from '@/infrastructure';
+import { createHealthRoutes } from '@/presentation';
 
 const createMockContainer = (): jest.Mocked<IContainer> => {
   const container: jest.Mocked<IContainer> = {
@@ -25,10 +24,16 @@ const createMockContainer = (): jest.Mocked<IContainer> => {
           port: 3000,
           logLevel: 'info',
           corsOrigins: [],
+          jwtPrivateKey: '',
+          jwtPublicKey: '',
+          jwtKeyId: '',
+          jwtAudience: '',
+          jwtIssuer: '',
+          jwtExpiration: '',
           isDevelopment: jest.fn(() => false),
           isProduction: jest.fn(() => false),
           isTest: jest.fn(() => true),
-        } as IConfig;
+        } as unknown as IConfig;
       case 'Uuid':
         return {
           generate: jest.fn(() => 'test-uuid-123'),
@@ -61,10 +66,10 @@ describe('HealthService Integration Tests', () => {
 
   beforeEach(() => {
     mockContainer = createMockContainer();
-    const HealthService = new HealthService(mockContainer);
+    const healthService = new HealthService(mockContainer);
 
     app = express();
-    app.use('/health', createHealthRoutes(HealthService));
+    app.use('/health', createHealthRoutes(healthService));
   });
 
   describe('GET /health', () => {

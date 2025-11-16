@@ -58,7 +58,16 @@ describe('WinstonLoggerService', () => {
       port: 4000,
       corsOrigins: [],
       version: '1.0.0',
-    };
+      jwtPrivateKey: '',
+      jwtPublicKey: '',
+      jwtKeyId: '',
+      jwtAudience: [],
+      jwtIssuer: '',
+      jwtExpiration: '',
+      oauth2Issuer: '',
+      tokenExpiresIn: 900,
+      getSummary: jest.fn(() => ({})),
+    } as jest.Mocked<IConfig>;
 
     mockClock = {
       now: jest.fn(() => new Date('2025-01-15T12:30:45.123Z')),

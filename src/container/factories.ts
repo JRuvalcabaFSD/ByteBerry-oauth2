@@ -4,6 +4,17 @@ import { ICodeStore, IContainer, IExchangeCodeForTokenUseCase, IGenerateAuthoriz
 import { AuthorizeController, JWksController, PkceVerifierService, TokenController } from '@/presentation';
 
 /**
+ * Creates an instance of `EnvKeyProvider` using the provided container.
+ *
+ * @param c - The dependency injection container used to resolve required configuration.
+ * @returns An `EnvKeyProvider` initialized with the resolved configuration.
+ */
+
+export function createKeyProvider(c: IContainer): infrastructure.EnvKeyProvider {
+  return new infrastructure.EnvKeyProvider(c.resolve('Config'));
+}
+
+/**
  * Factory function to create a WinstonLoggerService instance.
  *
  * @param c - The dependency injection container used to resolve dependencies

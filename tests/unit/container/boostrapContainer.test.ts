@@ -8,11 +8,20 @@ const mockConfig: IConfig = {
   port: 4000,
   logLevel: 'info',
   serviceName: 'ByteBerry-OAuth2',
+  jwtPrivateKey: '',
+  jwtPublicKey: '',
+  jwtKeyId: '',
+  jwtAudience: [],
   corsOrigins: ['http://localhost:5173'],
   version: '0.1.0',
   isDevelopment: () => false,
   isProduction: () => false,
   isTest: () => true,
+  oauth2Issuer: '',
+  tokenExpiresIn: 0,
+  getSummary: function (): Record<string, unknown> {
+    throw new Error('Function not implemented.');
+  },
 };
 
 describe('bootstrapContainer', () => {

@@ -8,11 +8,18 @@ const createMockConfig = (overrides: Partial<IConfig> = {}): IConfig => ({
   port: 4000,
   logLevel: 'info',
   serviceName: 'ByteBerry-OAuth2',
+  jwtPrivateKey: '',
+  jwtPublicKey: '',
+  jwtKeyId: '',
+  jwtAudience: [],
   corsOrigins: ['http://localhost:5173'],
   version: '0.1.0',
+  oauth2Issuer: 'byteberry-oauth2',
+  tokenExpiresIn: 900,
   isDevelopment: () => false,
   isProduction: () => false,
   isTest: () => true,
+  getSummary: () => ({}),
   ...overrides,
 });
 

@@ -1,4 +1,4 @@
-import { createClockService, createKeyProvider, createNodeHashService, createUuidService } from '@/infrastructure';
+import { createClockService, createNodeHashService, createUuidService } from '@/infrastructure';
 import { Container, Token, criticalServices } from '@/container';
 import { ContainerCreationError } from '@/shared';
 import { IContainer } from '@/interfaces';
@@ -9,34 +9,10 @@ import { createConfig } from '@/config';
 export function bootstrapContainer(): IContainer {
   const container = new Container();
 
-  //Core services
-  container.registerSingleton('Config', createConfig);
-  container.registerSingleton('Clock', createClockService);
-  container.registerSingleton('Uuid', createUuidService);
-  container.registerSingleton('Logger', factories.createWinstonLoggerService);
-  container.registerSingleton('Hash', createNodeHashService);
-
-  //Http Services
-  container.registerSingleton('GracefulShutdown', factories.createGracefulShutdown);
-  container.registerSingleton('HttpServer', factories.createHttpServer);
-
-  //OAuth2 services
-  container.registerSingleton('CodeStore', factories.createCodeStore);
-  container.register('PkceVerifierService', factories.createPkceVerifierService);
-  container.register('KeyProvider', createKeyProvider);
-  container.register('JwtService', factories.createJwtService);
-  container.register('JwksService', factories.createJwksService);
-
-  //Uses cases
-  container.register('GenerateAuthorizationCodeUseCase', factories.createGenerateAuthorizationCodeUseCase);
-  container.register('ExchangeCodeForTokenUseCase', factories.createExchangeCodeForTokenUseCase);
-  container.register('GetJwksUseCase', factories.createGetJwksUseCase);
-
-  //Controllers
-  container.registerSingleton('HealthService', factories.createHealthService);
-  container.register('AuthorizeController', factories.createAuthorizeController);
-  container.register('TokenController', factories.createTokenController);
-  container.register('JwksController', factories.createJwksController);
+  registerCoreServices(container);
+  registerOAuthServices(container);
+  registerJwtServices(container);
+  registerControllers(container);
 
   validate(container, criticalServices);
 
@@ -47,4 +23,33 @@ export function validate(container: IContainer, services: string[]): void {
   services.forEach(token => {
     if (!container.isRegistered(token as Token)) throw new ContainerCreationError(token as Token);
   });
+}
+function registerCoreServices(container: Container): void {
+  container.registerSingleton('Config', createConfig);
+  container.registerSingleton('Clock', createClockService);
+  container.registerSingleton('Uuid', createUuidService);
+  container.registerSingleton('Logger', factories.createWinstonLoggerService);
+  container.registerSingleton('Hash', createNodeHashService);
+  container.registerSingleton('GracefulShutdown', factories.createGracefulShutdown);
+  container.registerSingleton('HttpServer', factories.createHttpServer);
+}
+
+function registerOAuthServices(container: IContainer): void {
+  container.registerSingleton('CodeStore', factories.createCodeStore);
+  container.register('PkceVerifierService', factories.createPkceVerifierService);
+  container.register('KeyProvider', factories.createKeyProvider);
+  container.register('JwtService', factories.createJwtService);
+  container.register('JwksService', factories.createJwksService);
+}
+
+function registerJwtServices(container: IContainer): void {
+  container.register('GenerateAuthorizationCodeUseCase', factories.createGenerateAuthorizationCodeUseCase);
+  container.register('ExchangeCodeForTokenUseCase', factories.createExchangeCodeForTokenUseCase);
+  container.register('GetJwksUseCase', factories.createGetJwksUseCase);
+}
+function registerControllers(container: Container): void {
+  container.registerSingleton('HealthService', factories.createHealthService);
+  container.register('AuthorizeController', factories.createAuthorizeController);
+  container.register('TokenController', factories.createTokenController);
+  container.register('JwksController', factories.createJwksController);
 }
