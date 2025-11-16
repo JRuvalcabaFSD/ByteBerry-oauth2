@@ -4,6 +4,17 @@ import { ICodeStore, IContainer, IExchangeCodeForTokenUseCase, IGenerateAuthoriz
 import { AuthorizeController, JWksController, PkceVerifierService, TokenController } from '@/presentation';
 
 /**
+ * Creates an instance of `EnvKeyProvider` using the provided container.
+ *
+ * @param c - The dependency injection container used to resolve required configuration.
+ * @returns An `EnvKeyProvider` initialized with the resolved configuration.
+ */
+
+export function createKeyProvider(c: IContainer): infrastructure.EnvKeyProvider {
+  return new infrastructure.EnvKeyProvider(c.resolve('Config'));
+}
+
+/**
  * Factory function to create a WinstonLoggerService instance.
  *
  * @param c - The dependency injection container used to resolve dependencies
@@ -48,14 +59,14 @@ export function createHttpServer(c: IContainer): infrastructure.HttpServer {
 }
 
 /**
- * Creates and returns a new instance of the HealthController.
+ * Creates and returns a new instance of the HealthService.
  *
  * @param c - The dependency injection container that provides required dependencies
- * @returns A new HealthController instance initialized with the provided container
+ * @returns A new HealthService instance initialized with the provided container
  */
 
-export function createHealthController(c: IContainer): infrastructure.HealthController {
-  return new infrastructure.HealthController(c);
+export function createHealthService(c: IContainer): infrastructure.HealthService {
+  return new infrastructure.HealthService(c);
 }
 
 /**
@@ -168,7 +179,8 @@ export function createPkceVerifierService(c: IContainer): PkceVerifierService {
  */
 
 export function createJwtService(c: IContainer): infrastructure.JwtService {
-  return new infrastructure.JwtService(c.resolve('Config').serviceName, c.resolve('KeyProvider'), c.resolve('Logger'));
+  const { oauth2Issuer, jwtAudience, tokenExpiresIn } = c.resolve('Config');
+  return new infrastructure.JwtService(oauth2Issuer, tokenExpiresIn, jwtAudience, c.resolve('KeyProvider'), c.resolve('Logger'));
 }
 
 /**

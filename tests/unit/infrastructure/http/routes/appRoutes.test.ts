@@ -48,7 +48,7 @@ describe('App Routes', () => {
       // agrega otros métodos si los necesitas
     } as unknown as Router;
 
-    const mod = await import('@/infrastructure/http/routes/app.routes');
+    const mod = await import('@/presentation/routes/app.routes');
     createAppRoutes = mod.createAppRoutes as typeof createAppRoutes;
 
     mockContainer.resolve = jest.fn().mockImplementation((service: string) => {

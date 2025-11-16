@@ -27,13 +27,24 @@ export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 //TODO documentar
 export interface IConfig {
+  //Core config
   readonly nodeEnv: NodeEnv;
   readonly port: number;
   readonly logLevel: LogLevel;
   readonly serviceName: string;
   readonly corsOrigins: string[];
   readonly version: string;
+
+  //jwt config
+  readonly jwtPrivateKey: string | undefined;
+  readonly jwtPublicKey: string | undefined;
+  readonly jwtKeyId: string;
+  readonly jwtAudience: string[];
+  readonly oauth2Issuer: string;
+  readonly tokenExpiresIn: number;
+
   isDevelopment(): boolean;
   isProduction(): boolean;
   isTest(): boolean;
+  getSummary(): Record<string, unknown>;
 }

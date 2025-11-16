@@ -47,13 +47,6 @@ try {
 	// Mostrar resultado en consola
 	console.log("Keys generated successfully!\n");
 	console.log("Copy the following lines to your .env file:\n");
-	console.log("# JWT Keys (RS256)");
-	console.log(`JWT_PRIVATE_KEY="${privateKeyEscaped}"`);
-	console.log("");
-	console.log(`JWT_PUBLIC_KEY="${publicKeyEscaped}"`);
-	console.log("");
-	console.log("JWT_KEY_ID=default-key-1");
-	console.log("");
 
 	console.log("Security reminders:");
 	console.log("   • Never commit private keys or the keys/ folder");

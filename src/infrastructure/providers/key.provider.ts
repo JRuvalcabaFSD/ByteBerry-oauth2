@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { existsSync, readFileSync } from 'fs';
 
-import { IKeyProvider } from '@/interfaces';
+import { IConfig, IKeyProvider } from '@/interfaces';
 import { ConfigError } from '@/shared';
 
 /**
@@ -37,37 +37,52 @@ export class EnvKeyProvider implements IKeyProvider {
    * @throws {ConfigError} If JWT keys are not found in environment variables or the keys directory.
    */
 
-  constructor() {
+  constructor(config: IConfig) {
     const keysDir = join(process.cwd(), 'keys');
     const privatePath = join(keysDir, 'private.pem');
     const publicPath = join(keysDir, 'public.pem');
 
-    let privateKey = process.env.JWT_PRIVATE_KEY?.trim();
-    let publicKey = process.env.JWT_PUBLIC_KEY?.trim();
-    const keyId = process.env.JWT_KEY_ID?.trim() || 'default-key-1';
+    // Solo usa las claves del config si son strings no vacíos
+    const hasConfigKeys =
+      typeof config.jwtPrivateKey === 'string' &&
+      config.jwtPrivateKey.trim() !== '' &&
+      typeof config.jwtPublicKey === 'string' &&
+      config.jwtPublicKey.trim() !== '';
+    let privateKey: string;
+    let publicKey: string;
+    let keyId: string;
 
-    const fromEnv = !!privateKey && !!publicKey;
-
-    if (fromEnv) {
-      privateKey = this.validateAndFixPem(privateKey!, 'PRIVATE KEY', 'JWT_PRIVATE_KEY');
-      publicKey = this.validateAndFixPem(publicKey!, 'PUBLIC KEY', 'JWT_PUBLIC_KEY');
+    if (hasConfigKeys) {
+      privateKey = this.validateAndFixPem(config.jwtPrivateKey!.trim(), 'PRIVATE KEY', 'jwtPrivateKey');
+      publicKey = this.validateAndFixPem(config.jwtPublicKey!.trim(), 'PUBLIC KEY', 'jwtPublicKey');
+      keyId = config.jwtKeyId?.trim() || 'default-key-1';
     } else {
-      if (!existsSync(privatePath) || !existsSync(publicPath)) {
-        throw new ConfigError('JWT keys not found in environment variables nor in keys/ folder', {
-          envPrivate: !!process.env.JWT_PRIVATE_KEY,
-          envPublic: !!process.env.JWT_PUBLIC_KEY,
-          filesExist: {
-            private: existsSync(privatePath),
-            public: existsSync(publicPath),
-          },
-          hint: 'Run: pnpm generate:keys  or set JWT_PRIVATE_KEY / JWT_PUBLIC_KEY in .env',
-        });
+      // Si no hay claves válidas en config, usa las de entorno
+      const envPrivate = process.env.JWT_PRIVATE_KEY?.trim();
+      const envPublic = process.env.JWT_PUBLIC_KEY?.trim();
+      const envKeyId = process.env.JWT_KEY_ID?.trim() || 'default-key-1';
+      if (envPrivate && envPublic) {
+        privateKey = this.validateAndFixPem(envPrivate, 'PRIVATE KEY', 'JWT_PRIVATE_KEY');
+        publicKey = this.validateAndFixPem(envPublic, 'PUBLIC KEY', 'JWT_PUBLIC_KEY');
+        keyId = envKeyId;
+      } else {
+        if (!existsSync(privatePath) || !existsSync(publicPath)) {
+          throw new ConfigError('JWT keys not found in environment variables nor in keys/ folder', {
+            envPrivate: !!process.env.JWT_PRIVATE_KEY,
+            envPublic: !!process.env.JWT_PUBLIC_KEY,
+            filesExist: {
+              private: existsSync(privatePath),
+              public: existsSync(publicPath),
+            },
+            hint: 'Run: pnpm generate:keys  or set JWT_PRIVATE_KEY / JWT_PUBLIC_KEY in .env',
+          });
+        }
+        const privateFile = readFileSync(privatePath, 'utf-8');
+        const publicFile = readFileSync(publicPath, 'utf-8');
+        privateKey = this.normalizePem(privateFile, 'PRIVATE KEY', privatePath);
+        publicKey = this.normalizePem(publicFile, 'PUBLIC KEY', publicPath);
+        keyId = envKeyId;
       }
-      const privateFile = readFileSync(privatePath, 'utf-8');
-      const publicFile = readFileSync(publicPath, 'utf-8');
-
-      privateKey = this.normalizePem(privateFile, 'PRIVATE KEY', privatePath);
-      publicKey = this.normalizePem(publicFile, 'PUBLIC KEY', publicPath);
     }
 
     this.privateKey = privateKey;
@@ -144,14 +159,3 @@ export class EnvKeyProvider implements IKeyProvider {
     return trimmed;
   }
 }
-
-/**
- * Creates and returns a new instance of `EnvKeyProvider`.
- *
- * @returns {EnvKeyProvider} An instance of the environment-based key provider.
- *
- * @remarks
- * This factory function is used to instantiate the key provider that retrieves keys from environment variables.
- */
-
-export const createKeyProvider = () => new EnvKeyProvider();

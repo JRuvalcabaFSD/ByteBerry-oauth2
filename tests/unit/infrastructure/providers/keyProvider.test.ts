@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { EnvKeyProvider } from '@/infrastructure';
 import { ConfigError } from '@/shared';
+import { IConfig } from '@/interfaces';
 
 // Mock del módulo fs
 jest.mock('fs');
@@ -9,6 +10,7 @@ const mockedExistsSync = existsSync as jest.MockedFunction<typeof existsSync>;
 const mockedReadFileSync = readFileSync as jest.MockedFunction<typeof readFileSync>;
 
 describe('EnvKeyProvider', () => {
+  let mockConfig: IConfig;
   const validPrivateKey = `-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7VJTUt9Us8cKj
 MzEfYyjiWA4R4/M2bS1GB4t7NXp98C3SC6dVMvDuictGeurT8jNbvJZHtCSuYEvu
@@ -24,6 +26,24 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1LfVLPHCozMxH2Mo
   beforeEach(() => {
     jest.clearAllMocks();
     process.env = { ...originalEnv };
+    mockConfig = {
+      jwtPrivateKey: undefined as any,
+      jwtPublicKey: undefined as any,
+      jwtKeyId: '',
+      jwtAudience: [],
+      nodeEnv: 'test',
+      port: 3000,
+      logLevel: 'info',
+      corsOrigins: [],
+      serviceName: 'TestService',
+      version: '1.0.0',
+      tokenExpiresIn: 900,
+      oauth2Issuer: '',
+      isDevelopment: () => false,
+      isProduction: () => false,
+      isTest: () => true,
+      getSummary: () => ({}),
+    } as IConfig;
   });
 
   afterEach(() => {
@@ -37,8 +57,15 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1LfVLPHCozMxH2Mo
       process.env.JWT_PUBLIC_KEY = validPublicKey;
       process.env.JWT_KEY_ID = 'test-key-1';
 
+      // Las claves en config ya están vacías por defecto
+
+      mockedExistsSync.mockReturnValue(false);
+
+      // Asegúrate de que el mock cumple la interfaz
+      // Si falta alguna propiedad, agrégala con valores dummy
+
       // Act
-      const provider = new EnvKeyProvider();
+      const provider = new EnvKeyProvider(mockConfig as IConfig);
 
       // Assert
       expect(provider.getPrivateKey()).toBe(validPrivateKey);
@@ -52,10 +79,16 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1LfVLPHCozMxH2Mo
       process.env.JWT_PUBLIC_KEY = validPublicKey;
       delete process.env.JWT_KEY_ID;
 
+      // Las claves en config ya están vacías por defecto
+
+      mockedExistsSync.mockReturnValue(false);
+
       // Act
-      const provider = new EnvKeyProvider();
+      const provider = new EnvKeyProvider(mockConfig as IConfig);
 
       // Assert
+      expect(provider.getPrivateKey()).toBe(validPrivateKey);
+      expect(provider.getPublicKey()).toBe(validPublicKey);
       expect(provider.getKeyId()).toBe('default-key-1');
     });
 
@@ -65,10 +98,11 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1LfVLPHCozMxH2Mo
       process.env.JWT_PRIVATE_KEY = keyWithEscapedNewlines;
       process.env.JWT_PUBLIC_KEY = validPublicKey;
 
-      // Act
-      const provider = new EnvKeyProvider();
+      // Las claves en config ya están vacías por defecto
 
-      // Assert
+      // Act
+      const provider = new EnvKeyProvider(mockConfig as IConfig);
+      // Assert: la clave se normaliza correctamente
       expect(provider.getPrivateKey()).toBe(validPrivateKey);
     });
 
@@ -77,9 +111,11 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1LfVLPHCozMxH2Mo
       process.env.JWT_PRIVATE_KEY = 'invalid-key';
       process.env.JWT_PUBLIC_KEY = validPublicKey;
 
+      // Las claves en config ya están vacías por defecto
+
       // Act & Assert
-      expect(() => new EnvKeyProvider()).toThrow(ConfigError);
-      expect(() => new EnvKeyProvider()).toThrow('must contain PEM header');
+      expect(() => new EnvKeyProvider(mockConfig as IConfig)).toThrow(ConfigError);
+      expect(() => new EnvKeyProvider(mockConfig as IConfig)).toThrow('JWT_PRIVATE_KEY must contain PEM header');
     });
   });
 
@@ -93,7 +129,7 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1LfVLPHCozMxH2Mo
       mockedReadFileSync.mockReturnValueOnce(validPrivateKey as any).mockReturnValueOnce(validPublicKey as any);
 
       // Act
-      const provider = new EnvKeyProvider();
+      const provider = new EnvKeyProvider(mockConfig as IConfig);
 
       // Assert
       expect(provider.getPrivateKey()).toBe(validPrivateKey);
@@ -109,8 +145,8 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1LfVLPHCozMxH2Mo
       mockedExistsSync.mockReturnValue(false);
 
       // Act & Assert
-      expect(() => new EnvKeyProvider()).toThrow(ConfigError);
-      expect(() => new EnvKeyProvider()).toThrow('JWT keys not found');
+      expect(() => new EnvKeyProvider(mockConfig as IConfig)).toThrow(ConfigError);
+      expect(() => new EnvKeyProvider(mockConfig as IConfig)).toThrow('JWT keys not found');
     });
   });
 });

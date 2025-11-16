@@ -1,30 +1,28 @@
-//Application - use cases
-export * from './application/uses-case/exchangeCodeForTokenUseCase.interface';
-export * from './application/uses-case/generateAuthorizationCodeUseCase.interface';
-
 //Config
 export * from './config/envConfig.interface';
 
 //Container
 export * from './container/container.interface';
 
-//Infrastructure - Controller
-export * from './infrastructure/controllers/healthController.interface';
+//Http
+export * from './http/httpServer.interface';
 
-//Infrastructure - Http
-export * from './infrastructure/http/httpServer.interface';
+//Providers
+export * from './providers/keyProvider.interface';
 
-//Infrastructure - Providers
-export * from './infrastructure/providers/keyProvider.interface';
+//Services
+export * from './services/clock.interface';
+export * from './services/logger.interface';
+export * from './services/uuid.interface';
+export * from './services/jwtService.interface';
+export * from './services/hashService.interface';
+export * from './services/pkceVerifierService.interface';
+export * from './services/jwksService.interface';
+export * from './services/healthService.interface';
 
-//Infrastructure - Services
-export * from './infrastructure/services/clock.interface';
-export * from './infrastructure/services/logger.interface';
-export * from './infrastructure/services/uuid.interface';
-export * from './infrastructure/services/jwtService.interface';
-export * from './infrastructure/services/hashService.interface';
-export * from './infrastructure/services/pkceVerifierService.interface';
-export * from './infrastructure/services/jwksService.interface';
+//storage
+export * from './storage/codeStorage.interface';
 
-//Infrastructure - storage
-export * from './infrastructure/storage/codeStorage.interface';
+//use cases
+export * from './uses-case/exchangeCodeForTokenUseCase.interface';
+export * from './uses-case/generateAuthorizationCodeUseCase.interface';

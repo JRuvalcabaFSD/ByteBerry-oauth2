@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 
-import { createHealthRoutes, createOAuth2Routes } from '@/infrastructure';
 import { IContainer } from '@/interfaces';
+import { createHealthRoutes, createOAuth2Routes } from '@/presentation';
 
 //TODO documentar
 export function createAppRoutes(container: IContainer): Router {
@@ -17,7 +17,7 @@ export function createAppRoutes(container: IContainer): Router {
   );
 
   //Health routes
-  router.use('/health', createHealthRoutes(container.resolve('HealthController')));
+  router.use('/health', createHealthRoutes(container.resolve('HealthService')));
 
   //Home route
   router.get('/', (req: Request, res: Response) => {

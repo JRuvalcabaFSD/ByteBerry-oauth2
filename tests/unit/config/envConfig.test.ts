@@ -191,6 +191,12 @@ describe('Config', () => {
         isDevelopment: false,
         isProduction: true,
         isTest: false,
+        hasJwtPrivateKey: false,
+        hasJwtPublicKey: false,
+        jwtAudience: ['byteberry-expenses', 'byteberry-bff'],
+        jwtKeyId: 'default-key-1',
+        oauth2Issuer: 'byteberry-oauth2',
+        tokenExpiresIn: 900,
       });
     });
 

@@ -1,9 +1,11 @@
 import express, { Application } from 'express';
 import { Server } from 'http';
 
+import * as Middlewares from '@/infrastructure';
+
 import { IClock, IConfig, IContainer, IHttpServer, ILogger, ServerInfo } from '@/interfaces';
 import { getErrMsg, LogContextClass, LogContextMethod } from '@/shared';
-import * as Middlewares from '@/infrastructure';
+import { createAppRoutes } from '@/presentation';
 
 /**
  * HTTP server implementation that manages the Express application lifecycle.
@@ -59,7 +61,7 @@ export class HttpServer implements IHttpServer {
     this.logger = this.container.resolve('Logger');
     this.app = express();
     this.setupMiddlewares();
-    this.app.use(Middlewares.createAppRoutes(this.container));
+    this.app.use(createAppRoutes(this.container));
     this.setupErrorHandler();
   }
 

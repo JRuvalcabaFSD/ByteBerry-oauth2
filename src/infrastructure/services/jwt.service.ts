@@ -3,58 +3,19 @@ import { JsonWebTokenError, sign, SignOptions, TokenExpiredError, verify, decode
 import { IJwtPayload, IJwtService, IKeyProvider, ILogger } from '@/interfaces';
 import { getErrMsg, InvalidTokenError } from '@/shared';
 
-/**
- * Service for handling JWT (JSON Web Token) operations such as generation, verification, and decoding.
- *
- * @remarks
- * This service uses asymmetric cryptography (RS256) for signing and verifying tokens.
- * It relies on an injected key provider for key management and a logger for observability.
- *
- * @example
- * ```typescript
- * const jwtService = new JwtService('my-service', keyProvider, logger);
- * const token = jwtService.generateAccessToken({ sub: 'user123' });
- * const payload = jwtService.verifyToken(token);
- * ```
- *
- * @see IJwtService
- */
-
 export class JwtService implements IJwtService {
-  private readonly issuer: string;
   private readonly algorithm = 'RS256';
-  private readonly defaultExpiresIn = 900;
-
-  /**
-   * Creates an instance of the JWT service.
-   *
-   * @param service - The name of the service to be used as the JWT issuer.
-   * @param keyProvider - An implementation of the IKeyProvider interface for managing cryptographic keys.
-   * @param logger - An implementation of the ILogger interface for logging purposes.
-   */
 
   constructor(
-    service: string,
+    private readonly issuer: string,
+    private readonly expiresIn: number,
+    private readonly audience: string | string[] | undefined,
     private readonly keyProvider: IKeyProvider,
     private readonly logger: ILogger
-  ) {
-    this.issuer = service;
-  }
+  ) {}
 
-  /**
-   * Generates a JWT access token using the provided payload and expiration time.
-   *
-   * @param payload - The payload to include in the JWT, containing the subject (`sub`), and optionally `scope` and `client_id`.
-   * @param expiresIn - The expiration time for the token in seconds. If `null`, uses the default expiration time.
-   * @returns The signed JWT access token as a string.
-   * @throws Throws an error if token generation fails.
-   */
-
-  public generateAccessToken(
-    payload: { sub: string; scope?: string | undefined; client_id?: string | undefined },
-    expiresIn: number | null = this.defaultExpiresIn
-  ): string {
-    this.logger.debug('Generating JWT access token', { sub: payload.sub, expiresIn });
+  public generateAccessToken(payload: { sub: string; scope?: string | undefined; client_id?: string | undefined }): string {
+    this.logger.debug('Generating JWT access token', { sub: payload.sub, expiresIn: this.expiresIn });
 
     try {
       const privateKey = this.keyProvider.getPrivateKey();
@@ -63,6 +24,7 @@ export class JwtService implements IJwtService {
       const tokenPayload: Omit<IJwtPayload, 'iat' | 'exp'> = {
         sub: payload.sub,
         iss: this.issuer,
+        aud: this.audience,
         ...(payload.scope && { scope: payload.scope }),
         ...(payload.client_id && { client_id: payload.client_id }),
       };
@@ -70,7 +32,7 @@ export class JwtService implements IJwtService {
       const options: SignOptions = {
         algorithm: this.algorithm,
         keyid: keyId,
-        ...(expiresIn != null && { expiresIn }), // Solo si expiresIn es distinto de null y undefined
+        expiresIn: this.expiresIn,
       };
 
       const token = sign(tokenPayload, privateKey, options);
@@ -82,28 +44,40 @@ export class JwtService implements IJwtService {
       throw error;
     }
   }
+
   /**
    * Verifies a JWT token using the configured public key, algorithm, and issuer.
+   * Validates the token's audience against the expected audience if provided.
+   * Logs verification steps and errors.
    *
-   * @param token - The JWT token string to verify.
+   * @param token - The JWT token to verify.
+   * @param expectedAudience - The expected audience value to validate against the token's `aud` claim.
    * @returns The decoded JWT payload as an {@link IJwtPayload} object.
-   * @throws {InvalidTokenError} If the token is expired, has an invalid signature or format, or verification fails.
-   *
-   * @remarks
-   * - Logs verification attempts and results for debugging purposes.
-   * - Throws a specific error if the decoded token is a string instead of an object.
+   * @throws {InvalidTokenError} If the token is expired, has an invalid signature or format, or fails audience validation.
    */
 
-  public verifyToken(token: string): IJwtPayload {
+  public verifyToken(token: string, expectedAudience?: string): IJwtPayload {
     this.logger.debug('Verifying JWT token');
 
     try {
       const publicKey = this.keyProvider.getPublicKey();
 
-      const decoded = verify(token, publicKey, { algorithms: [this.algorithm], issuer: this.issuer });
+      const decoded = verify(token, publicKey, {
+        algorithms: [this.algorithm],
+        issuer: this.issuer,
+      });
 
       if (typeof decoded === 'string') {
         throw new Error('El token decodificado es un string, no un objeto JWT válido');
+      }
+
+      const payload = decoded as IJwtPayload;
+
+      if (expectedAudience) {
+        const isAudienceValid = this.validateAudience(payload.aud, expectedAudience);
+
+        if (!isAudienceValid)
+          throw new InvalidTokenError(`Token audience mismatch. Expected: ${expectedAudience}, Got: ${JSON.stringify(payload.aud)}`);
       }
 
       this.logger.debug('JWT token verified successfully', { sub: decoded.sub });
@@ -156,5 +130,29 @@ export class JwtService implements IJwtService {
       });
       return null;
     }
+  }
+
+  /**
+   * Validates whether the provided token audience matches the expected audience.
+   *
+   * This method checks if the `tokenAudience` (which may be a string, an array of strings, or undefined)
+   * contains the `expectedAudience`. If `tokenAudience` is a string, it compares directly.
+   * If it's an array, it checks for inclusion. Returns `false` if `tokenAudience` is undefined or does not match.
+   *
+   * @param tokenAudience - The audience claim from the token, which can be a string, an array of strings, or undefined.
+   * @param expectedAudience - The audience value to validate against.
+   * @returns `true` if the expected audience is present in the token audience; otherwise, `false`.
+   */
+
+  private validateAudience(tokenAudience: string | string[] | undefined, expectedAudience: string): boolean {
+    if (typeof tokenAudience === 'string') {
+      return tokenAudience === expectedAudience;
+    }
+
+    if (Array.isArray(tokenAudience)) {
+      return tokenAudience.includes(expectedAudience);
+    }
+
+    return false;
   }
 }

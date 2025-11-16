@@ -1,17 +1,9 @@
-//Controllers
-export * from './controllers/health.controller';
-
 // Http - middlewares
 export * from './http/middlewares/cors.middleware';
 export * from './http/middlewares/error.middleware';
 export * from './http/middlewares/logging.middleware';
 export * from './http/middlewares/requestId.middleware';
 export * from './http/middlewares/security.middleware';
-
-// Http - routes
-export * from './http/routes/app.routes';
-export * from './http/routes/health.routes';
-export * from './http/routes/oauth2.routes';
 
 //Http
 export * from './http/httpServer';
@@ -30,6 +22,7 @@ export * from './services/winstonLogger.service';
 export * from './services/nodeHash.service';
 export * from './services/jwt.service';
 export * from './services/jwks.service';
+export * from './services/health.service';
 
 //Storage
 export * from './storage/inMemoryCode.store';

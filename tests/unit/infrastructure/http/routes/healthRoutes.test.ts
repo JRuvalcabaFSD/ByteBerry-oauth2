@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { createHealthRoutes } from '@/infrastructure/http/routes/health.routes';
-import { IHealthController } from '@/interfaces';
+import { createHealthRoutes } from '@/presentation/routes/health.routes';
+import { IHealthService } from '@/interfaces';
 
-// Mock del HealthController genérico
-const createMockHealthController = (): jest.Mocked<IHealthController> => ({
+// Mock del HealthService genérico
+const createMockHealthService = (): jest.Mocked<IHealthService> => ({
   getHealth: jest.fn(),
   getDeepHealth: jest.fn(),
   checkHealth: jest.fn(),
@@ -22,11 +22,11 @@ jest.mock('express', () => ({
 
 describe('createHealthRoutes', () => {
   let mockRouter: jest.Mocked<Router>;
-  let mockController: jest.Mocked<IHealthController>;
+  let mockController: jest.Mocked<IHealthService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockController = createMockHealthController();
+    mockController = createMockHealthService();
     mockRouter = {
       get: jest.fn(),
       post: jest.fn(),

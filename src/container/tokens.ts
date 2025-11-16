@@ -17,7 +17,7 @@ export type Token =
   | 'GenerateAuthorizationCodeUseCase'
   | 'ExchangeCodeForTokenUseCase'
   | 'AuthorizeController'
-  | 'HealthController'
+  | 'HealthService'
   | 'TokenController'
   | 'JwksController'
   | 'KeyProvider'
@@ -33,7 +33,7 @@ export interface ServiceMap {
   Hash: interfaces.IHashService;
   GracefulShutdown: GracefulShutdown;
   HttpServer: interfaces.IHttpServer;
-  HealthController: interfaces.IHealthController;
+  HealthService: interfaces.IHealthService;
   GenerateAuthorizationCodeUseCase: interfaces.IGenerateAuthorizationCodeUseCase;
   TokenController: TokenController;
   JwksController: JWksController;
@@ -59,7 +59,7 @@ export const criticalServices = [
   'CodeStore',
   'GenerateAuthorizationCodeUseCase',
   'ExchangeCodeForTokenUseCase',
-  'HealthController',
+  'HealthService',
   'AuthorizeController',
   'TokenController',
   'JwksController',
