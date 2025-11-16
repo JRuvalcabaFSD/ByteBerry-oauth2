@@ -177,8 +177,8 @@ describe('Factories', () => {
   });
 
   describe('createJwtService', () => {
-    it('should create JwtService with serviceName, KeyProvider, and Logger', () => {
-      const mockConfig = { serviceName: 'auth-service' };
+    it('should create JwtService with issuer,audience,expiresInd , KeyProvider, and Logger', () => {
+      const mockConfig = { oauth2Issuer: 'auth-service', jwtAudience: [], tokenExpiresIn: 900 };
       const mockKeyProvider = { getPrivateKey: jest.fn() };
       const mockLogger = { debug: jest.fn() };
 
@@ -186,7 +186,7 @@ describe('Factories', () => {
 
       const result = createJwtService(mockContainer);
 
-      expect(infrastructure.JwtService).toHaveBeenCalledWith('auth-service', mockKeyProvider, mockLogger);
+      expect(infrastructure.JwtService).toHaveBeenCalledWith('auth-service', 900, [], mockKeyProvider, mockLogger);
       expect(result).toBeInstanceOf(infrastructure.JwtService);
     });
   });

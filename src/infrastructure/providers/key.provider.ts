@@ -43,8 +43,11 @@ export class EnvKeyProvider implements IKeyProvider {
     const publicPath = join(keysDir, 'public.pem');
 
     // Solo usa las claves del config si son strings no vacíos
-    const hasConfigKeys = typeof config.jwtPrivateKey === 'string' && config.jwtPrivateKey.trim() !== '' &&
-                         typeof config.jwtPublicKey === 'string' && config.jwtPublicKey.trim() !== '';
+    const hasConfigKeys =
+      typeof config.jwtPrivateKey === 'string' &&
+      config.jwtPrivateKey.trim() !== '' &&
+      typeof config.jwtPublicKey === 'string' &&
+      config.jwtPublicKey.trim() !== '';
     let privateKey: string;
     let publicKey: string;
     let keyId: string;

@@ -179,7 +179,8 @@ export function createPkceVerifierService(c: IContainer): PkceVerifierService {
  */
 
 export function createJwtService(c: IContainer): infrastructure.JwtService {
-  return new infrastructure.JwtService(c.resolve('Config').serviceName, c.resolve('KeyProvider'), c.resolve('Logger'));
+  const { oauth2Issuer, jwtAudience, tokenExpiresIn } = c.resolve('Config');
+  return new infrastructure.JwtService(oauth2Issuer, tokenExpiresIn, jwtAudience, c.resolve('KeyProvider'), c.resolve('Logger'));
 }
 
 /**

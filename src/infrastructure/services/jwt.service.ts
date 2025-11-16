@@ -3,58 +3,19 @@ import { JsonWebTokenError, sign, SignOptions, TokenExpiredError, verify, decode
 import { IJwtPayload, IJwtService, IKeyProvider, ILogger } from '@/interfaces';
 import { getErrMsg, InvalidTokenError } from '@/shared';
 
-/**
- * Service for handling JWT (JSON Web Token) operations such as generation, verification, and decoding.
- *
- * @remarks
- * This service uses asymmetric cryptography (RS256) for signing and verifying tokens.
- * It relies on an injected key provider for key management and a logger for observability.
- *
- * @example
- * ```typescript
- * const jwtService = new JwtService('my-service', keyProvider, logger);
- * const token = jwtService.generateAccessToken({ sub: 'user123' });
- * const payload = jwtService.verifyToken(token);
- * ```
- *
- * @see IJwtService
- */
-
 export class JwtService implements IJwtService {
-  private readonly issuer: string;
   private readonly algorithm = 'RS256';
-  private readonly defaultExpiresIn = 900;
-
-  /**
-   * Creates an instance of the JWT service.
-   *
-   * @param service - The name of the service to be used as the JWT issuer.
-   * @param keyProvider - An implementation of the IKeyProvider interface for managing cryptographic keys.
-   * @param logger - An implementation of the ILogger interface for logging purposes.
-   */
 
   constructor(
-    service: string,
+    private readonly issuer: string,
+    private readonly expiresIn: number,
+    private readonly audience: string | string[] | undefined,
     private readonly keyProvider: IKeyProvider,
     private readonly logger: ILogger
-  ) {
-    this.issuer = service;
-  }
+  ) {}
 
-  /**
-   * Generates a JWT access token using the provided payload and expiration time.
-   *
-   * @param payload - The payload to include in the JWT, containing the subject (`sub`), and optionally the audience (`audience`), scope (`scope`), and client ID (`client_id`).
-   * @param expiresIn - The expiration time for the token in seconds. If `null`, the default expiration time is used.
-   * @returns The signed JWT access token as a string.
-   * @throws If token generation fails, an error is logged and rethrown.
-   */
-
-  public generateAccessToken(
-    payload: { sub: string; scope?: string | undefined; client_id?: string | undefined; audience?: string | string[] | undefined },
-    expiresIn: number | null = this.defaultExpiresIn
-  ): string {
-    this.logger.debug('Generating JWT access token', { sub: payload.sub, expiresIn });
+  public generateAccessToken(payload: { sub: string; scope?: string | undefined; client_id?: string | undefined }): string {
+    this.logger.debug('Generating JWT access token', { sub: payload.sub, expiresIn: this.expiresIn });
 
     try {
       const privateKey = this.keyProvider.getPrivateKey();
@@ -63,7 +24,7 @@ export class JwtService implements IJwtService {
       const tokenPayload: Omit<IJwtPayload, 'iat' | 'exp'> = {
         sub: payload.sub,
         iss: this.issuer,
-        aud: payload.audience,
+        aud: this.audience,
         ...(payload.scope && { scope: payload.scope }),
         ...(payload.client_id && { client_id: payload.client_id }),
       };
@@ -71,7 +32,7 @@ export class JwtService implements IJwtService {
       const options: SignOptions = {
         algorithm: this.algorithm,
         keyid: keyId,
-        ...(expiresIn != null && { expiresIn }), // Solo si expiresIn es distinto de null y undefined
+        expiresIn: this.expiresIn,
       };
 
       const token = sign(tokenPayload, privateKey, options);
