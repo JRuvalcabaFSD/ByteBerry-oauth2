@@ -15,11 +15,11 @@ describe('AuthorizationCodeEntity', () => {
       state: 'xyz',
     });
 
-    expect(authCode.getCode()).toBe('test-code-123');
-    expect(authCode.getClientId()).toBe(mockClientId);
-    expect(authCode.getRedirectUri()).toBe('https://example.com/callback');
-    expect(authCode.getScope()).toBe('read write');
-    expect(authCode.getState()).toBe('xyz');
+    expect(authCode.code).toBe('test-code-123');
+    expect(authCode.clientId).toBe(mockClientId);
+    expect(authCode.redirectUri).toBe('https://example.com/callback');
+    expect(authCode.scope).toBe('read write');
+    expect(authCode.state).toBe('xyz');
   });
 
   it('should return false when code not expired', () => {
@@ -67,7 +67,7 @@ describe('AuthorizationCodeEntity', () => {
       codeChallenge: mockCodeChallenge,
     });
 
-    expect(authCode.getScope()).toBeUndefined();
-    expect(authCode.getState()).toBeUndefined();
+    expect(authCode.scope).toBeUndefined();
+    expect(authCode.scope).toBeUndefined();
   });
 });

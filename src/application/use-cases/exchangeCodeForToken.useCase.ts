@@ -120,10 +120,10 @@ export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase
         throw error;
       }
 
-      if (!authCode.getClientId().equals(clientId)) throw new InvalidGrantError('Client ID mismatch');
-      if (authCode.getRedirectUri() !== request.redirect_uri) throw new InvalidGrantError('Redirect URI mismatch');
+      if (!authCode.clientId.equals(clientId)) throw new InvalidGrantError('Client ID mismatch');
+      if (authCode.redirectUri !== request.redirect_uri) throw new InvalidGrantError('Redirect URI mismatch');
 
-      const isValid = this.pkceVerifier.verify(authCode.getCodeChallenge(), codeVerifier.getValue());
+      const isValid = this.pkceVerifier.verify(authCode.codeChallenge, codeVerifier.getValue());
       if (!isValid) {
         this.logger.warn('Invalid PKCE code_verifier', {
           client_id: request.client_id,
@@ -134,16 +134,16 @@ export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase
 
       const accessToken = this.jwtService.generateAccessToken({
         sub: clientId.getValue(),
-        scope: authCode.getScope(),
+        scope: authCode.scope,
         client_id: clientId.getValue(),
       });
 
       this.logger.info('Access token issued successfully', {
         client_id: request.client_id,
-        has_scope: !!authCode.getScope(),
+        has_scope: !!authCode.scope,
       });
 
-      const scope = authCode.getScope();
+      const scope = authCode.scope;
       return { access_token: accessToken, token_type: 'Bearer', expires_in: 900, ...(scope && { scope }) };
     } catch (error) {
       if (error instanceof InvalidRequestError || error instanceof InvalidGrantError || error instanceof UnsupportedGrantTypeError) {
