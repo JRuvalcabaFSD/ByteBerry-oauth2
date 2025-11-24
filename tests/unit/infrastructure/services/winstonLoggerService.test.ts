@@ -67,6 +67,7 @@ describe('WinstonLoggerService', () => {
       oauth2Issuer: '',
       tokenExpiresIn: 900,
       getSummary: jest.fn(() => ({})),
+      databaseUrl: '',
     } as jest.Mocked<IConfig>;
 
     mockClock = {

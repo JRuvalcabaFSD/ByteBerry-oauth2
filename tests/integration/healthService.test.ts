@@ -30,6 +30,7 @@ const createMockContainer = (): jest.Mocked<IContainer> => {
           jwtAudience: '',
           jwtIssuer: '',
           jwtExpiration: '',
+          databaseUrl: '',
           isDevelopment: jest.fn(() => false),
           isProduction: jest.fn(() => false),
           isTest: jest.fn(() => true),

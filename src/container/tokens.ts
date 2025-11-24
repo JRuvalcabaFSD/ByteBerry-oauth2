@@ -1,4 +1,6 @@
+import { PrismaClient } from './../../generated/prisma/client';
 import { GetJwksUseCase } from '@/application';
+import { DatabaseConfig } from '@/config/database.config';
 import { GracefulShutdown } from '@/infrastructure';
 import * as interfaces from '@/interfaces';
 import { AuthorizeController, JWksController, TokenController } from '@/presentation';
@@ -23,7 +25,9 @@ export type Token =
   | 'KeyProvider'
   | 'JwtService'
   | 'JwksService'
-  | 'GetJwksUseCase';
+  | 'GetJwksUseCase'
+  | 'DatabaseConfig'
+  | 'DbClient';
 
 export interface ServiceMap {
   Config: interfaces.IConfig;
@@ -45,6 +49,8 @@ export interface ServiceMap {
   JwtService: interfaces.IJwtService;
   JwksService: interfaces.IJwksService;
   GetJwksUseCase: GetJwksUseCase;
+  DatabaseConfig: DatabaseConfig;
+  DbClient: PrismaClient;
 }
 
 export const criticalServices = [
@@ -67,4 +73,6 @@ export const criticalServices = [
   'JwtService',
   'JwksService',
   'GetJwksUseCase',
+  'DatabaseConfig',
+  'DbClient',
 ];

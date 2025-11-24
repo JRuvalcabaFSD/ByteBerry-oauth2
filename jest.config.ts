@@ -72,9 +72,13 @@ const config: Config = {
   moduleFileExtensions: ['ts', 'js', 'json'],
 
   // Module name mapping for path aliases (auto desde tsconfig)
-  moduleNameMapper: pathsToModuleNameMapper(compilerOptions?.paths ?? {}, {
-    prefix: '<rootDir>/', // asumiendo baseUrl="."
-  }),
+  moduleNameMapper: {
+    ...pathsToModuleNameMapper(compilerOptions?.paths ?? {}, {
+      prefix: '<rootDir>/', // asumiendo baseUrl="."
+    }),
+    // Mapeo explícito para Prisma Client generado
+    '^generated/prisma/(.*)$': '<rootDir>/generated/prisma/$1',
+  },
 
   // Setup files after environment
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],

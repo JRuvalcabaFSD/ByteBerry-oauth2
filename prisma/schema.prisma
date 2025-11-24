@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String?  @unique
+  password  String?  // Para usuarios locales, null para OAuth externos
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relaciones
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model OAuthClient {
+  id            String   @id @default(uuid())
+  clientId      String   @unique @map("client_id")
+  clientSecret  String?  @map("client_secret")  // Para confidential clients
+  clientName    String   @map("client_name")
+  redirectUris  String[] @map("redirect_uris")
+  grantTypes    String[] @map("grant_types")
+  isPublic      Boolean  @default(true) @map("is_public")  // PKCE clients son públicos
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relaciones
+  refreshTokens RefreshToken[]
+  authCodes     AuthCode[]
+
+  @@map("oauth_clients")
+}
+
+model AuthCode {
+  id            String    @id @default(uuid())
+  code          String    @unique
+  clientId      String    @map("client_id")
+  userId        String    @map("user_id")
+  redirectUri   String    @map("redirect_uri")
+  scopes        String[]  @default([])
+  codeChallenge String?   @map("code_challenge")  // PKCE
+  codeChallengeMethod String? @map("code_challenge_method")  // PKCE
+  expiresAt     DateTime  @map("expires_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  // Relaciones
+  client        OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+
+  @@map("auth_codes")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  clientId  String   @map("client_id")
+  userId    String   @map("user_id")
+  scopes    String[] @default([])
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relaciones
+  client    OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}

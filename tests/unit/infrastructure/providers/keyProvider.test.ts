@@ -43,6 +43,7 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1LfVLPHCozMxH2Mo
       isProduction: () => false,
       isTest: () => true,
       getSummary: () => ({}),
+      databaseUrl: '',
     } as IConfig;
   });
 

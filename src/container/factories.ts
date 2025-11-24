@@ -1,7 +1,9 @@
 import { ExchangeCodeForTokenUseCase, GenerateAuthorizationCodeUseCase, GetJwksUseCase } from '@/application';
+import { DatabaseConfig } from '@/config/database.config';
 import * as infrastructure from '@/infrastructure';
 import { ICodeStore, IContainer, IExchangeCodeForTokenUseCase, IGenerateAuthorizationCodeUseCase } from '@/interfaces';
 import { AuthorizeController, JWksController, PkceVerifierService, TokenController } from '@/presentation';
+import { PrismaClient } from 'generated/prisma/client';
 
 /**
  * Creates an instance of `EnvKeyProvider` using the provided container.
@@ -209,4 +211,26 @@ export function createJwksService(c: IContainer): infrastructure.JwksService {
 
 export function createGetJwksUseCase(c: IContainer): GetJwksUseCase {
   return new GetJwksUseCase(c.resolve('JwksService'));
+}
+
+/**
+ * Factory function to create and return a singleton instance of {@link DatabaseConfig}.
+ *
+ * @param c - The dependency injection container used to resolve configuration values.
+ * @returns The singleton {@link DatabaseConfig} instance initialized with the database URL from the configuration.
+ */
+
+export function createDatabaseConfig(c: IContainer): DatabaseConfig {
+  return DatabaseConfig.getInstance(c.resolve('Config').databaseUrl);
+}
+
+/**
+ * Creates and returns a PrismaClient instance using the provided container.
+ *
+ * @param c - The dependency injection container implementing `IContainer`.
+ * @returns A configured `PrismaClient` instance.
+ */
+
+export function createDbClient(c: IContainer): PrismaClient {
+  return c.resolve('DatabaseConfig').getClient();
 }

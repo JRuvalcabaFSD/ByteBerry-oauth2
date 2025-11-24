@@ -10,6 +10,9 @@ export * from './http/httpServer.interface';
 //Providers
 export * from './providers/keyProvider.interface';
 
+//Repositories
+export * from './repositories/authCodeRepository.interface';
+
 //Services
 export * from './services/clock.interface';
 export * from './services/logger.interface';

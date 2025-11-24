@@ -1,5 +1,7 @@
 onlyBuiltDependencies:
+  - '@prisma/engines'
   - esbuild
+  - prisma
   - unrs-resolver
 
 overrides:

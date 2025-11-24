@@ -13,6 +13,7 @@ export function bootstrapContainer(): IContainer {
   registerOAuthServices(container);
   registerJwtServices(container);
   registerControllers(container);
+  registerDatabaseServices(container);
 
   validate(container, criticalServices);
 
@@ -52,4 +53,9 @@ function registerControllers(container: Container): void {
   container.register('AuthorizeController', factories.createAuthorizeController);
   container.register('TokenController', factories.createTokenController);
   container.register('JwksController', factories.createJwksController);
+}
+
+function registerDatabaseServices(container: IContainer): void {
+  container.registerSingleton('DatabaseConfig', factories.createDatabaseConfig);
+  container.registerSingleton('DbClient', factories.createDbClient);
 }

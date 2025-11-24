@@ -23,6 +23,9 @@ export class Config implements IConfig {
   public readonly oauth2Issuer: string;
   public readonly tokenExpiresIn: number;
 
+  //Database
+  public readonly databaseUrl: string;
+
   private static instance: Config | null = null;
 
   private constructor() {
@@ -46,6 +49,7 @@ export class Config implements IConfig {
       this.jwtAudience = get('JWT_AUDIENCE').default('byteberry-expenses,byteberry-bff').asArray();
       this.oauth2Issuer = get('OAUTH2_ISSUER').default('byteberry-oauth2').asString();
       this.tokenExpiresIn = get('TOKEN_EXPIRES_IN').default(900).asIntPositive();
+      this.databaseUrl = get('DATABASE_URL').required().asString();
     } catch (error) {
       const errMsg = getErrMsg(error);
       throw new ConfigError(`Failed to validate environment variables: ${errMsg}`, {

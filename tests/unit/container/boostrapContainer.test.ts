@@ -22,6 +22,7 @@ const mockConfig: IConfig = {
   getSummary: function (): Record<string, unknown> {
     throw new Error('Function not implemented.');
   },
+  databaseUrl: '',
 };
 
 describe('bootstrapContainer', () => {

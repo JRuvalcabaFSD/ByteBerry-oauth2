@@ -1,5 +1,10 @@
 import type { ConfigError } from '@/shared';
 
+// Asegura que DATABASE_URL esté definida para todos los tests
+beforeAll(() => {
+  process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/db_test';
+});
+
 jest.mock('dotenv', () => ({
   config: jest.fn(),
 }));
@@ -18,6 +23,7 @@ describe('Config', () => {
   beforeEach(() => {
     jest.resetModules();
     process.env = {};
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db_test';
     jest.clearAllMocks();
   });
 
@@ -45,6 +51,7 @@ describe('Config', () => {
         LOG_LEVEL: 'warn',
         SERVICE_NAME: 'Custom Oauth2',
         CORS_ORIGINS: 'http://example.com',
+        DATABASE_URL: 'postgresql://user:pass@localhost:5432/db_test',
       };
 
       const { Config } = await import('@config');

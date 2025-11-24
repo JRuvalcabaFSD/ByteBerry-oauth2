@@ -18,6 +18,7 @@ const createMockDependencies = () => ({
     nodeEnv: 'test',
     port: 3000,
     logLevel: 'info',
+    databaseUrl: '',
     corsOrigins: ['http://localhost:3000'],
     isDevelopment: jest.fn(() => false),
     isProduction: jest.fn(() => false),
