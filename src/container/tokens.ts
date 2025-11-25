@@ -15,7 +15,6 @@ export type Token =
   | 'PkceVerifierService'
   | 'GracefulShutdown'
   | 'HttpServer'
-  | 'CodeStore'
   | 'GenerateAuthorizationCodeUseCase'
   | 'ExchangeCodeForTokenUseCase'
   | 'AuthorizeController'
@@ -27,7 +26,9 @@ export type Token =
   | 'JwksService'
   | 'GetJwksUseCase'
   | 'DatabaseConfig'
-  | 'DbClient';
+  | 'DbClient'
+  | 'AuthorizationCodeRepository'
+  | 'AuthCodeMappers';
 
 export interface ServiceMap {
   Config: interfaces.IConfig;
@@ -42,7 +43,6 @@ export interface ServiceMap {
   TokenController: TokenController;
   JwksController: JWksController;
   ExchangeCodeForTokenUseCase: interfaces.IExchangeCodeForTokenUseCase;
-  CodeStore: interfaces.ICodeStore;
   AuthorizeController: AuthorizeController;
   PkceVerifierService: interfaces.IPKceVerifierService;
   KeyProvider: interfaces.IKeyProvider;
@@ -51,6 +51,8 @@ export interface ServiceMap {
   GetJwksUseCase: GetJwksUseCase;
   DatabaseConfig: DatabaseConfig;
   DbClient: PrismaClient;
+  AuthorizationCodeRepository: interfaces.IAuthorizationCodeRepository;
+  AuthCodeMappers: interfaces.IAuthCodeMappers;
 }
 
 export const criticalServices = [
@@ -62,7 +64,6 @@ export const criticalServices = [
   'PkceVerifierService',
   'GracefulShutdown',
   'HttpServer',
-  'CodeStore',
   'GenerateAuthorizationCodeUseCase',
   'ExchangeCodeForTokenUseCase',
   'HealthService',
@@ -75,4 +76,6 @@ export const criticalServices = [
   'GetJwksUseCase',
   'DatabaseConfig',
   'DbClient',
+  'AuthorizationCodeRepository',
+  'AuthCodeMappers',
 ];

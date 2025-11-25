@@ -36,7 +36,6 @@ function registerCoreServices(container: Container): void {
 }
 
 function registerOAuthServices(container: IContainer): void {
-  container.registerSingleton('CodeStore', factories.createCodeStore);
   container.register('PkceVerifierService', factories.createPkceVerifierService);
   container.register('KeyProvider', factories.createKeyProvider);
   container.register('JwtService', factories.createJwtService);
@@ -58,4 +57,6 @@ function registerControllers(container: Container): void {
 function registerDatabaseServices(container: IContainer): void {
   container.registerSingleton('DatabaseConfig', factories.createDatabaseConfig);
   container.registerSingleton('DbClient', factories.createDbClient);
+  container.registerSingleton('AuthCodeMappers', factories.createAuthCodeMapper);
+  container.registerSingleton('AuthorizationCodeRepository', factories.createAuthorizationCodeRepository);
 }

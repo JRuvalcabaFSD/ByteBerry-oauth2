@@ -4,7 +4,7 @@
 	"description": "Servidor OAuth2 con Authorization Code + PKCE, JWT RS256, refresh tokens y JWKS",
 	"main": "dist/app.js",
 	"engines": {
-		"node": "22.18.0",
+		"node": "22.21.0",
 		"pnpm": "10.20.0"
 	},
 	"scripts": {
@@ -38,7 +38,12 @@
 		"docs:watch": "nodemon --watch src --ext ts --exec \"pnpm run docs:build\"",
 		"docs:ci": "pnpm run docs:build && echo 'Documentation generated successfully'",
 		"generate:pkce": " node ./scripts/generate-pkce.js",
-		"generate:keys": "node scripts/generate-keys.js"
+		"generate:keys": "node scripts/generate-keys.js",
+		"db:generate": "prisma generate",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset --force"
 	},
 	"keywords": [],
 	"author": "",

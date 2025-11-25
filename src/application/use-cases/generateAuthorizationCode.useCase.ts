@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 
 import { InvalidRequestError, InvalidValueObjectError, LogContextClass, LogContextMethod, UnauthorizedClientError } from '@/shared';
-import { ICodeStore, IGenerateAuthorizationCodeUseCase, ILogger } from '@/interfaces';
+import { IAuthorizationCodeRepository, IGenerateAuthorizationCodeUseCase, ILogger } from '@/interfaces';
 import { AuthorizeRequestDto, AuthorizeResponseDto } from '@/application';
 import { AuthorizationCodeEntity, ClientId, CodeChallenge } from '@/domain';
 
@@ -39,14 +39,14 @@ import { AuthorizationCodeEntity, ClientId, CodeChallenge } from '@/domain';
 @LogContextClass()
 export class GenerateAuthorizationCodeUseCase implements IGenerateAuthorizationCodeUseCase {
   /**
-   * Creates an instance of the use case for generating authorization codes.
+   * Creates an instance of the use case with the required dependencies.
    *
-   * @param codeStore - The code store repository for persisting authorization codes
-   * @param logger - The logger instance for tracking operations and errors
+   * @param repository - The repository responsible for managing authorization codes.
+   * @param logger - The logger instance used for logging application events and errors.
    */
 
   constructor(
-    private readonly codeStore: ICodeStore,
+    private readonly repository: IAuthorizationCodeRepository,
     private readonly logger: ILogger
   ) {}
 
@@ -101,6 +101,7 @@ export class GenerateAuthorizationCodeUseCase implements IGenerateAuthorizationC
       const authCode = AuthorizationCodeEntity.create({
         code,
         clientId,
+        userId: '',
         redirectUri: request.redirect_uri,
         codeChallenge,
         expirationMinutes: 5,
@@ -108,7 +109,7 @@ export class GenerateAuthorizationCodeUseCase implements IGenerateAuthorizationC
         state: request.state,
       });
 
-      this.codeStore.set(code, authCode);
+      await this.repository.save(authCode);
       this.logger.debug('Authorization code generated successfully', { client_id: request.client_id, code_length: code.length });
 
       return { code, state: request.state };

@@ -56,6 +56,8 @@ model AuthCode {
   codeChallengeMethod String? @map("code_challenge_method")  // PKCE
   expiresAt     DateTime  @map("expires_at")
   createdAt     DateTime  @default(now()) @map("created_at")
+	used          Boolean   @default(false)
+	state         String?
 
   // Relaciones
   client        OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)

@@ -17,6 +17,7 @@ export class AuthorizationCodeEntity {
 
   private constructor(
     public readonly code: string,
+    public readonly userId: string,
     public readonly clientId: ClientId,
     public readonly redirectUri: string,
     public readonly codeChallenge: CodeChallenge,
@@ -41,6 +42,7 @@ export class AuthorizationCodeEntity {
 
   static create(params: {
     code: string;
+    userId: string;
     clientId: ClientId;
     redirectUri: string;
     codeChallenge: CodeChallenge;
@@ -53,6 +55,7 @@ export class AuthorizationCodeEntity {
 
     return new AuthorizationCodeEntity(
       params.code,
+      params.userId,
       params.clientId,
       params.redirectUri,
       params.codeChallenge,

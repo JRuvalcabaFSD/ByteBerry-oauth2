@@ -6,7 +6,7 @@ import {
   LogContextMethod,
   UnsupportedGrantTypeError,
 } from '@/shared';
-import { ICodeStore, IExchangeCodeForTokenUseCase, IJwtService, ILogger, IPKceVerifierService } from '@/interfaces';
+import { IAuthorizationCodeRepository, IExchangeCodeForTokenUseCase, IJwtService, ILogger, IPKceVerifierService } from '@/interfaces';
 import { TokenRequestDto, TokenResponseDto } from '@/application';
 import { ClientId, CodeVerifier } from '@/domain';
 
@@ -52,14 +52,16 @@ import { ClientId, CodeVerifier } from '@/domain';
 @LogContextClass()
 export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase {
   /**
-   * Creates an instance of the use case for exchanging authorization codes for tokens.
+   * Constructs an instance of the use case for exchanging an authorization code for a token.
    *
-   * @param codeStore - The code store implementation for managing authorization codes
-   * @param logger - The logger implementation for logging operations and errors
-   * @param pkceVerifier - The PKCE verifier service for validating code challenges
+   * @param repository - The repository responsible for managing authorization codes.
+   * @param logger - The logger service for logging application events and errors.
+   * @param jwtService - The service used for generating and verifying JWT tokens.
+   * @param pkceVerifier - The service responsible for verifying PKCE code challenges.
    */
+
   constructor(
-    private readonly codeStore: ICodeStore,
+    private readonly repository: IAuthorizationCodeRepository,
     private readonly logger: ILogger,
     private readonly jwtService: IJwtService,
     private pkceVerifier: IPKceVerifierService
@@ -86,7 +88,7 @@ export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase
         throw new UnsupportedGrantTypeError('Only authorization_code grant type is supported');
       if (!request.code || !request.code_verifier) throw new InvalidRequestError('code and code_verifier are required');
 
-      const authCode = this.codeStore.get(request.code);
+      const authCode = await this.repository.findByCode(request.code);
       if (!authCode) throw new InvalidGrantError('Authorization code not found');
 
       if (authCode.isUsed()) {
@@ -131,6 +133,7 @@ export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase
         throw new InvalidGrantError('Invalid code_verifier');
       }
       authCode.markAsUsed();
+      await this.repository.save(authCode);
 
       const accessToken = this.jwtService.generateAccessToken({
         sub: clientId.getValue(),

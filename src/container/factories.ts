@@ -1,7 +1,13 @@
 import { ExchangeCodeForTokenUseCase, GenerateAuthorizationCodeUseCase, GetJwksUseCase } from '@/application';
 import { DatabaseConfig } from '@/config/database.config';
 import * as infrastructure from '@/infrastructure';
-import { ICodeStore, IContainer, IExchangeCodeForTokenUseCase, IGenerateAuthorizationCodeUseCase } from '@/interfaces';
+import {
+  IAuthCodeMappers,
+  IAuthorizationCodeRepository,
+  IContainer,
+  IExchangeCodeForTokenUseCase,
+  IGenerateAuthorizationCodeUseCase,
+} from '@/interfaces';
 import { AuthorizeController, JWksController, PkceVerifierService, TokenController } from '@/presentation';
 import { PrismaClient } from 'generated/prisma/client';
 
@@ -72,22 +78,6 @@ export function createHealthService(c: IContainer): infrastructure.HealthService
 }
 
 /**
- * Creates an instance of an in-memory code store.
- *
- * @param c - The dependency injection container used to resolve dependencies
- * @returns An implementation of ICodeStore that stores authorization codes in memory
- *
- * @remarks
- * This factory function instantiates an InMemoryCodeStore with a logger resolved from the container.
- * The in-memory implementation is suitable for development and testing purposes, but should be
- * replaced with a persistent storage solution for production environments.
- */
-
-export function createCodeStore(c: IContainer): ICodeStore {
-  return new infrastructure.InMemoryCodeStore(c.resolve('Logger'));
-}
-
-/**
  * Creates and returns an instance of the GenerateAuthorizationCodeUseCase.
  *
  * This factory function resolves the required dependencies from the provided container
@@ -103,7 +93,7 @@ export function createCodeStore(c: IContainer): ICodeStore {
  */
 
 export function createGenerateAuthorizationCodeUseCase(c: IContainer): IGenerateAuthorizationCodeUseCase {
-  return new GenerateAuthorizationCodeUseCase(c.resolve('CodeStore'), c.resolve('Logger'));
+  return new GenerateAuthorizationCodeUseCase(c.resolve('AuthorizationCodeRepository'), c.resolve('Logger'));
 }
 
 /**
@@ -115,7 +105,7 @@ export function createGenerateAuthorizationCodeUseCase(c: IContainer): IGenerate
 
 export function createExchangeCodeForTokenUseCase(c: IContainer): IExchangeCodeForTokenUseCase {
   return new ExchangeCodeForTokenUseCase(
-    c.resolve('CodeStore'),
+    c.resolve('AuthorizationCodeRepository'),
     c.resolve('Logger'),
     c.resolve('JwtService'),
     c.resolve('PkceVerifierService')
@@ -233,4 +223,30 @@ export function createDatabaseConfig(c: IContainer): DatabaseConfig {
 
 export function createDbClient(c: IContainer): PrismaClient {
   return c.resolve('DatabaseConfig').getClient();
+}
+
+/**
+ * Factory function that creates and returns an instance of `IAuthCodeMappers`.
+ *
+ * @returns {IAuthCodeMappers} An instance of `AuthCodeMapper` from the infrastructure layer.
+ */
+
+export function createAuthCodeMapper(): IAuthCodeMappers {
+  return new infrastructure.AuthCodeMapper();
+}
+
+/**
+ * Creates and returns an instance of `IAuthorizationCodeRepository` using the provided container.
+ *
+ * This factory function resolves the required dependencies from the given `IContainer`:
+ * - `AuthCodeMappers`: Used for mapping authorization code data.
+ * - `DbClient`: Database client for data persistence.
+ * - `Logger`: Logger instance for logging operations.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies.
+ * @returns An instance of `IAuthorizationCodeRepository` backed by a database implementation.
+ */
+
+export function createAuthorizationCodeRepository(c: IContainer): IAuthorizationCodeRepository {
+  return new infrastructure.DatabaseAuthorizationCodeRepository(c.resolve('AuthCodeMappers'), c.resolve('DbClient'), c.resolve('Logger'));
 }

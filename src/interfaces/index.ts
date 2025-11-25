@@ -7,6 +7,9 @@ export * from './container/container.interface';
 //Http
 export * from './http/httpServer.interface';
 
+//Mappers
+export * from './mappers/AuthCodeMapper.interface';
+
 //Providers
 export * from './providers/keyProvider.interface';
 
@@ -22,9 +25,6 @@ export * from './services/hashService.interface';
 export * from './services/pkceVerifierService.interface';
 export * from './services/jwksService.interface';
 export * from './services/healthService.interface';
-
-//storage
-export * from './storage/codeStorage.interface';
 
 //use cases
 export * from './uses-case/exchangeCodeForTokenUseCase.interface';
