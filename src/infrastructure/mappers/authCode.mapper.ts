@@ -67,3 +67,14 @@ export class AuthCodeMapper implements IAuthCodeMappers {
     };
   }
 }
+
+/**
+ * Creates a new instance of the `AuthCodeMapper`.
+ *
+ * @returns {AuthCodeMapper} A new `AuthCodeMapper` instance.
+ *
+ * @example
+ * const mapper = createAuthCodeMapper();
+ */
+
+export const createAuthCodeMapper = () => new AuthCodeMapper();

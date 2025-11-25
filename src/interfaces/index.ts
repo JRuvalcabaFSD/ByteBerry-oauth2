@@ -8,13 +8,16 @@ export * from './container/container.interface';
 export * from './http/httpServer.interface';
 
 //Mappers
-export * from './mappers/AuthCodeMapper.interface';
+export * from './mappers/mappers.interface';
 
 //Providers
 export * from './providers/keyProvider.interface';
 
 //Repositories
 export * from './repositories/authCodeRepository.interface';
+export * from './repositories/userRepository.interface';
+export * from './repositories/oauthClientRepository.interface';
+export * from './repositories/tokenRepository.interface';
 
 //Services
 export * from './services/clock.interface';

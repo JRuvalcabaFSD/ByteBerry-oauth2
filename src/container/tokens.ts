@@ -28,7 +28,11 @@ export type Token =
   | 'DatabaseConfig'
   | 'DbClient'
   | 'AuthorizationCodeRepository'
-  | 'AuthCodeMappers';
+  | 'AuthCodeMappers'
+  | 'UserMapper'
+  | 'UserRepository'
+  | 'OAuthClientRepository'
+  | 'TokenRepository';
 
 export interface ServiceMap {
   Config: interfaces.IConfig;
@@ -53,6 +57,10 @@ export interface ServiceMap {
   DbClient: PrismaClient;
   AuthorizationCodeRepository: interfaces.IAuthorizationCodeRepository;
   AuthCodeMappers: interfaces.IAuthCodeMappers;
+  UserMapper: interfaces.IUserMapper;
+  UserRepository: interfaces.IUserRepository;
+  OAuthClientRepository: interfaces.IOAuthClientRepository;
+  TokenRepository: interfaces.ITokenRepository;
 }
 
 export const criticalServices = [
@@ -78,4 +86,8 @@ export const criticalServices = [
   'DbClient',
   'AuthorizationCodeRepository',
   'AuthCodeMappers',
+  'UserMapper',
+  'UserRepository',
+  'OAuthClientRepository',
+  'TokenRepository',
 ];

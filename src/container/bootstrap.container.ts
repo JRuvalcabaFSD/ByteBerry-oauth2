@@ -1,4 +1,4 @@
-import { createClockService, createNodeHashService, createUuidService } from '@/infrastructure';
+import { createAuthCodeMapper, createClockService, createNodeHashService, createUserMapper, createUuidService } from '@/infrastructure';
 import { Container, Token, criticalServices } from '@/container';
 import { ContainerCreationError } from '@/shared';
 import { IContainer } from '@/interfaces';
@@ -57,6 +57,10 @@ function registerControllers(container: Container): void {
 function registerDatabaseServices(container: IContainer): void {
   container.registerSingleton('DatabaseConfig', factories.createDatabaseConfig);
   container.registerSingleton('DbClient', factories.createDbClient);
-  container.registerSingleton('AuthCodeMappers', factories.createAuthCodeMapper);
+  container.registerSingleton('AuthCodeMappers', createAuthCodeMapper);
+  container.registerSingleton('UserMapper', createUserMapper);
   container.registerSingleton('AuthorizationCodeRepository', factories.createAuthorizationCodeRepository);
+  container.registerSingleton('OAuthClientRepository', factories.createOAuthClientRepository);
+  container.registerSingleton('TokenRepository', factories.createTokenRepository);
+  container.registerSingleton('UserRepository', factories.createUserRepository);
 }

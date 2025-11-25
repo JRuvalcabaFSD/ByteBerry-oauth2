@@ -40,10 +40,10 @@
 		"generate:pkce": " node ./scripts/generate-pkce.js",
 		"generate:keys": "node scripts/generate-keys.js",
 		"db:generate": "prisma generate",
-    "db:migrate:dev": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy",
-    "db:studio": "prisma studio",
-    "db:reset": "prisma migrate reset --force"
+		"db:migrate:dev": "prisma migrate dev",
+		"db:migrate:deploy": "prisma migrate deploy",
+		"db:studio": "prisma studio",
+		"db:reset": "prisma migrate reset --force"
 	},
 	"keywords": [],
 	"author": "",
@@ -55,6 +55,7 @@
 		"@eslint/js": "^9.36.0",
 		"@semantic-release/changelog": "^6.0.3",
 		"@semantic-release/git": "^10.0.1",
+		"@types/bcrypt": "^6.0.0",
 		"@types/cors": "^2.8.19",
 		"@types/express": "^5.0.3",
 		"@types/jest": "^30.0.0",
@@ -93,6 +94,7 @@
 	"dependencies": {
 		"@prisma/adapter-pg": "^7.0.0",
 		"@prisma/client": "^7.0.0",
+		"bcrypt": "^6.0.0",
 		"cors": "^2.8.5",
 		"dotenv": "16.4.5",
 		"env-var": "^7.5.0",

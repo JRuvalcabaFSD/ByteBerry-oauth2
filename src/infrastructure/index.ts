@@ -14,12 +14,16 @@ export * from './lifecycle/shutdownConfig';
 
 //Mappers
 export * from './mappers/authCode.mapper';
+export * from './mappers/user.mapper';
 
 //Providers
 export * from './providers/key.provider';
 
 // Repositories
 export * from './repositories/authCode.repository';
+export * from './repositories/user.repository';
+export * from './repositories/oauthClient.repository';
+export * from './repositories/token.repository';
 
 //Services
 export * from './services/clock.service';

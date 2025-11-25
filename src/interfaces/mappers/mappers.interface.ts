@@ -1,5 +1,5 @@
-import { AuthorizationCodeEntity } from '@/domain';
-import { AuthCode } from 'generated/prisma/client';
+import { AuthorizationCodeEntity, OAuthClientEntity, UserEntity } from '@/domain';
+import { AuthCode, OAuthClient, User } from 'generated/prisma/client';
 
 /**
  * Interface for mapping between persistence and domain representations of authorization codes.
@@ -30,4 +30,26 @@ export interface IAuthCodeMappers {
    */
 
   toPersistence(entity: AuthorizationCodeEntity): Omit<AuthCode, 'id' | 'createdAt' | 'updatedAt'>;
+}
+
+/**
+ * Interface for mapping between persistence User records and domain UserEntity objects.
+ *
+ * @remarks
+ * This interface defines methods for converting data between the persistence layer (e.g., database models)
+ * and the domain layer (business logic entities). Implementations of this interface should handle the
+ * transformation logic required to map between these representations.
+ *
+ * @method toDomain Converts a persistence User record to a domain UserEntity.
+ * @param record - The User record from the persistence layer.
+ * @returns The corresponding UserEntity for use in the domain layer.
+ *
+ * @method toPersistence Converts a domain UserEntity to a persistence-ready object.
+ * @param entity - The UserEntity from the domain layer.
+ * @returns An object suitable for persistence, omitting 'id', 'createdAt', and 'updatedAt' fields.
+ */
+
+export interface IUserMapper {
+  toDomain(record: User): UserEntity;
+  toPersistence(entity: UserEntity): Omit<User, 'id' | 'createdAt' | 'updatedAt'>;
 }

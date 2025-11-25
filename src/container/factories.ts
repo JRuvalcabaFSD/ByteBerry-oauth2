@@ -1,13 +1,7 @@
 import { ExchangeCodeForTokenUseCase, GenerateAuthorizationCodeUseCase, GetJwksUseCase } from '@/application';
 import { DatabaseConfig } from '@/config/database.config';
 import * as infrastructure from '@/infrastructure';
-import {
-  IAuthCodeMappers,
-  IAuthorizationCodeRepository,
-  IContainer,
-  IExchangeCodeForTokenUseCase,
-  IGenerateAuthorizationCodeUseCase,
-} from '@/interfaces';
+import { IAuthorizationCodeRepository, IContainer, IExchangeCodeForTokenUseCase, IGenerateAuthorizationCodeUseCase } from '@/interfaces';
 import { AuthorizeController, JWksController, PkceVerifierService, TokenController } from '@/presentation';
 import { PrismaClient } from 'generated/prisma/client';
 
@@ -226,16 +220,6 @@ export function createDbClient(c: IContainer): PrismaClient {
 }
 
 /**
- * Factory function that creates and returns an instance of `IAuthCodeMappers`.
- *
- * @returns {IAuthCodeMappers} An instance of `AuthCodeMapper` from the infrastructure layer.
- */
-
-export function createAuthCodeMapper(): IAuthCodeMappers {
-  return new infrastructure.AuthCodeMapper();
-}
-
-/**
  * Creates and returns an instance of `IAuthorizationCodeRepository` using the provided container.
  *
  * This factory function resolves the required dependencies from the given `IContainer`:
@@ -249,4 +233,37 @@ export function createAuthCodeMapper(): IAuthCodeMappers {
 
 export function createAuthorizationCodeRepository(c: IContainer): IAuthorizationCodeRepository {
   return new infrastructure.DatabaseAuthorizationCodeRepository(c.resolve('AuthCodeMappers'), c.resolve('DbClient'), c.resolve('Logger'));
+}
+
+/**
+ * Factory function to create an instance of {@link infrastructure.UserRepository}.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies.
+ * @returns An initialized {@link infrastructure.UserRepository} with injected UserMapper, DbClient, and Logger.
+ */
+
+export function createUserRepository(c: IContainer): infrastructure.UserRepository {
+  return new infrastructure.UserRepository(c.resolve('UserMapper'), c.resolve('DbClient'), c.resolve('Logger'));
+}
+
+/**
+ * Factory function to create an instance of {@link infrastructure.OAuthClientRepository}.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies.
+ * @returns An initialized {@link infrastructure.OAuthClientRepository} with a database client and logger.
+ */
+
+export function createOAuthClientRepository(c: IContainer): infrastructure.OAuthClientRepository {
+  return new infrastructure.OAuthClientRepository(c.resolve('DbClient'), c.resolve('Logger'));
+}
+
+/**
+ * Factory function to create an instance of {@link infrastructure.TokenRepository}.
+ *
+ * @param c - The dependency injection container used to resolve dependencies.
+ * @returns An instance of {@link infrastructure.TokenRepository} initialized with a logger.
+ */
+
+export function createTokenRepository(c: IContainer): infrastructure.TokenRepository {
+  return new infrastructure.TokenRepository(c.resolve('Logger'));
 }
