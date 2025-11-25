@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 
 import { InvalidRequestError, InvalidValueObjectError, LogContextClass, LogContextMethod, UnauthorizedClientError } from '@/shared';
 import { IAuthorizationCodeRepository, IGenerateAuthorizationCodeUseCase, ILogger } from '@/interfaces';
-import { AuthorizeRequestDto, AuthorizeResponseDto } from '@/application';
+import { AuthorizeRequestDto, AuthorizeResponseDto, ValidateClientUseCase } from '@/application';
 import { AuthorizationCodeEntity, ClientId, CodeChallenge } from '@/domain';
 
 /**
@@ -39,14 +39,16 @@ import { AuthorizationCodeEntity, ClientId, CodeChallenge } from '@/domain';
 @LogContextClass()
 export class GenerateAuthorizationCodeUseCase implements IGenerateAuthorizationCodeUseCase {
   /**
-   * Creates an instance of the use case with the required dependencies.
+   * Constructs a new instance of the use case for generating authorization codes.
    *
    * @param repository - The repository responsible for managing authorization codes.
-   * @param logger - The logger instance used for logging application events and errors.
+   * @param validateClient - The use case responsible for validating OAuth2 clients.
+   * @param logger - The logger instance used for logging activities within the use case.
    */
 
   constructor(
     private readonly repository: IAuthorizationCodeRepository,
+    private readonly validateClient: ValidateClientUseCase,
     private readonly logger: ILogger
   ) {}
 
@@ -80,7 +82,15 @@ export class GenerateAuthorizationCodeUseCase implements IGenerateAuthorizationC
       let codeChallenge: CodeChallenge;
 
       try {
-        clientId = ClientId.create(request.client_id);
+        const clientInfo = await this.validateClient.execute({
+          clientId: request.client_id,
+          redirectUri: request.redirect_uri,
+          grandType: 'authorization_code',
+        });
+
+        this.logger.debug('Client validated for authorization', { clientId: clientInfo.clientId, clientName: clientInfo.clientName });
+
+        clientId = ClientId.create(clientInfo.clientId);
       } catch (error) {
         if (error instanceof InvalidValueObjectError) {
           throw new InvalidRequestError(error.message);

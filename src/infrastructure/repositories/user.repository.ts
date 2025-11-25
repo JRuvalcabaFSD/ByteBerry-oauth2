@@ -2,7 +2,7 @@ import { PrismaClient } from 'generated/prisma/client';
 import { compare } from 'bcrypt';
 
 import { ILogger, IUserMapper, IUserRepository } from '@/interfaces';
-import { handledPrismaError } from '@/shared';
+import { handledPrismaError, LogContextClass, LogContextMethod } from '@/shared';
 import { UserEntity } from '@/domain';
 
 /**
@@ -26,6 +26,7 @@ import { UserEntity } from '@/domain';
  * @method authenticate Authenticates a user by email and password.
  */
 
+@LogContextClass()
 export class UserRepository implements IUserRepository {
   /**
    * Creates an instance of the repository.
@@ -49,6 +50,7 @@ export class UserRepository implements IUserRepository {
    * @throws Throws a handled Prisma error if the registration fails.
    */
 
+  @LogContextMethod()
   public async register(user: UserEntity): Promise<void> {
     try {
       const data = this.mapper.toPersistence(user);
@@ -104,6 +106,7 @@ export class UserRepository implements IUserRepository {
    * @throws Throws a handled Prisma error if an exception occurs during authentication.
    */
 
+  @LogContextMethod()
   public async authenticate(email: string, password: string): Promise<UserEntity | null> {
     try {
       const user = await this.findByEmail(email);

@@ -1,6 +1,6 @@
 import { OAuthClientEntity } from '@/domain';
 import { ILogger, IOAuthClientRepository } from '@/interfaces';
-import { handledPrismaError } from '@/shared';
+import { handledPrismaError, LogContextClass, LogContextMethod } from '@/shared';
 import { PrismaClient } from 'generated/prisma/client';
 
 /**
@@ -13,6 +13,7 @@ import { PrismaClient } from 'generated/prisma/client';
  * @implements {IOAuthClientRepository}
  */
 
+@LogContextClass()
 export class OAuthClientRepository implements IOAuthClientRepository {
   constructor(
     private readonly client: PrismaClient,
@@ -27,6 +28,7 @@ export class OAuthClientRepository implements IOAuthClientRepository {
    * @throws Throws a handled Prisma error if the database operation fails.
    */
 
+  @LogContextMethod()
   public async findByClientId(clientId: string): Promise<OAuthClientEntity | null> {
     try {
       const record = await this.client.oAuthClient.findUnique({ where: { clientId } });

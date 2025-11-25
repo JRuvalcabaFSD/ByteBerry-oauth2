@@ -6,9 +6,17 @@ import {
   LogContextMethod,
   UnsupportedGrantTypeError,
 } from '@/shared';
-import { IAuthorizationCodeRepository, IExchangeCodeForTokenUseCase, IJwtService, ILogger, IPKceVerifierService } from '@/interfaces';
+import {
+  IAuthorizationCodeRepository,
+  IExchangeCodeForTokenUseCase,
+  IJwtService,
+  ILogger,
+  IPKceVerifierService,
+  ITokenRepository,
+} from '@/interfaces';
 import { TokenRequestDto, TokenResponseDto } from '@/application';
-import { ClientId, CodeVerifier } from '@/domain';
+import { ClientId, CodeVerifier, TokenEntity } from '@/domain';
+import { randomBytes } from 'crypto';
 
 /**
  * Use case for exchanging an authorization code for an access token.
@@ -55,13 +63,15 @@ export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase
    * Constructs an instance of the use case for exchanging an authorization code for a token.
    *
    * @param repository - The repository responsible for managing authorization codes.
-   * @param logger - The logger service for logging application events and errors.
-   * @param jwtService - The service used for generating and verifying JWT tokens.
-   * @param pkceVerifier - The service responsible for verifying PKCE code challenges.
+   * @param tokenRepository - The repository responsible for managing tokens.
+   * @param logger - The logger service for logging operations and errors.
+   * @param jwtService - The service for handling JWT creation and validation.
+   * @param pkceVerifier - The service for verifying PKCE (Proof Key for Code Exchange) challenges.
    */
 
   constructor(
     private readonly repository: IAuthorizationCodeRepository,
+    private readonly tokenRepository: ITokenRepository,
     private readonly logger: ILogger,
     private readonly jwtService: IJwtService,
     private pkceVerifier: IPKceVerifierService
@@ -141,7 +151,16 @@ export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase
         client_id: clientId.getValue(),
       });
 
-      this.logger.info('Access token issued successfully', {
+      const tokenEntity = TokenEntity.create({
+        tokenId: 'jti-' + randomBytes(16).toString('hex'),
+        userId: authCode.userId || 'system',
+        clientId: clientId.getValue(),
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+      });
+
+      await this.tokenRepository.saveToken(tokenEntity);
+
+      this.logger.debug('Token issued and audited', {
         client_id: request.client_id,
         has_scope: !!authCode.scope,
       });

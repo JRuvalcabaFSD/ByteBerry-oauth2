@@ -63,4 +63,7 @@ function registerDatabaseServices(container: IContainer): void {
   container.registerSingleton('OAuthClientRepository', factories.createOAuthClientRepository);
   container.registerSingleton('TokenRepository', factories.createTokenRepository);
   container.registerSingleton('UserRepository', factories.createUserRepository);
+  container.registerSingleton('CreateUserUseCase', factories.createCreateUserUseCase);
+  container.registerSingleton('AuthenticateUserUseCase', factories.createAuthenticateUserUseCase);
+  container.registerSingleton('ValidateClientUseCase', factories.createValidateClientUseCase);
 }

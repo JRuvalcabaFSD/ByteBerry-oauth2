@@ -1,5 +1,5 @@
 import { PrismaClient } from './../../generated/prisma/client';
-import { GetJwksUseCase } from '@/application';
+import { AuthenticateUserUseCase, CreateUserUseCase, GetJwksUseCase, ValidateClientUseCase } from '@/application';
 import { DatabaseConfig } from '@/config/database.config';
 import { GracefulShutdown } from '@/infrastructure';
 import * as interfaces from '@/interfaces';
@@ -32,7 +32,10 @@ export type Token =
   | 'UserMapper'
   | 'UserRepository'
   | 'OAuthClientRepository'
-  | 'TokenRepository';
+  | 'TokenRepository'
+  | 'CreateUserUseCase'
+  | 'AuthenticateUserUseCase'
+  | 'ValidateClientUseCase';
 
 export interface ServiceMap {
   Config: interfaces.IConfig;
@@ -61,6 +64,9 @@ export interface ServiceMap {
   UserRepository: interfaces.IUserRepository;
   OAuthClientRepository: interfaces.IOAuthClientRepository;
   TokenRepository: interfaces.ITokenRepository;
+  CreateUserUseCase: CreateUserUseCase;
+  AuthenticateUserUseCase: AuthenticateUserUseCase;
+  ValidateClientUseCase: ValidateClientUseCase;
 }
 
 export const criticalServices = [
@@ -90,4 +96,7 @@ export const criticalServices = [
   'UserRepository',
   'OAuthClientRepository',
   'TokenRepository',
+  'CreateUserUseCase',
+  'AuthenticateUserUseCase',
+  'ValidateClientUseCase',
 ];

@@ -1,4 +1,11 @@
-import { ExchangeCodeForTokenUseCase, GenerateAuthorizationCodeUseCase, GetJwksUseCase } from '@/application';
+import {
+  AuthenticateUserUseCase,
+  CreateUserUseCase,
+  ExchangeCodeForTokenUseCase,
+  GenerateAuthorizationCodeUseCase,
+  GetJwksUseCase,
+  ValidateClientUseCase,
+} from '@/application';
 import { DatabaseConfig } from '@/config/database.config';
 import * as infrastructure from '@/infrastructure';
 import { IAuthorizationCodeRepository, IContainer, IExchangeCodeForTokenUseCase, IGenerateAuthorizationCodeUseCase } from '@/interfaces';
@@ -87,7 +94,11 @@ export function createHealthService(c: IContainer): infrastructure.HealthService
  */
 
 export function createGenerateAuthorizationCodeUseCase(c: IContainer): IGenerateAuthorizationCodeUseCase {
-  return new GenerateAuthorizationCodeUseCase(c.resolve('AuthorizationCodeRepository'), c.resolve('Logger'));
+  return new GenerateAuthorizationCodeUseCase(
+    c.resolve('AuthorizationCodeRepository'),
+    c.resolve('ValidateClientUseCase'),
+    c.resolve('Logger')
+  );
 }
 
 /**
@@ -100,6 +111,7 @@ export function createGenerateAuthorizationCodeUseCase(c: IContainer): IGenerate
 export function createExchangeCodeForTokenUseCase(c: IContainer): IExchangeCodeForTokenUseCase {
   return new ExchangeCodeForTokenUseCase(
     c.resolve('AuthorizationCodeRepository'),
+    c.resolve('TokenRepository'),
     c.resolve('Logger'),
     c.resolve('JwtService'),
     c.resolve('PkceVerifierService')
@@ -266,4 +278,37 @@ export function createOAuthClientRepository(c: IContainer): infrastructure.OAuth
 
 export function createTokenRepository(c: IContainer): infrastructure.TokenRepository {
   return new infrastructure.TokenRepository(c.resolve('Logger'));
+}
+
+/**
+ * Factory function to create an instance of `CreateUserUseCase`.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies.
+ * @returns An instance of `CreateUserUseCase` with injected `UserRepository`, `Logger`, and `Uuid` services.
+ */
+
+export function createCreateUserUseCase(c: IContainer): CreateUserUseCase {
+  return new CreateUserUseCase(c.resolve('UserRepository'), c.resolve('Logger'), c.resolve('Uuid'));
+}
+
+/**
+ * Factory function to create an instance of {@link AuthenticateUserUseCase}.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies.
+ * @returns An instance of {@link AuthenticateUserUseCase} initialized with a `UserRepository` and a `Logger`.
+ */
+
+export function createAuthenticateUserUseCase(c: IContainer): AuthenticateUserUseCase {
+  return new AuthenticateUserUseCase(c.resolve('UserRepository'), c.resolve('Logger'));
+}
+
+/**
+ * Factory function to create an instance of `ValidateClientUseCase`.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies.
+ * @returns An instance of `ValidateClientUseCase` initialized with the resolved `OAuthClientRepository` and `Logger`.
+ */
+
+export function createValidateClientUseCase(c: IContainer): ValidateClientUseCase {
+  return new ValidateClientUseCase(c.resolve('OAuthClientRepository'), c.resolve('Logger'));
 }
