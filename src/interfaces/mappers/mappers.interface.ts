@@ -51,5 +51,5 @@ export interface IAuthCodeMappers {
 
 export interface IUserMapper {
   toDomain(record: User): UserEntity;
-  toPersistence(entity: UserEntity): Omit<User, 'id' | 'createdAt' | 'updatedAt'>;
+  toPersistence(entity: UserEntity): Omit<User, 'createdAt' | 'updatedAt'>;
 }

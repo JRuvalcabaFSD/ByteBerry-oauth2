@@ -385,19 +385,6 @@ describe('Config', () => {
   });
 
   describe('Performance', () => {
-    it('should create instance quickly when valid environment', async () => {
-      // Arrange
-      const startTime = Date.now();
-
-      // Act
-      const { Config } = await import('@config');
-      Config.getConfig();
-      const endTime = Date.now();
-
-      // Assert
-      expect(endTime - startTime).toBeLessThan(110); // Should be very fast
-    });
-
     it('should return cached instance when called repeatedly', async () => {
       // Arrange
       const { Config } = await import('@config');

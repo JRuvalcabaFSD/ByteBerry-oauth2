@@ -139,6 +139,21 @@ jobs:
     needs: [setup, build]
     timeout-minutes: 10
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: oauth2_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U test_user -d oauth2_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -163,11 +178,30 @@ jobs:
           name: build-artifacts-${{ github.sha }}
           path: dist/
 
-      - name: 🧪 Run tests with coverage
+      - name: 🔧 Setup test environment
+        run: |
+          cp .env.test.example .env.test
+          # Override DATABASE_URL for CI
+          echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public" >> .env.test
+
+      - name: 📊 Run Prisma migrations
+        run: |
+          export NODE_ENV=test
+          pnpm prisma migrate deploy --schema=./prisma/schema.prisma
+          pnpm prisma generate
+
+      - name: 🧪 Run unit tests with coverage
         run: |
           export NODE_ENV=test
           export CI=true
-          pnpm test:coverage
+          pnpm test:unit
+
+      - name: 🧪 Run integration tests
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public
+          NODE_ENV: test
+          CI: true
+        run: pnpm test:integration
 
       - name: 📊 Display coverage summary
         run: |

@@ -53,9 +53,10 @@ export class UserMapper implements IUserMapper {
    *          suitable for database persistence.
    */
 
-  public toPersistence(entity: UserEntity): Omit<User, 'id' | 'createdAt' | 'updatedAt'> {
-    const { email, username } = entity;
+  public toPersistence(entity: UserEntity): Omit<User, 'createdAt' | 'updatedAt'> {
+    const { id, email, username } = entity;
     return {
+      id,
       email,
       username,
       password: entity.getPasswordHash(),
