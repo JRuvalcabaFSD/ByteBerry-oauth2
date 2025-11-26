@@ -1,5 +1,5 @@
-import { AuthorizationCodeEntity, OAuthClientEntity, UserEntity } from '@/domain';
-import { AuthCode, OAuthClient, User } from 'generated/prisma/client';
+import { AuthCode, User } from 'generated/prisma/client';
+import { AuthorizationCodeEntity, UserEntity } from '@/domain';
 
 /**
  * Interface for mapping between persistence and domain representations of authorization codes.

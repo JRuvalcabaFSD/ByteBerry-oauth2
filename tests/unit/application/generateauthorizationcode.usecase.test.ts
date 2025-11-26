@@ -1,21 +1,14 @@
 import { GenerateAuthorizationCodeUseCase } from '@/application';
-import { ICodeStore, ILogger } from '@/interfaces';
+import { ILogger } from '@/interfaces';
 import { InvalidRequestError } from '@/shared';
 
 describe('GenerateAuthorizationCodeUseCase', () => {
   let useCase: GenerateAuthorizationCodeUseCase;
-  let mockCodeStore: jest.Mocked<ICodeStore>;
   let mockLogger: jest.Mocked<ILogger>;
+  let mockAuthCodeRepository: any;
+  let mockValidateClientUseCase: any;
 
   beforeEach(() => {
-    mockCodeStore = {
-      set: jest.fn(),
-      get: jest.fn(),
-      has: jest.fn(),
-      cleanedExpired: jest.fn(),
-      shutdown: jest.fn(),
-    };
-
     mockLogger = {
       debug: jest.fn(),
       info: jest.fn(),
@@ -23,7 +16,30 @@ describe('GenerateAuthorizationCodeUseCase', () => {
       error: jest.fn(),
     } as unknown as jest.Mocked<ILogger>;
 
-    useCase = new GenerateAuthorizationCodeUseCase(mockCodeStore, mockLogger);
+    mockAuthCodeRepository = {
+      save: jest.fn().mockResolvedValue(undefined),
+      findByCode: jest.fn(),
+      cleanup: jest.fn(),
+      set: jest.fn().mockResolvedValue(undefined),
+      get: jest.fn(),
+    };
+
+    mockValidateClientUseCase = {
+      execute: jest.fn().mockImplementation(request => {
+        if (request.client_id === 'short' || request.clientId === 'short') {
+          return Promise.reject(new InvalidRequestError('Invalid client_id'));
+        }
+        return Promise.resolve({
+          clientId: 'test-client-12345',
+          clientName: 'Test Client',
+          isPublic: false,
+          redirectUris: ['https://example.com/callback'],
+          grantTypes: ['authorization_code'],
+        });
+      }),
+    };
+
+    useCase = new GenerateAuthorizationCodeUseCase(mockAuthCodeRepository, mockValidateClientUseCase, mockLogger);
   });
 
   it('should generate code when valid request provided', async () => {
@@ -41,7 +57,7 @@ describe('GenerateAuthorizationCodeUseCase', () => {
 
     expect(result.code).toBeDefined();
     expect(result.state).toBe('xyz');
-    expect(mockCodeStore.set).toHaveBeenCalledTimes(1);
+    expect(mockAuthCodeRepository.save).toHaveBeenCalledTimes(1);
     expect(mockLogger.debug).toHaveBeenCalled();
   });
 

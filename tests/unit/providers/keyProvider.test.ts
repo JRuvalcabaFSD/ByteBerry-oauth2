@@ -5,6 +5,10 @@ import { IConfig } from '@/interfaces';
 
 // Mock del módulo fs
 jest.mock('fs');
+jest.mock('bcrypt', () => ({
+  compare: jest.fn(),
+}));
+jest.mock('generated/prisma/client', () => ({}));
 
 const mockedExistsSync = existsSync as jest.MockedFunction<typeof existsSync>;
 const mockedReadFileSync = readFileSync as jest.MockedFunction<typeof readFileSync>;

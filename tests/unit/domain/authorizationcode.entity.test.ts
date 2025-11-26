@@ -8,6 +8,7 @@ describe('AuthorizationCodeEntity', () => {
     const authCode = AuthorizationCodeEntity.create({
       code: 'test-code-123',
       clientId: mockClientId,
+      userId: 'test-user',
       redirectUri: 'https://example.com/callback',
       codeChallenge: mockCodeChallenge,
       expirationMinutes: 5,
@@ -26,6 +27,7 @@ describe('AuthorizationCodeEntity', () => {
     const authCode = AuthorizationCodeEntity.create({
       code: 'test-code',
       clientId: mockClientId,
+      userId: 'test-user',
       redirectUri: 'https://example.com/callback',
       codeChallenge: mockCodeChallenge,
       expirationMinutes: 5,
@@ -38,6 +40,7 @@ describe('AuthorizationCodeEntity', () => {
     const authCode = AuthorizationCodeEntity.create({
       code: 'test-code',
       clientId: mockClientId,
+      userId: 'test-user',
       redirectUri: 'https://example.com/callback',
       codeChallenge: mockCodeChallenge,
       expirationMinutes: -1, // Expired 1 minute ago
@@ -50,6 +53,7 @@ describe('AuthorizationCodeEntity', () => {
     const authCode = AuthorizationCodeEntity.create({
       code: 'test-code',
       clientId: mockClientId,
+      userId: 'test-user',
       redirectUri: 'https://example.com/callback',
       codeChallenge: mockCodeChallenge,
     });
@@ -63,6 +67,7 @@ describe('AuthorizationCodeEntity', () => {
     const authCode = AuthorizationCodeEntity.create({
       code: 'test-code',
       clientId: mockClientId,
+      userId: 'test-user',
       redirectUri: 'https://example.com/callback',
       codeChallenge: mockCodeChallenge,
     });
