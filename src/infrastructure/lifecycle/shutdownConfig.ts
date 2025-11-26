@@ -28,7 +28,23 @@ export function configureShutdown(container: IContainer): GracefulShutdown {
     }
   });
 
-  //TODO registrar Database service
+  //Register Http Service in cleanup function
+  gracefulShutdown.registerCleanup(async () => {
+    logger.debug('Database disconnect');
+
+    try {
+      const dbConfig = container.resolve('DatabaseConfig');
+
+      if (dbConfig && typeof dbConfig.disconnect === 'function') {
+        await dbConfig.disconnect();
+
+        logger.info('Database disconnect');
+      }
+    } catch (error) {
+      logger.error('Failed to disconnect database', { error: getErrMsg(error) });
+      throw error;
+    }
+  });
   //TODO registrar Redis service
   logger.debug('Graceful shutdown configured', { requestCleanups: gracefulShutdown.registerCleanupsCount });
 
