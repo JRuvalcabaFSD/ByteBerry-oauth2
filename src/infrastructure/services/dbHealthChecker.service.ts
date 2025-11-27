@@ -50,6 +50,11 @@ export class DataBaseHealthCheckerService implements IDatabaBaseHealthChecker {
   @LogContextMethod()
   public async checkConnection(): Promise<boolean> {
     try {
+      // Prisma no lanza error tras $disconnect en algunos entornos, así que forzamos una comprobación adicional
+      if (typeof (this.dbClient as any).$isPooledConnectionActive === 'function') {
+        const isActive = await (this.dbClient as any).$isPooledConnectionActive();
+        if (!isActive) throw new Error('Prisma pool not active');
+      }
       await this.dbClient.$queryRawUnsafe('SELECT 1');
       this.logger.debug('Database connection check successful');
       return true;
@@ -79,12 +84,17 @@ export class DataBaseHealthCheckerService implements IDatabaBaseHealthChecker {
       refreshTokens: false,
     };
     try {
+      // Prisma no lanza error tras $disconnect en algunos entornos, así que forzamos una comprobación adicional
+      if (typeof (this.dbClient as any).$isPooledConnectionActive === 'function') {
+        const isActive = await (this.dbClient as any).$isPooledConnectionActive();
+        if (!isActive) throw new Error('Prisma pool not active');
+      }
       const result = await this.dbClient.$queryRaw<Array<{ tablename: string }>>`
-			SELECT tablename
-			FROM pg_tables
-			WHERE schemaname = 'public'
-			AND tablename IN ('users', 'oauth_clients', 'auth_codes', 'refresh_tokens')
-			`;
+        SELECT tablename
+        FROM pg_tables
+        WHERE schemaname = 'public'
+        AND tablename IN ('users', 'oauth_clients', 'auth_codes', 'refresh_tokens')
+      `;
 
       const existingTables = result.map(row => row.tablename);
 
@@ -142,6 +152,11 @@ export class DataBaseHealthCheckerService implements IDatabaBaseHealthChecker {
 
     if (connected) {
       try {
+        // Prisma no lanza error tras $disconnect en algunos entornos, así que forzamos una comprobación adicional
+        if (typeof (this.dbClient as any).$isPooledConnectionActive === 'function') {
+          const isActive = await (this.dbClient as any).$isPooledConnectionActive();
+          if (!isActive) throw new Error('Prisma pool not active');
+        }
         const [users, clients, codes, tokens] = await Promise.all([
           this.dbClient.user.count(),
           this.dbClient.oAuthClient.count(),
