@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { NodeEnv } from '@/interfaces';
+import { IDatabaseHealthResponse, NodeEnv } from '@/interfaces';
 
 /**
  * Represents the response object for a dependency health check.
@@ -62,6 +62,7 @@ export interface IHealthResponse {
 
 export interface IDeepHealthResponse extends IHealthResponse {
   dependencies: Record<string, unknown>;
+  database: IDatabaseHealthResponse;
   system: ISystemInfoResponse;
 }
 

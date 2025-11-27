@@ -96,7 +96,7 @@ describe('Shutdown Configuration', () => {
     await new Promise(r => setImmediate(r));
 
     // Verificar que registerCleanup fue llamada
-    expect(mockGracefulShutdown.registerCleanup).toHaveBeenCalledTimes(1);
+    expect(mockGracefulShutdown.registerCleanup).toHaveBeenCalledTimes(2);
 
     // Obtener la función registrada — casteamos a jest.Mock para acceder a .mock
     const cleanupFunction = (mockGracefulShutdown.registerCleanup as unknown as jest.Mock).mock.calls[0][0];

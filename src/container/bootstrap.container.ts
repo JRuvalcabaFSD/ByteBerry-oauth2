@@ -66,4 +66,5 @@ function registerDatabaseServices(container: IContainer): void {
   container.registerSingleton('CreateUserUseCase', factories.createCreateUserUseCase);
   container.registerSingleton('AuthenticateUserUseCase', factories.createAuthenticateUserUseCase);
   container.registerSingleton('ValidateClientUseCase', factories.createValidateClientUseCase);
+  container.registerSingleton('DatabaseHealthChecker', factories.createDatabaseHealthChecker);
 }

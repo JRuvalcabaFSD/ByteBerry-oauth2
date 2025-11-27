@@ -28,6 +28,7 @@ export * from './services/hashService.interface';
 export * from './services/pkceVerifierService.interface';
 export * from './services/jwksService.interface';
 export * from './services/healthService.interface';
+export * from './services/dbHealthChecker.interface';
 
 //use cases
 export * from './uses-case/exchangeCodeForTokenUseCase.interface';

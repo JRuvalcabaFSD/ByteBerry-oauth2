@@ -35,7 +35,8 @@ export type Token =
   | 'TokenRepository'
   | 'CreateUserUseCase'
   | 'AuthenticateUserUseCase'
-  | 'ValidateClientUseCase';
+  | 'ValidateClientUseCase'
+  | 'DatabaseHealthChecker';
 
 export interface ServiceMap {
   Config: interfaces.IConfig;
@@ -67,6 +68,7 @@ export interface ServiceMap {
   CreateUserUseCase: CreateUserUseCase;
   AuthenticateUserUseCase: AuthenticateUserUseCase;
   ValidateClientUseCase: ValidateClientUseCase;
+  DatabaseHealthChecker: interfaces.IDatabaBaseHealthChecker;
 }
 
 export const criticalServices = [
@@ -99,4 +101,5 @@ export const criticalServices = [
   'CreateUserUseCase',
   'AuthenticateUserUseCase',
   'ValidateClientUseCase',
+  'DatabaseHealthChecker',
 ];

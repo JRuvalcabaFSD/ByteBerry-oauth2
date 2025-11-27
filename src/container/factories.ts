@@ -1,13 +1,7 @@
-import {
-  AuthenticateUserUseCase,
-  CreateUserUseCase,
-  ExchangeCodeForTokenUseCase,
-  GenerateAuthorizationCodeUseCase,
-  GetJwksUseCase,
-  ValidateClientUseCase,
-} from '@/application';
-import { DatabaseConfig } from '@/config/database.config';
+import { DataBaseHealthCheckerService } from './../infrastructure/services/dbHealthChecker.service';
+import * as usesCases from '@/application';
 import * as infrastructure from '@/infrastructure';
+import { DatabaseConfig } from '@/config/database.config';
 import { IAuthorizationCodeRepository, IContainer, IExchangeCodeForTokenUseCase, IGenerateAuthorizationCodeUseCase } from '@/interfaces';
 import { AuthorizeController, JWksController, PkceVerifierService, TokenController } from '@/presentation';
 import { PrismaClient } from 'generated/prisma/client';
@@ -94,7 +88,7 @@ export function createHealthService(c: IContainer): infrastructure.HealthService
  */
 
 export function createGenerateAuthorizationCodeUseCase(c: IContainer): IGenerateAuthorizationCodeUseCase {
-  return new GenerateAuthorizationCodeUseCase(
+  return new usesCases.GenerateAuthorizationCodeUseCase(
     c.resolve('AuthorizationCodeRepository'),
     c.resolve('ValidateClientUseCase'),
     c.resolve('Logger')
@@ -109,7 +103,7 @@ export function createGenerateAuthorizationCodeUseCase(c: IContainer): IGenerate
  */
 
 export function createExchangeCodeForTokenUseCase(c: IContainer): IExchangeCodeForTokenUseCase {
-  return new ExchangeCodeForTokenUseCase(
+  return new usesCases.ExchangeCodeForTokenUseCase(
     c.resolve('AuthorizationCodeRepository'),
     c.resolve('TokenRepository'),
     c.resolve('Logger'),
@@ -205,8 +199,8 @@ export function createJwksService(c: IContainer): infrastructure.JwksService {
  * @returns A new instance of `GetJwksUseCase` initialized with the resolved `JwksService`.
  */
 
-export function createGetJwksUseCase(c: IContainer): GetJwksUseCase {
-  return new GetJwksUseCase(c.resolve('JwksService'));
+export function createGetJwksUseCase(c: IContainer): usesCases.GetJwksUseCase {
+  return new usesCases.GetJwksUseCase(c.resolve('JwksService'));
 }
 
 /**
@@ -287,8 +281,8 @@ export function createTokenRepository(c: IContainer): infrastructure.TokenReposi
  * @returns An instance of `CreateUserUseCase` with injected `UserRepository`, `Logger`, and `Uuid` services.
  */
 
-export function createCreateUserUseCase(c: IContainer): CreateUserUseCase {
-  return new CreateUserUseCase(c.resolve('UserRepository'), c.resolve('Logger'), c.resolve('Uuid'));
+export function createCreateUserUseCase(c: IContainer): usesCases.CreateUserUseCase {
+  return new usesCases.CreateUserUseCase(c.resolve('UserRepository'), c.resolve('Logger'), c.resolve('Uuid'));
 }
 
 /**
@@ -298,8 +292,8 @@ export function createCreateUserUseCase(c: IContainer): CreateUserUseCase {
  * @returns An instance of {@link AuthenticateUserUseCase} initialized with a `UserRepository` and a `Logger`.
  */
 
-export function createAuthenticateUserUseCase(c: IContainer): AuthenticateUserUseCase {
-  return new AuthenticateUserUseCase(c.resolve('UserRepository'), c.resolve('Logger'));
+export function createAuthenticateUserUseCase(c: IContainer): usesCases.AuthenticateUserUseCase {
+  return new usesCases.AuthenticateUserUseCase(c.resolve('UserRepository'), c.resolve('Logger'));
 }
 
 /**
@@ -309,6 +303,17 @@ export function createAuthenticateUserUseCase(c: IContainer): AuthenticateUserUs
  * @returns An instance of `ValidateClientUseCase` initialized with the resolved `OAuthClientRepository` and `Logger`.
  */
 
-export function createValidateClientUseCase(c: IContainer): ValidateClientUseCase {
-  return new ValidateClientUseCase(c.resolve('OAuthClientRepository'), c.resolve('Logger'));
+export function createValidateClientUseCase(c: IContainer): usesCases.ValidateClientUseCase {
+  return new usesCases.ValidateClientUseCase(c.resolve('OAuthClientRepository'), c.resolve('Logger'));
+}
+
+/**
+ * Factory function to create an instance of {@link DataBaseHealthCheckerService}.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies.
+ * @returns An instance of {@link DataBaseHealthCheckerService} initialized with a database client and logger.
+ */
+
+export function createDatabaseHealthChecker(c: IContainer): DataBaseHealthCheckerService {
+  return new DataBaseHealthCheckerService(c.resolve('DbClient'), c.resolve('Logger'));
 }
