@@ -1,53 +1,61 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "CommonJS",
-    "lib": ["ES2022"],
-    "strict": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "removeComments": true,
-    "noEmitOnError": true,
-    "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "allowJs": true,
-    "checkJs": false,
-    "noEmit": false,
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "CommonJS",
+		"lib": ["ES2022"],
+		"strict": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"outDir": "./dist",
+		"rootDir": ".", // ← CAMBIO 1
+		"sourceMap": true,
+		"declaration": true,
+		"declarationMap": true,
+		"removeComments": true,
+		"noEmitOnError": true,
+		"resolveJsonModule": true,
+		"moduleResolution": "node",
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"allowJs": true,
+		"checkJs": false,
+		"noEmit": false,
 
-    // Path mapping for cleaner imports
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["./*"],
-      "@application": ["./application/index.ts"],
-      "@config": ["./config/index.ts"],
-      "@container": ["./container/index.ts"],
-      "@domain": ["./domain/index.ts"],
-      "@infrastructure": ["./infrastructure/index.ts"],
-      "@interfaces": ["./interfaces/index.ts"],
-      "@presentation": ["./presentation/index.ts"],
-      "@shared": ["./shared/index.ts"]
-    },
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"],
+			"@application": ["src/application/index.ts"],
+			"@config": ["src/config/index.ts"],
+			"@container": ["src/container/index.ts"],
+			"@domain": ["src/domain/index.ts"],
+			"@infrastructure": ["src/infrastructure/index.ts"],
+			"@interfaces": ["src/interfaces/index.ts"],
+			"@presentation": ["src/presentation/index.ts"],
+			"@shared": ["src/shared/index.ts"],
+			"generated/prisma/client": ["generated/prisma/client.ts"], // ← CLAVE
+			"generated/prisma/client/*": ["generated/prisma/*"]
+		},
 
-    // Additional strict checks
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "exactOptionalPropertyTypes": true,
-
-    // Only node types for build
-    "types": ["node"]
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["tests", "**/*.test.ts", "**/*.spec.ts", "node_modules", "dist", "coverage"]
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"exactOptionalPropertyTypes": true,
+		"types": ["node"]
+	},
+	"include": [
+		"src/**/*.ts",
+		"generated/prisma/**/*.ts" // ← CLAVE 2
+	],
+	"exclude": [
+		"tests",
+		"**/*.test.ts",
+		"**/*.spec.ts",
+		"node_modules",
+		"dist",
+		"coverage"
+	]
 }

@@ -4,7 +4,7 @@
 	"description": "Servidor OAuth2 con Authorization Code + PKCE, JWT RS256, refresh tokens y JWKS",
 	"main": "dist/app.js",
 	"engines": {
-		"node": "22.21.0",
+		"node": "22.21.1",
 		"pnpm": "10.20.0"
 	},
 	"scripts": {
@@ -22,7 +22,7 @@
 		"lint": "eslint .",
 		"postbuild": "tsc-alias -p tsconfig.build.json",
 		"prebuild": "npm run clean",
-		"quality": "pnpm type-check && pnpm lint && pnpm audit && pnpm build && pnpm test:coverage",
+		"quality": "pnpm type-check && pnpm lint && pnpm audit && pnpm build && pnpm test:all",
 		"release": "semantic-release",
 		"start": "node dist/app.js",
 		"test": "jest --config jest.config.ts",
@@ -85,7 +85,7 @@
 		"jiti": "^2.6.0",
 		"jsdoc": "^4.0.5",
 		"prettier": "^3.6.2",
-		"prisma": "^7.0.0",
+		"prisma": "6.19.0",
 		"rimraf": "^6.1.0",
 		"semantic-release": "^24.2.9",
 		"supertest": "^7.1.4",
@@ -101,7 +101,7 @@
 	},
 	"dependencies": {
 		"@prisma/adapter-pg": "^7.0.0",
-		"@prisma/client": "^7.0.0",
+		"@prisma/client": "6.19.0",
 		"bcrypt": "^6.0.0",
 		"cors": "^2.8.5",
 		"dotenv": "16.4.5",
