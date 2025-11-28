@@ -7,7 +7,7 @@ import prettierPlugin from 'eslint-plugin-prettier';
 export default [
   // Global ignores - must be first
   {
-    ignores: ['coverage/**', 'dist/**', 'docs/**', 'node_modules/**', 'jest.config.ts', 'scripts/**'],
+    ignores: ['coverage/**', 'dist/**', 'docs/**', 'node_modules/**', 'jest.config.ts', 'scripts/**', 'generated/**'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

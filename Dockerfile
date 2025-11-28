@@ -61,7 +61,7 @@ RUN pnpm build
 
 # Remove dev dependencies
 RUN pnpm prune --production
-
+ENV DATABASE_URL=""
 
 #==============================================================================
 # Runtime Stage - Minimal production image
@@ -127,7 +127,7 @@ EXPOSE 4000
 ENTRYPOINT ["/usr/bin/dumb-init", "--", "./scripts/docker-entrypoint.sh"]
 
 # Start application
-CMD ["node", "dist/app.js"]
+CMD ["node", "dist/src/app.js"]
 
 # Metadata labels
 LABEL maintainer="JRuvalcabaFSD <support@jrmdev.org>"

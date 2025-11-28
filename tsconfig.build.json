@@ -1,61 +1,13 @@
 {
+	"extends": "./tsconfig.json",
 	"compilerOptions": {
-		"target": "ES2022",
-		"module": "CommonJS",
-		"lib": ["ES2022"],
-		"strict": true,
-		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true,
-		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
 		"outDir": "./dist",
-		"rootDir": ".", // ← CAMBIO 1
-		"sourceMap": true,
 		"declaration": true,
 		"declarationMap": true,
 		"removeComments": true,
-		"noEmitOnError": true,
-		"resolveJsonModule": true,
-		"moduleResolution": "node",
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true,
-		"allowJs": true,
-		"checkJs": false,
 		"noEmit": false,
-
-		"baseUrl": ".",
-		"paths": {
-			"@/*": ["src/*"],
-			"@application": ["src/application/index.ts"],
-			"@config": ["src/config/index.ts"],
-			"@container": ["src/container/index.ts"],
-			"@domain": ["src/domain/index.ts"],
-			"@infrastructure": ["src/infrastructure/index.ts"],
-			"@interfaces": ["src/interfaces/index.ts"],
-			"@presentation": ["src/presentation/index.ts"],
-			"@shared": ["src/shared/index.ts"],
-			"generated/prisma/client": ["generated/prisma/client.ts"], // ← CLAVE
-			"generated/prisma/client/*": ["generated/prisma/*"]
-		},
-
-		"noImplicitAny": true,
-		"noImplicitReturns": true,
-		"noImplicitThis": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"exactOptionalPropertyTypes": true,
-		"types": ["node"]
+		"rootDir": "." // ← aquí SÍ puedes poner "." porque hereda paths e include bien configurados
 	},
-	"include": [
-		"src/**/*.ts",
-		"generated/prisma/**/*.ts" // ← CLAVE 2
-	],
-	"exclude": [
-		"tests",
-		"**/*.test.ts",
-		"**/*.spec.ts",
-		"node_modules",
-		"dist",
-		"coverage"
-	]
+	"include": ["src", "generated/prisma"],
+	"exclude": ["node_modules", "dist", "tests", "**/*.spec.ts", "**/*.test.ts"]
 }

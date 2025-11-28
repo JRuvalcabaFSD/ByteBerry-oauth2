@@ -5,3 +5,6 @@ onlyBuiltDependencies:
   - esbuild
   - prisma
   - unrs-resolver
+
+overrides:
+  tmp@<=0.2.3: '>=0.2.4'

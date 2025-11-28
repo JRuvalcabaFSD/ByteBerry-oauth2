@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { IDatabaBaseHealthChecker, IDatabaseHealthResponse, ILogger } from '@/interfaces';
 import { LogContextClass, LogContextMethod } from '@/shared';
 import { PrismaClient } from 'generated/prisma/client';
