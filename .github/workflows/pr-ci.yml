@@ -20,7 +20,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: "22.18.0"
+  NODE_VERSION: "22.22.1"
+  DATABASE_URL: "ignore"
 
 jobs:
   setup:
@@ -78,8 +79,6 @@ jobs:
         run: pnpm lint
 
       - name: Generate Prisma Client
-        env:
-          DATABASE_URL: ignore
         run: pnpm prisma generate
 
       - name: 📏 Check TypeScript types
@@ -118,8 +117,6 @@ jobs:
           key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Generate Prisma Client
-        env:
-          DATABASE_URL: ignore
         run: pnpm prisma generate
 
       - name: 🏗️ Build TypeScript
