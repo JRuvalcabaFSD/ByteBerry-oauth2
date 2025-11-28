@@ -54,10 +54,8 @@ RUN chmod +x /tmp/update-version.sh && /tmp/update-version.sh && rm /tmp/update-
 
 
 # Generate Prisma client
-RUN rm -rf generated
-
-RUN DATABASE_URL=postgresql://build:build@localhost:5432/build?schema=public \
-    pnpm prisma generate --schema=prisma/schema.prisma
+ENV DATABASE_URL=ignore
+RUN npx prisma generate
 # Build TypeScript
 RUN pnpm build
 
