@@ -77,6 +77,11 @@ jobs:
       - name: 🔍 Run ESLint
         run: pnpm lint
 
+      - name: Generate Prisma Client
+        env:
+          DATABASE_URL: ignore
+        run: pnpm prisma generate
+
       - name: 📏 Check TypeScript types
         run: pnpm type-check
 
