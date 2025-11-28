@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: "22.22.1"
+  NODE_VERSION: "22.21.1"
   DATABASE_URL: "ignore"
 
 jobs:
