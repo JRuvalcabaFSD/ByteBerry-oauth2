@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  NODE_VERSION: "22.22.1"
+  NODE_VERSION: "22.21.1"
   DATABASE_URL: "postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public"
 
 jobs:

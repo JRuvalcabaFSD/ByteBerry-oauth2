@@ -6,59 +6,6 @@ echo "📦 Version: ${APP_VERSION:-unknown}"
 echo "🌍 Environment: ${NODE_ENV:-development}"
 
 # ============================================
-# STEP 1: Wait for PostgreSQL to be ready
-# ============================================
-echo "⏳ Waiting for PostgreSQL..."
-
-if [ -n "$DATABASE_URL" ] && [ "$DATABASE_URL" != "ignore" ]; then
-  MAX_RETRIES=30
-  RETRY_COUNT=0
-
-  until node -e "
-    const { PrismaClient } = require('./node_modules/@prisma/client');
-    const prisma = new PrismaClient();
-    prisma.\$connect()
-      .then(() => { console.log('✅ PostgreSQL ready'); prisma.\$disconnect(); process.exit(0); })
-      .catch(() => process.exit(1));
-  " 2>/dev/null || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
-    RETRY_COUNT=$((RETRY_COUNT + 1))
-    echo "   PostgreSQL not ready yet (attempt $RETRY_COUNT/$MAX_RETRIES)..."
-    sleep 2
-  done
-
-  if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-    echo "❌ PostgreSQL connection timeout after $MAX_RETRIES attempts"
-    exit 1
-  fi
-
-  echo "✅ PostgreSQL is ready"
-else
-  echo "⏭️  Skipping PostgreSQL wait (DATABASE_URL not set or is 'ignore')"
-fi
-
-# ============================================
-# STEP 2: Run Database Migrations (Production only)
-# ============================================
-if [ "$NODE_ENV" = "production" ] || [ "$RUN_MIGRATIONS" = "true" ]; then
-  if [ -n "$DATABASE_URL" ] && [ "$DATABASE_URL" != "ignore" ]; then
-    echo "🔄 Running database migrations..."
-
-    npx prisma migrate deploy
-
-    if [ $? -eq 0 ]; then
-      echo "✅ Migrations completed successfully"
-    else
-      echo "❌ Migration failed"
-      exit 1
-    fi
-  else
-    echo "⚠️  Cannot run migrations: DATABASE_URL not set"
-  fi
-else
-  echo "⏭️  Skipping migrations (NODE_ENV=$NODE_ENV, RUN_MIGRATIONS=$RUN_MIGRATIONS)"
-fi
-
-# ============================================
 # STEP 3: JWT Key Management
 # ============================================
 echo "🔐 ByteBerry OAuth2 - JWT Key Management"
