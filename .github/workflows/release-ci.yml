@@ -70,7 +70,7 @@ jobs:
       - name: 📊 Run Prisma migrations
         run: |
           export NODE_ENV=test
-          export DATABASE_URL="ignore"
+          export DATABASE_URL="postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public"
           pnpm prisma migrate deploy --schema=./prisma/schema.prisma
           pnpm prisma generate
 
