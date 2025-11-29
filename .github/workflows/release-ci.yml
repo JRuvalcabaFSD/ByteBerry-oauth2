@@ -10,7 +10,7 @@ permissions:
   packages: write
 
 env:
-  NODE_VERSION: "22.18.0"
+  NODE_VERSION: "22.21.1"
   REGISTRY: docker.io
   IMAGE_NAME: jruvalcabafsd/byteberry-oauth2
 
@@ -84,7 +84,7 @@ jobs:
           pnpm lint
           pnpm audit
           pnpm build
-          pnpm test:unit
+          pnpm test
           pnpm test:integration
 
   docker:
