@@ -1,3 +1,40 @@
+# [1.3.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.2.0...v1.3.0) (2025-11-29)
+
+
+### Bug Fixes
+
+* actualizar comando de prueba unitaria en el flujo de trabajo de CI ([ac1a321](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/ac1a321069c481196ec1ab68c5c0c28971fde93d))
+* actualizar DATABASE_URL en el flujo de trabajo de CI para pruebas ([e9f9153](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/e9f915383f9dddf1f8736e115b682a7376e120e5))
+* actualizar DATABASE_URL en las migraciones de Prisma para usar la base de datos de prueba ([4f03fad](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/4f03fad3c12dbd1a3c52bb6c583f328dcab072d4))
+* actualizar flujo de trabajo de CI para usar Node.js 22.22.1 y mejorar la verificación de PostgreSQL ([4ef7460](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/4ef7460c9491298693c313d11581f9ab489c065d))
+* actualizar NODE_VERSION a 22.21.1 y modificar el comando de prueba en el flujo de trabajo de CI ([d76d0a0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/d76d0a01ba52e06949377ef98ea446549e486d84))
+* actualizar variable DATABASE_URL a 'ignore' en el flujo de trabajo de CI ([59f9260](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/59f9260e1b83ff77c700e5d0fb8d45cdac4aada5))
+* actualizar versión de Node.js y eliminar variable de entorno redundante en el flujo de trabajo de CI ([299166b](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/299166b31fc62ef31c96827b33d7c6751b1d9604))
+* corregir comillas en NODE_VERSION y caché de pnpm, y establecer DATABASE_URL a 'ignore' en las migraciones de Prisma ([acda192](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/acda192ab709b99468cc4217a550e575bde259df))
+* corregir error de sintaxis en el flujo de trabajo de CI para la planificación de la próxima versión ([93b6dbb](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/93b6dbbf10ff7ac60e050009263ad136168d92c4))
+* instalar openssl en la etapa de generación del cliente Prisma ([7959518](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/79595180e9c8fbd7646a20e6e140530540b80905))
+* **logger:** preserve sync/async behavior in LogContextMethod ([9d1de11](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/9d1de11d99ab1846fa8e689b1dfddafb615424d9))
+* **prisma:**  Prisma configuration and Dockerfile for environment variable handling ([4a5e958](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/4a5e9584b43724f57e5ed97925ce67672a22647a))
+* revert NODE_VERSION a 22.21.1 y eliminar pasos de espera y migración de PostgreSQL en el script de entrada ([9d2fe52](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/9d2fe52a0381a850216d4151616f56236aee6539))
+* revert Node.js version to 22.21.1 in CI workflow ([5283697](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/528369727e3c6a1db2ac65aac2495f909298fd1b))
+* **test:** fix text for code changes. ([2d9f56b](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/2d9f56b68a37aa7c2a0e876a17ad433ff57de8b6))
+* update entry point check in CI workflow to reflect new file path ([c523498](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/c523498cfba2375e824540ddbbc9c022c2c71dc3))
+
+
+### Features
+
+* add step to generate Prisma Client in CI workflow ([6df11b3](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/6df11b3794b768598bcba702658e7f69216d1f36))
+* add user and client management use cases and DTOs ([f4e6d37](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/f4e6d37a869f98dc44df54152a137d482400ede8)), closes [#T085](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/T085) [#33](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/33)
+* agregar pasos para subir artefactos de construcción y planificar la próxima versión en el flujo de trabajo de CI ([87096d5](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/87096d5ffc570db6e6a980b714fe421afb3149b1))
+* **database:** implement database integration and refactor authorization code management ([344ee38](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/344ee38736e2c3d3f4975d948accab0c6182065f)), closes [#30](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/30)
+* Implement database health checker service and interface ([19630bd](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/19630bd66f589f71594c1b828c664f1d2a83775c)), closes [#T087](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/T087) [#35](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/35)
+* integrate Prisma ORM and PostgreSQL for database management ([f54f423](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/f54f423b24ead6ba04f768325170fc2a77df1baa))
+* Refactor OAuth2 implementation with user and token management ([2ca7bb2](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/2ca7bb204493e6ea9dae65d7906772c1faa3e5ba)), closes [#T084](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/T084) [#32](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/32)
+* **shutdown:** add database disconnection during graceful shutdown ([333b150](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/333b1505f2e3c66a126ba3a12ada1262f9c0b939))
+* **tests:** implement integration tests for authorization code and user repositories ([4e06298](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/4e06298fc2525d6b098f07bb26fd47d2b33386d1)), closes [#T084](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/T084) [#34](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/issues/34)
+* update Dockerfile, package.json, and pnpm configurations; add prisma copy script and adjust entry point ([3f3548f](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/3f3548f5e12f15b18e26e1ef4d272d1808d1f46d))
+* update PR CI workflow to improve formatting and add Prisma client generation step ([ed63d55](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/commit/ed63d55c46e191f1f16941814c31891f5fe8e579))
+
 # [1.2.0](https://github.com/JRuvalcabaFSD/ByteBerry-oauth2/compare/v1.1.0...v1.2.0) (2025-11-16)
 
 
