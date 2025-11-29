@@ -202,7 +202,7 @@ jobs:
         run: |
           export NODE_ENV=test
           export CI=true
-          pnpm test:unit
+          pnpm test
 
       - name: 🧪 Run integration tests
         env:
