@@ -1,9 +1,15 @@
 #!/bin/sh
 set -e
 
+echo "🚀 ByteBerry OAuth2 Service Starting..."
+echo "📦 Version: ${APP_VERSION:-unknown}"
+echo "🌍 Environment: ${NODE_ENV:-development}"
+
+# ============================================
+# STEP 3: JWT Key Management
+# ============================================
 echo "🔐 ByteBerry OAuth2 - JWT Key Management"
 
-# Verificar entorno
 if [ "$NODE_ENV" = "production" ]; then
   echo "📦 Production mode detected"
 
@@ -15,7 +21,7 @@ if [ "$NODE_ENV" = "production" ]; then
   fi
 
   # Verificar permisos
-  if [ "$(stat -c '%a' /app/keys/private.pem)" != "600" ]; then
+  if [ "$(stat -c '%a' /app/keys/private.pem 2>/dev/null || stat -f '%Lp' /app/keys/private.pem 2>/dev/null)" != "600" ]; then
     echo "⚠️  WARNING: private.pem should have 600 permissions"
   fi
 
@@ -47,10 +53,10 @@ else
   export JWT_PUBLIC_KEY=$(cat /app/keys/public.pem | tr '\n' '|' | sed 's/|/\\n/g')
 fi
 
-# Imprimir información de inicio
-echo "🚀 Starting OAuth2 Service..."
-echo "   Version: ${APP_VERSION:-unknown}"
-echo "   Environment: ${NODE_ENV:-development}"
+# ============================================
+# STEP 4: Start Application
+# ============================================
+echo "🎉 Starting OAuth2 Service..."
 echo "   Port: ${PORT:-4000}"
 echo "   Key ID: ${JWT_KEY_ID:-default-key-1}"
 

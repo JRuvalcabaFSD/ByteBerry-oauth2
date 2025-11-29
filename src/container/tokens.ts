@@ -1,4 +1,6 @@
-import { GetJwksUseCase } from '@/application';
+import { PrismaClient } from './../../generated/prisma/client';
+import { AuthenticateUserUseCase, CreateUserUseCase, GetJwksUseCase, ValidateClientUseCase } from '@/application';
+import { DatabaseConfig } from '@/config/database.config';
 import { GracefulShutdown } from '@/infrastructure';
 import * as interfaces from '@/interfaces';
 import { AuthorizeController, JWksController, TokenController } from '@/presentation';
@@ -13,7 +15,6 @@ export type Token =
   | 'PkceVerifierService'
   | 'GracefulShutdown'
   | 'HttpServer'
-  | 'CodeStore'
   | 'GenerateAuthorizationCodeUseCase'
   | 'ExchangeCodeForTokenUseCase'
   | 'AuthorizeController'
@@ -23,7 +24,19 @@ export type Token =
   | 'KeyProvider'
   | 'JwtService'
   | 'JwksService'
-  | 'GetJwksUseCase';
+  | 'GetJwksUseCase'
+  | 'DatabaseConfig'
+  | 'DbClient'
+  | 'AuthorizationCodeRepository'
+  | 'AuthCodeMappers'
+  | 'UserMapper'
+  | 'UserRepository'
+  | 'OAuthClientRepository'
+  | 'TokenRepository'
+  | 'CreateUserUseCase'
+  | 'AuthenticateUserUseCase'
+  | 'ValidateClientUseCase'
+  | 'DatabaseHealthChecker';
 
 export interface ServiceMap {
   Config: interfaces.IConfig;
@@ -38,13 +51,24 @@ export interface ServiceMap {
   TokenController: TokenController;
   JwksController: JWksController;
   ExchangeCodeForTokenUseCase: interfaces.IExchangeCodeForTokenUseCase;
-  CodeStore: interfaces.ICodeStore;
   AuthorizeController: AuthorizeController;
   PkceVerifierService: interfaces.IPKceVerifierService;
   KeyProvider: interfaces.IKeyProvider;
   JwtService: interfaces.IJwtService;
   JwksService: interfaces.IJwksService;
   GetJwksUseCase: GetJwksUseCase;
+  DatabaseConfig: DatabaseConfig;
+  DbClient: PrismaClient;
+  AuthorizationCodeRepository: interfaces.IAuthorizationCodeRepository;
+  AuthCodeMappers: interfaces.IAuthCodeMappers;
+  UserMapper: interfaces.IUserMapper;
+  UserRepository: interfaces.IUserRepository;
+  OAuthClientRepository: interfaces.IOAuthClientRepository;
+  TokenRepository: interfaces.ITokenRepository;
+  CreateUserUseCase: CreateUserUseCase;
+  AuthenticateUserUseCase: AuthenticateUserUseCase;
+  ValidateClientUseCase: ValidateClientUseCase;
+  DatabaseHealthChecker: interfaces.IDatabaBaseHealthChecker;
 }
 
 export const criticalServices = [
@@ -56,7 +80,6 @@ export const criticalServices = [
   'PkceVerifierService',
   'GracefulShutdown',
   'HttpServer',
-  'CodeStore',
   'GenerateAuthorizationCodeUseCase',
   'ExchangeCodeForTokenUseCase',
   'HealthService',
@@ -67,4 +90,16 @@ export const criticalServices = [
   'JwtService',
   'JwksService',
   'GetJwksUseCase',
+  'DatabaseConfig',
+  'DbClient',
+  'AuthorizationCodeRepository',
+  'AuthCodeMappers',
+  'UserMapper',
+  'UserRepository',
+  'OAuthClientRepository',
+  'TokenRepository',
+  'CreateUserUseCase',
+  'AuthenticateUserUseCase',
+  'ValidateClientUseCase',
+  'DatabaseHealthChecker',
 ];

@@ -8,6 +8,7 @@ describe('AuthorizationCodeEntity', () => {
     const authCode = AuthorizationCodeEntity.create({
       code: 'test-code-123',
       clientId: mockClientId,
+      userId: 'test-user',
       redirectUri: 'https://example.com/callback',
       codeChallenge: mockCodeChallenge,
       expirationMinutes: 5,
@@ -15,17 +16,18 @@ describe('AuthorizationCodeEntity', () => {
       state: 'xyz',
     });
 
-    expect(authCode.getCode()).toBe('test-code-123');
-    expect(authCode.getClientId()).toBe(mockClientId);
-    expect(authCode.getRedirectUri()).toBe('https://example.com/callback');
-    expect(authCode.getScope()).toBe('read write');
-    expect(authCode.getState()).toBe('xyz');
+    expect(authCode.code).toBe('test-code-123');
+    expect(authCode.clientId).toBe(mockClientId);
+    expect(authCode.redirectUri).toBe('https://example.com/callback');
+    expect(authCode.scope).toBe('read write');
+    expect(authCode.state).toBe('xyz');
   });
 
   it('should return false when code not expired', () => {
     const authCode = AuthorizationCodeEntity.create({
       code: 'test-code',
       clientId: mockClientId,
+      userId: 'test-user',
       redirectUri: 'https://example.com/callback',
       codeChallenge: mockCodeChallenge,
       expirationMinutes: 5,
@@ -38,6 +40,7 @@ describe('AuthorizationCodeEntity', () => {
     const authCode = AuthorizationCodeEntity.create({
       code: 'test-code',
       clientId: mockClientId,
+      userId: 'test-user',
       redirectUri: 'https://example.com/callback',
       codeChallenge: mockCodeChallenge,
       expirationMinutes: -1, // Expired 1 minute ago
@@ -50,6 +53,7 @@ describe('AuthorizationCodeEntity', () => {
     const authCode = AuthorizationCodeEntity.create({
       code: 'test-code',
       clientId: mockClientId,
+      userId: 'test-user',
       redirectUri: 'https://example.com/callback',
       codeChallenge: mockCodeChallenge,
     });
@@ -63,11 +67,12 @@ describe('AuthorizationCodeEntity', () => {
     const authCode = AuthorizationCodeEntity.create({
       code: 'test-code',
       clientId: mockClientId,
+      userId: 'test-user',
       redirectUri: 'https://example.com/callback',
       codeChallenge: mockCodeChallenge,
     });
 
-    expect(authCode.getScope()).toBeUndefined();
-    expect(authCode.getState()).toBeUndefined();
+    expect(authCode.scope).toBeUndefined();
+    expect(authCode.scope).toBeUndefined();
   });
 });

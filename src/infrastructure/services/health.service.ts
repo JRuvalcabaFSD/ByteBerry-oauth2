@@ -31,6 +31,7 @@ export class HealthService implements Interfaces.IHealthService {
   private readonly uuid: Interfaces.IUuid;
   private readonly clock: Interfaces.IClock;
   private readonly logger: Interfaces.ILogger;
+  private readonly dbCheck: Interfaces.IDatabaBaseHealthChecker;
 
   /**
    * Creates an instance of the health controller.
@@ -50,6 +51,7 @@ export class HealthService implements Interfaces.IHealthService {
     this.uuid = this.container.resolve('Uuid');
     this.clock = this.container.resolve('Clock');
     this.logger = this.container.resolve('Logger');
+    this.dbCheck = this.container.resolve('DatabaseHealthChecker');
   }
 
   /**
@@ -128,6 +130,7 @@ export class HealthService implements Interfaces.IHealthService {
         status: response.status,
         responseTime: this.clock.timestamp() - startTime,
         dependenciesCount: Object.keys(response.dependencies).length,
+        databaseConnected: response.database?.connected ?? false,
       });
 
       const statusCode = response.status === 'healthy' ? 200 : response.status === 'degraded' ? 200 : 503;
@@ -175,6 +178,7 @@ export class HealthService implements Interfaces.IHealthService {
 
     if (type === 'deep') {
       response.dependencies = dependencies;
+      response.database = await this.checkDatabaseHealth();
       response.system = systemInfo;
       return response as Interfaces.IDeepHealthResponse;
     }
@@ -323,6 +327,54 @@ export class HealthService implements Interfaces.IHealthService {
       return 'unhealthy';
     } else {
       return 'degraded';
+    }
+  }
+
+  /**
+   * Checks the health status of the database by invoking the DataBaseHealthChecker service.
+   *
+   * This method returns a promise that resolves to an object containing information about the database connection,
+   * latency, and the availability of specific tables. If the health checker is not available or an error occurs,
+   * it returns a default response indicating the database is not connected and logs the error.
+   *
+   * @returns {Promise<Interfaces.IDatabaseHealthResponse>} A promise that resolves to the database health status.
+   */
+
+  private async checkDatabaseHealth(): Promise<Interfaces.IDatabaseHealthResponse> {
+    const defaultResponse: Interfaces.IDatabaseHealthResponse = {
+      connected: false,
+      latency: 0,
+      tables: {
+        users: false,
+        oAuthClients: false,
+        authCodes: false,
+        refreshTokens: false,
+      },
+    };
+
+    try {
+      if (!this.dbCheck) {
+        this.logger.warn('DataBaseHealthChecker not available in container');
+        return defaultResponse;
+      }
+
+      const healthStatus = await this.dbCheck.getHealthStatus();
+
+      this.logger.debug('Database health check completed via DataBaseHealthCheckerService', {
+        connected: healthStatus.connected,
+        latency: healthStatus.latency,
+      });
+
+      return healthStatus;
+    } catch (error) {
+      this.logger.error('Database health check failed', {
+        error: getErrMsg(error),
+      });
+
+      return {
+        ...defaultResponse,
+        error: getErrMsg(error),
+      };
     }
   }
 

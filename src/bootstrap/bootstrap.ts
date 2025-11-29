@@ -61,6 +61,7 @@ export async function bootstrap(): Promise<BootstrapResult> {
     const httpServer = container.resolve('HttpServer');
 
     await validateServices(container, logger);
+    await validateDbConnection(container, logger);
     await httpServer.start();
 
     return { container, shutdown };
@@ -103,7 +104,7 @@ export async function bootstrap(): Promise<BootstrapResult> {
  */
 
 async function validateServices(container: IContainer, logger: ILogger) {
-  const ctxLogger = withLoggerContext(logger, 'validateServices');
+  const ctxLogger = withLoggerContext(logger, 'bootstrap.validateServices');
 
   ctxLogger.info(`Validating ${criticalServices.length} critical services...`);
 
@@ -122,5 +123,25 @@ async function validateServices(container: IContainer, logger: ILogger) {
         originalError: getErrMsg(error),
       });
     }
+  }
+}
+
+/**
+ * Validates the database connection by attempting to test the connection using the provided container.
+ * Logs an error and throws a `BootstrapError` if the connection fails.
+ *
+ * @param container - The dependency injection container used to resolve the database configuration.
+ * @param logger - The logger instance used for logging context and errors.
+ * @throws {BootstrapError} If the database connection test fails.
+ */
+
+async function validateDbConnection(container: IContainer, logger: ILogger) {
+  const ctxLogger = withLoggerContext(logger, 'bootstrap.validateDbConnection');
+
+  try {
+    await container.resolve('DatabaseConfig').testConnection();
+  } catch (error) {
+    ctxLogger.error('Database connection failed', { error: getErrMsg(error) });
+    throw new BootstrapError('Database connection failed', { error: getErrMsg(error) });
   }
 }

@@ -97,6 +97,23 @@ const HANDLERS = new Map<string, ErrorHandler>([
       });
     },
   ],
+  [
+    'database',
+    (error, req, res, config) => {
+      const e = error as any;
+      const requestId = req.requestId || 'unknown';
+
+      // EN PRODUCCIÓN: nunca expongas detalles de DB
+      const message = config.isDevelopment() ? e.message : 'Internal server error';
+
+      res.status(e.statusCode || 500).json({
+        error: 'Database Error',
+        error_description: message,
+        requestId,
+        timestamp: new Date().toISOString(),
+      });
+    },
+  ],
 ]);
 
 /**

@@ -1,4 +1,4 @@
-import { createClockService, createNodeHashService, createUuidService } from '@/infrastructure';
+import { createAuthCodeMapper, createClockService, createNodeHashService, createUserMapper, createUuidService } from '@/infrastructure';
 import { Container, Token, criticalServices } from '@/container';
 import { ContainerCreationError } from '@/shared';
 import { IContainer } from '@/interfaces';
@@ -13,6 +13,7 @@ export function bootstrapContainer(): IContainer {
   registerOAuthServices(container);
   registerJwtServices(container);
   registerControllers(container);
+  registerDatabaseServices(container);
 
   validate(container, criticalServices);
 
@@ -35,7 +36,6 @@ function registerCoreServices(container: Container): void {
 }
 
 function registerOAuthServices(container: IContainer): void {
-  container.registerSingleton('CodeStore', factories.createCodeStore);
   container.register('PkceVerifierService', factories.createPkceVerifierService);
   container.register('KeyProvider', factories.createKeyProvider);
   container.register('JwtService', factories.createJwtService);
@@ -52,4 +52,19 @@ function registerControllers(container: Container): void {
   container.register('AuthorizeController', factories.createAuthorizeController);
   container.register('TokenController', factories.createTokenController);
   container.register('JwksController', factories.createJwksController);
+}
+
+function registerDatabaseServices(container: IContainer): void {
+  container.registerSingleton('DatabaseConfig', factories.createDatabaseConfig);
+  container.registerSingleton('DbClient', factories.createDbClient);
+  container.registerSingleton('AuthCodeMappers', createAuthCodeMapper);
+  container.registerSingleton('UserMapper', createUserMapper);
+  container.registerSingleton('AuthorizationCodeRepository', factories.createAuthorizationCodeRepository);
+  container.registerSingleton('OAuthClientRepository', factories.createOAuthClientRepository);
+  container.registerSingleton('TokenRepository', factories.createTokenRepository);
+  container.registerSingleton('UserRepository', factories.createUserRepository);
+  container.registerSingleton('CreateUserUseCase', factories.createCreateUserUseCase);
+  container.registerSingleton('AuthenticateUserUseCase', factories.createAuthenticateUserUseCase);
+  container.registerSingleton('ValidateClientUseCase', factories.createValidateClientUseCase);
+  container.registerSingleton('DatabaseHealthChecker', factories.createDatabaseHealthChecker);
 }

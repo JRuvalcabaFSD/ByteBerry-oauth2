@@ -1,7 +1,7 @@
 #==============================================================================
 # Dependencies Stage - Install deps without source code
 #==============================================================================
-FROM node:lts-slim AS deps
+FROM node:22-slim AS deps
 
 # Install build dependencies for native modules
 RUN apt-get update && apt-get install -y \
@@ -29,7 +29,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 #==============================================================================
 # Build Stage - TypeScript compilation with version injection
 #==============================================================================
-FROM node:lts-slim AS builder
+FROM node:22-slim AS builder
 
 # Accept version as build argument
 ARG VERSION
@@ -52,16 +52,22 @@ RUN corepack enable pnpm
 COPY scripts/update-version.sh /tmp/update-version.sh
 RUN chmod +x /tmp/update-version.sh && /tmp/update-version.sh && rm /tmp/update-version.sh
 
+
+# Generate Prisma client
+ENV DATABASE_URL=ignore
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+RUN npx prisma generate
 # Build TypeScript
 RUN pnpm build
 
 # Remove dev dependencies
 RUN pnpm prune --production
+ENV DATABASE_URL=""
 
 #==============================================================================
 # Runtime Stage - Minimal production image
 #==============================================================================
-FROM node:lts-slim AS runtime
+FROM node:22-slim AS runtime
 
 # Accept version for metadata
 ARG VERSION
@@ -122,7 +128,7 @@ EXPOSE 4000
 ENTRYPOINT ["/usr/bin/dumb-init", "--", "./scripts/docker-entrypoint.sh"]
 
 # Start application
-CMD ["node", "dist/app.js"]
+CMD ["node", "dist/src/app.js"]
 
 # Metadata labels
 LABEL maintainer="JRuvalcabaFSD <support@jrmdev.org>"
@@ -135,19 +141,3 @@ LABEL org.opencontainers.image.version="${APP_VERSION}"
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.source="https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2"
 LABEL org.opencontainers.image.documentation="https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2#readme"
-
-#==============================================================================
-# Usage Notes:
-#
-# Development (auto-generate keys):
-#   docker run -e NODE_ENV=development -p 4000:4000 byteberry-oauth2:latest
-#
-# Production (mount keys):
-#   docker run -e NODE_ENV=production \
-#              -v /path/to/keys:/app/keys:ro \
-#              -p 4000:4000 \
-#              byteberry-oauth2:latest
-#
-# OpenMediaVault (with Portainer):
-#   See: OMV_JWT_KEYS_SETUP.md
-#==============================================================================

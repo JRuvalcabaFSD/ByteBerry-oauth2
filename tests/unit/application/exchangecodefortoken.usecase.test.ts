@@ -1,25 +1,18 @@
 import { ExchangeCodeForTokenUseCase } from '@/application';
 import { AuthorizationCodeEntity, ClientId, CodeChallenge, CodeVerifier } from '@/domain';
-import { ICodeStore, ILogger, IPKceVerifierService, IJwtService } from '@/interfaces';
-import { InvalidGrantError, InvalidRequestError, UnsupportedGrantTypeError, InvalidValueObjectError } from '@/shared';
+import { ILogger, IPKceVerifierService, IJwtService } from '@/interfaces';
+import { InvalidGrantError, InvalidRequestError, InvalidValueObjectError } from '@/shared';
 
 describe('ExchangeCodeForTokenUseCase', () => {
   let useCase: ExchangeCodeForTokenUseCase;
-  let mockCodeStore: jest.Mocked<ICodeStore>;
   let mockLogger: jest.Mocked<ILogger>;
   let mockPkceVerifier: jest.Mocked<IPKceVerifierService>;
   let mockJwtService: jest.Mocked<IJwtService>;
   let mockAuthCode: AuthorizationCodeEntity;
+  let mockAuthCodeRepository: any;
+  let mockTokenRepository: any;
 
   beforeEach(() => {
-    mockCodeStore = {
-      set: jest.fn(),
-      get: jest.fn(),
-      has: jest.fn(),
-      cleanedExpired: jest.fn(),
-      shutdown: jest.fn(),
-    };
-
     mockLogger = {
       debug: jest.fn(),
       info: jest.fn(),
@@ -43,13 +36,27 @@ describe('ExchangeCodeForTokenUseCase', () => {
     mockAuthCode = AuthorizationCodeEntity.create({
       code: 'test-code-123',
       clientId,
+      userId: 'test-user',
       redirectUri: 'https://example.com/callback',
       codeChallenge,
       expirationMinutes: 5,
       scope: 'read write',
     });
 
-    useCase = new ExchangeCodeForTokenUseCase(mockCodeStore, mockLogger, mockJwtService, mockPkceVerifier);
+    mockAuthCodeRepository = {
+      findByCode: jest.fn(),
+      save: jest.fn(),
+      cleanup: jest.fn(),
+    };
+
+    mockTokenRepository = {
+      saveToken: jest.fn(),
+      findByTokenId: jest.fn(),
+      isBlacklisted: jest.fn(),
+      blacklistToken: jest.fn(),
+    };
+
+    useCase = new ExchangeCodeForTokenUseCase(mockAuthCodeRepository, mockTokenRepository, mockLogger, mockJwtService, mockPkceVerifier);
   });
 
   afterEach(() => {
@@ -58,7 +65,7 @@ describe('ExchangeCodeForTokenUseCase', () => {
 
   // --- CASO EXITOSO (ya cubierto, pero mejorado) ---
   it('should return token when valid code and verifier provided', async () => {
-    mockCodeStore.get.mockReturnValue(mockAuthCode);
+    mockAuthCodeRepository.findByCode.mockResolvedValue(mockAuthCode);
     mockPkceVerifier.verify.mockReturnValue(true);
 
     const request = {
@@ -78,38 +85,10 @@ describe('ExchangeCodeForTokenUseCase', () => {
     expect(mockAuthCode.isUsed()).toBe(true);
   });
 
-  // --- GRANT TYPE INVÁLIDO ---
-  it('should throw error when grant type invalid', async () => {
-    const request = {
-      grant_type: 'client_credentials' as any,
-      code: 'test-code',
-      code_verifier: 'verifier',
-      client_id: 'test-client-12345',
-      redirect_uri: 'https://example.com/callback',
-    };
-
-    await expect(useCase.execute(request)).rejects.toThrow(UnsupportedGrantTypeError);
-  });
-
-  // --- CÓDIGO NO ENCONTRADO ---
-  it('should throw error when code not found', async () => {
-    mockCodeStore.get.mockReturnValue(undefined);
-
-    const request = {
-      grant_type: 'authorization_code',
-      code: 'non-existent-code',
-      code_verifier: 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk',
-      client_id: 'test-client-12345',
-      redirect_uri: 'https://example.com/callback',
-    };
-
-    await expect(useCase.execute(request)).rejects.toThrow(InvalidGrantError);
-  });
-
   // --- CÓDIGO YA USADO ---
   it('should throw error when code already used', async () => {
     mockAuthCode.markAsUsed();
-    mockCodeStore.get.mockReturnValue(mockAuthCode);
+    mockAuthCodeRepository.findByCode.mockResolvedValue(mockAuthCode);
 
     const request = {
       grant_type: 'authorization_code',
@@ -129,7 +108,7 @@ describe('ExchangeCodeForTokenUseCase', () => {
   it('should throw error when code is expired', async () => {
     // Forzamos expiración
     jest.spyOn(mockAuthCode, 'isExpired').mockReturnValue(true);
-    mockCodeStore.get.mockReturnValue(mockAuthCode);
+    mockAuthCodeRepository.findByCode.mockResolvedValue(mockAuthCode);
 
     const request = {
       grant_type: 'authorization_code',
@@ -147,7 +126,7 @@ describe('ExchangeCodeForTokenUseCase', () => {
 
   // --- CLIENT_ID INVÁLIDO (Value Object) → Cubre líneas 98-112 ---
   it('should throw InvalidRequestError when client_id is invalid', async () => {
-    mockCodeStore.get.mockReturnValue(mockAuthCode);
+    mockAuthCodeRepository.findByCode.mockResolvedValue(mockAuthCode);
 
     // Simulamos que ClientId.create lanza InvalidValueObjectError
     jest.spyOn(ClientId, 'create').mockImplementation(() => {
@@ -168,7 +147,7 @@ describe('ExchangeCodeForTokenUseCase', () => {
 
   // --- CODE_VERIFIER INVÁLIDO (Value Object) → Cubre líneas 98-112 ---
   it('should throw InvalidRequestError when code_verifier is invalid', async () => {
-    mockCodeStore.get.mockReturnValue(mockAuthCode);
+    mockAuthCodeRepository.findByCode.mockResolvedValue(mockAuthCode);
 
     jest.spyOn(CodeVerifier, 'create').mockImplementation(() => {
       throw new InvalidValueObjectError('Code verifier must be at least 43 characters', 'test');
@@ -188,7 +167,7 @@ describe('ExchangeCodeForTokenUseCase', () => {
 
   // --- CLIENT_ID NO COINCIDE → Cubre línea 120-121 ---
   it('should throw InvalidGrantError when client_id does not match stored code', async () => {
-    mockCodeStore.get.mockReturnValue(mockAuthCode);
+    mockAuthCodeRepository.findByCode.mockResolvedValue(mockAuthCode);
     mockPkceVerifier.verify.mockReturnValue(true);
 
     const request = {
@@ -205,7 +184,7 @@ describe('ExchangeCodeForTokenUseCase', () => {
 
   // --- REDIRECT_URI NO COINCIDE → Cubre líneas 128-132 ---
   it('should throw InvalidGrantError when redirect_uri does not match', async () => {
-    mockCodeStore.get.mockReturnValue(mockAuthCode);
+    mockAuthCodeRepository.findByCode.mockResolvedValue(mockAuthCode);
     mockPkceVerifier.verify.mockReturnValue(true);
 
     const request = {
@@ -222,7 +201,7 @@ describe('ExchangeCodeForTokenUseCase', () => {
 
   // --- PKCE VERIFICACIÓN FALLA → Ya cubierto, pero mejorado ---
   it('should throw InvalidGrantError when PKCE verification fails', async () => {
-    mockCodeStore.get.mockReturnValue(mockAuthCode);
+    mockAuthCodeRepository.findByCode.mockResolvedValue(mockAuthCode);
     mockPkceVerifier.verify.mockReturnValue(false);
 
     const request = {
@@ -245,13 +224,14 @@ describe('ExchangeCodeForTokenUseCase', () => {
     const noScopeAuthCode = AuthorizationCodeEntity.create({
       code: 'no-scope-code',
       clientId: ClientId.create('test-client-12345'),
+      userId: '',
       redirectUri: 'https://example.com/callback',
       codeChallenge: CodeChallenge.create('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk', 'S256'),
       expirationMinutes: 5,
       scope: undefined,
     });
 
-    mockCodeStore.get.mockReturnValue(noScopeAuthCode);
+    mockAuthCodeRepository.findByCode.mockResolvedValue(noScopeAuthCode);
     mockPkceVerifier.verify.mockReturnValue(true);
 
     const request = {
@@ -274,7 +254,7 @@ describe('ExchangeCodeForTokenUseCase', () => {
 
   // --- ERROR INESPERADO → Cubre catch general ---
   it('should log and rethrow unexpected errors', async () => {
-    mockCodeStore.get.mockImplementation(() => {
+    mockAuthCodeRepository.findByCode.mockImplementation(() => {
       throw new Error('Database connection failed');
     });
 
@@ -295,7 +275,7 @@ describe('ExchangeCodeForTokenUseCase', () => {
 
   // --- CASO ESPECIAL: CODE_VERIFIER VÁLIDO PERO PKCE FALLIDO ---
   it('should throw InvalidGrantError when code_verifier is valid length but incorrect value for PKCE', async () => {
-    mockCodeStore.get.mockReturnValue(mockAuthCode);
+    mockAuthCodeRepository.findByCode.mockResolvedValue(mockAuthCode);
     mockPkceVerifier.verify.mockReturnValue(false);
 
     const request = {

@@ -20,6 +20,7 @@ const createMockConfig = (overrides: Partial<IConfig> = {}): IConfig => ({
   isProduction: () => false,
   isTest: () => true,
   getSummary: () => ({}),
+  databaseUrl: '',
   ...overrides,
 });
 

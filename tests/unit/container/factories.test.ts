@@ -4,7 +4,6 @@ import {
   createGracefulShutdown,
   createHttpServer,
   createHealthService,
-  createCodeStore,
   createGenerateAuthorizationCodeUseCase,
   createExchangeCodeForTokenUseCase,
   createAuthorizeController,
@@ -82,47 +81,56 @@ describe('Factories', () => {
     });
   });
 
-  describe('createCodeStore', () => {
-    it('should create InMemoryCodeStore with Logger', () => {
-      const mockLogger = { debug: jest.fn() };
-      mockResolve.mockReturnValue(mockLogger);
-
-      const result = createCodeStore(mockContainer);
-
-      expect(infrastructure.InMemoryCodeStore).toHaveBeenCalledWith(mockLogger);
-      expect(result).toBeInstanceOf(infrastructure.InMemoryCodeStore);
-    });
-  });
-
   describe('createGenerateAuthorizationCodeUseCase', () => {
     it('should create GenerateAuthorizationCodeUseCase with CodeStore and Logger', () => {
-      const mockCodeStore = { save: jest.fn() };
+      const mockAuthorizationCodeRepository = { execute: jest.fn() };
+      const mockValidateClientUseCase = { execute: jest.fn() };
       const mockLogger = { info: jest.fn() };
-      mockResolve.mockReturnValueOnce(mockCodeStore).mockReturnValueOnce(mockLogger);
+      mockResolve
+        .mockReturnValueOnce(mockAuthorizationCodeRepository)
+        .mockReturnValueOnce(mockValidateClientUseCase)
+        .mockReturnValueOnce(mockLogger);
 
       const result = createGenerateAuthorizationCodeUseCase(mockContainer);
 
-      expect(application.GenerateAuthorizationCodeUseCase).toHaveBeenCalledWith(mockCodeStore, mockLogger);
+      expect(application.GenerateAuthorizationCodeUseCase).toHaveBeenCalledWith(
+        mockAuthorizationCodeRepository,
+        mockValidateClientUseCase,
+        mockLogger
+      );
       expect(result).toBeInstanceOf(application.GenerateAuthorizationCodeUseCase);
     });
   });
 
   describe('createExchangeCodeForTokenUseCase', () => {
     it('should create ExchangeCodeForTokenUseCase with all dependencies', () => {
-      const mockCodeStore = { get: jest.fn() };
+      const mockAuthorizationCodeRepository = { save: jest.fn(), findByCode: jest.fn(), cleanup: jest.fn() };
+      const mockTokenCodeRepository = {
+        saveToken: jest.fn(),
+        findByTokenId: jest.fn(),
+        isBlacklisted: jest.fn(),
+        blacklistToken: jest.fn(),
+      };
       const mockLogger = { error: jest.fn() };
       const mockJwtService = { sign: jest.fn() };
       const mockPkceVerifier = { verify: jest.fn() };
 
       mockResolve
-        .mockReturnValueOnce(mockCodeStore)
+        .mockReturnValueOnce(mockAuthorizationCodeRepository)
+        .mockReturnValueOnce(mockTokenCodeRepository)
         .mockReturnValueOnce(mockLogger)
         .mockReturnValueOnce(mockJwtService)
         .mockReturnValueOnce(mockPkceVerifier);
 
       const result = createExchangeCodeForTokenUseCase(mockContainer);
 
-      expect(application.ExchangeCodeForTokenUseCase).toHaveBeenCalledWith(mockCodeStore, mockLogger, mockJwtService, mockPkceVerifier);
+      expect(application.ExchangeCodeForTokenUseCase).toHaveBeenCalledWith(
+        mockAuthorizationCodeRepository,
+        mockTokenCodeRepository,
+        mockLogger,
+        mockJwtService,
+        mockPkceVerifier
+      );
       expect(result).toBeInstanceOf(application.ExchangeCodeForTokenUseCase);
     });
   });

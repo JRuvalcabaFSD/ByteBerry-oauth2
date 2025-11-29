@@ -292,8 +292,6 @@ export function LogContextMethod(): MethodDecorator {
       throw new Error('LogContextMethod solo puede aplicarse a métodos');
     }
 
-    // Capturamos un nombre *estático* fiable en el momento de aplicar el decorador.
-    // target puede ser el prototype (para métodos de instancia) o el constructor (para estáticos).
     const staticClassName =
       (typeof target === 'function' && (target as any).name) ||
       (target && (target as any).constructor && (target as any).constructor.name) ||
@@ -301,8 +299,9 @@ export function LogContextMethod(): MethodDecorator {
 
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
-      // Preferimos el nombre en tiempo de ejecución si está disponible y es útil.
+    // CRÍTICO: NO hacer async siempre - preservar sync/async del método original
+    descriptor.value = function (...args: any[]) {
+      // ← SIN async!
       const runtimeName =
         this && this.constructor && this.constructor.name && this.constructor.name !== 'Function' ? this.constructor.name : undefined;
 
@@ -312,13 +311,13 @@ export function LogContextMethod(): MethodDecorator {
       const replaced: Array<{ key: string | symbol; original: any }> = [];
 
       try {
+        // Wrap loggers
         for (const key of Object.keys(self || {})) {
           const prop = self[key];
           if (!isLoggerLike(prop)) continue;
 
           const originalTarget = getOriginalLogger(prop as ILogger);
 
-          // Si ya tiene exactamente el contexto que queremos, saltar
           if ((prop as any)[WRAPPED_FLAG] && (prop as any)[WRAPPED_FLAG] === ctx) continue;
 
           const methodProxy = withLoggerContext(originalTarget, ctx);
@@ -327,19 +326,30 @@ export function LogContextMethod(): MethodDecorator {
           self[key] = methodProxy;
         }
 
-        // Handle both sync and async methods
+        // CRÍTICO: Llamar método original sin await si es sync
         const result = originalMethod.apply(this, args);
 
-        // If the result is a Promise, wait for it
+        // Solo si es async, entonces manejarlo como Promise
         if (result && typeof result.then === 'function') {
-          return await result;
+          // Es async - retornar Promise que restaura en finally
+          return result.finally(() => {
+            for (const r of replaced) {
+              self[r.key] = r.original;
+            }
+          });
         }
 
-        return result;
-      } finally {
+        // Es sync - restaurar inmediatamente y retornar
         for (const r of replaced) {
           self[r.key] = r.original;
         }
+        return result;
+      } catch (error) {
+        // Error sync - restaurar y re-lanzar
+        for (const r of replaced) {
+          self[r.key] = r.original;
+        }
+        throw error; // ← Re-lanza el error original
       }
     };
 

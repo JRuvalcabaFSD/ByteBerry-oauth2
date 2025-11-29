@@ -21,6 +21,22 @@ jobs:
     outputs:
       should-release: ${{ steps.check.outputs.should-release }}
       next-version: ${{ steps.plan.outputs.next-version }}
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: oauth2_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U test_user -d oauth2_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -46,7 +62,20 @@ jobs:
           path: node_modules
           key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - name: 🔍 Run full validation
+      - name: 🔧 Setup test environment
+        run: |
+          cp .env.test.example .env.test
+          echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public" >> .env.test
+
+      - name: 📊 Run Prisma migrations
+        run: |
+          export NODE_ENV=test
+          pnpm prisma migrate deploy --schema=./prisma/schema.prisma
+          pnpm prisma generate
+
+      - name: 📝 Run full validation
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public
         run: |
           export NODE_ENV=test
           export CI=true
@@ -54,51 +83,8 @@ jobs:
           pnpm lint
           pnpm audit
           pnpm build
-          pnpm test:coverage
-
-      - name: 📦 Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts-release
-          path: dist/
-          retention-days: 1
-
-      - name: 🔍 Check if should release
-        id: check
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "should-release=true" >> $GITHUB_OUTPUT
-            echo "✅ Manual release triggered"
-          else
-            COMMITS=$(git log --format="%s" HEAD~1..HEAD)
-            if echo "$COMMITS" | grep -E "^(feat|fix|BREAKING CHANGE)"; then
-              echo "should-release=true" >> $GITHUB_OUTPUT
-              echo "✅ Found releasable commits"
-            else
-              echo "should-release=false" >> $GITHUB_OUTPUT
-              echo "⏭️ No releasable commits found"
-            fi
-          fi
-
-      - name: 🧮 Plan next version (semantic-release dry-run)
-        id: plan
-        if: steps.check.outputs.should-release == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "🔍 Running semantic-release in dry-run mode..."
-          pnpm dlx semantic-release --dry-run --no-ci > sr-dry-run.log 2>&1 || true
-
-          # Extraer la versión planeada
-          NEXT=$(grep -Eo "next release version is [0-9]+\.[0-9]+\.[0-9]+" sr-dry-run.log | awk '{print $NF}' | tail -n1)
-
-          if [ -z "$NEXT" ]; then
-            echo "⚠️ No new version planned by semantic-release"
-            echo "next-version=" >> $GITHUB_OUTPUT
-          else
-            echo "next-version=$NEXT" >> $GITHUB_OUTPUT
-            echo "📋 Planned next version: $NEXT"
-          fi
+          pnpm test:unit
+          pnpm test:integration
 
   docker:
     name: 🐳 Build & Push Docker

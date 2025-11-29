@@ -43,6 +43,9 @@ export interface IConfig {
   readonly oauth2Issuer: string;
   readonly tokenExpiresIn: number;
 
+  //Database
+  readonly databaseUrl: string;
+
   isDevelopment(): boolean;
   isProduction(): boolean;
   isTest(): boolean;

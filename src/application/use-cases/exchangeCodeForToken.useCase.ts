@@ -6,9 +6,17 @@ import {
   LogContextMethod,
   UnsupportedGrantTypeError,
 } from '@/shared';
-import { ICodeStore, IExchangeCodeForTokenUseCase, IJwtService, ILogger, IPKceVerifierService } from '@/interfaces';
+import {
+  IAuthorizationCodeRepository,
+  IExchangeCodeForTokenUseCase,
+  IJwtService,
+  ILogger,
+  IPKceVerifierService,
+  ITokenRepository,
+} from '@/interfaces';
 import { TokenRequestDto, TokenResponseDto } from '@/application';
-import { ClientId, CodeVerifier } from '@/domain';
+import { ClientId, CodeVerifier, TokenEntity } from '@/domain';
+import { randomBytes } from 'crypto';
 
 /**
  * Use case for exchanging an authorization code for an access token.
@@ -52,14 +60,18 @@ import { ClientId, CodeVerifier } from '@/domain';
 @LogContextClass()
 export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase {
   /**
-   * Creates an instance of the use case for exchanging authorization codes for tokens.
+   * Constructs an instance of the use case for exchanging an authorization code for a token.
    *
-   * @param codeStore - The code store implementation for managing authorization codes
-   * @param logger - The logger implementation for logging operations and errors
-   * @param pkceVerifier - The PKCE verifier service for validating code challenges
+   * @param repository - The repository responsible for managing authorization codes.
+   * @param tokenRepository - The repository responsible for managing tokens.
+   * @param logger - The logger service for logging operations and errors.
+   * @param jwtService - The service for handling JWT creation and validation.
+   * @param pkceVerifier - The service for verifying PKCE (Proof Key for Code Exchange) challenges.
    */
+
   constructor(
-    private readonly codeStore: ICodeStore,
+    private readonly repository: IAuthorizationCodeRepository,
+    private readonly tokenRepository: ITokenRepository,
     private readonly logger: ILogger,
     private readonly jwtService: IJwtService,
     private pkceVerifier: IPKceVerifierService
@@ -86,7 +98,7 @@ export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase
         throw new UnsupportedGrantTypeError('Only authorization_code grant type is supported');
       if (!request.code || !request.code_verifier) throw new InvalidRequestError('code and code_verifier are required');
 
-      const authCode = this.codeStore.get(request.code);
+      const authCode = await this.repository.findByCode(request.code);
       if (!authCode) throw new InvalidGrantError('Authorization code not found');
 
       if (authCode.isUsed()) {
@@ -120,10 +132,10 @@ export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase
         throw error;
       }
 
-      if (!authCode.getClientId().equals(clientId)) throw new InvalidGrantError('Client ID mismatch');
-      if (authCode.getRedirectUri() !== request.redirect_uri) throw new InvalidGrantError('Redirect URI mismatch');
+      if (!authCode.clientId.equals(clientId)) throw new InvalidGrantError('Client ID mismatch');
+      if (authCode.redirectUri !== request.redirect_uri) throw new InvalidGrantError('Redirect URI mismatch');
 
-      const isValid = this.pkceVerifier.verify(authCode.getCodeChallenge(), codeVerifier.getValue());
+      const isValid = this.pkceVerifier.verify(authCode.codeChallenge, codeVerifier.getValue());
       if (!isValid) {
         this.logger.warn('Invalid PKCE code_verifier', {
           client_id: request.client_id,
@@ -131,19 +143,29 @@ export class ExchangeCodeForTokenUseCase implements IExchangeCodeForTokenUseCase
         throw new InvalidGrantError('Invalid code_verifier');
       }
       authCode.markAsUsed();
+      await this.repository.save(authCode);
 
       const accessToken = this.jwtService.generateAccessToken({
         sub: clientId.getValue(),
-        scope: authCode.getScope(),
+        scope: authCode.scope,
         client_id: clientId.getValue(),
       });
 
-      this.logger.info('Access token issued successfully', {
-        client_id: request.client_id,
-        has_scope: !!authCode.getScope(),
+      const tokenEntity = TokenEntity.create({
+        tokenId: 'jti-' + randomBytes(16).toString('hex'),
+        userId: authCode.userId || 'system',
+        clientId: clientId.getValue(),
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
       });
 
-      const scope = authCode.getScope();
+      await this.tokenRepository.saveToken(tokenEntity);
+
+      this.logger.debug('Token issued and audited', {
+        client_id: request.client_id,
+        has_scope: !!authCode.scope,
+      });
+
+      const scope = authCode.scope;
       return { access_token: accessToken, token_type: 'Bearer', expires_in: 900, ...(scope && { scope }) };
     } catch (error) {
       if (error instanceof InvalidRequestError || error instanceof InvalidGrantError || error instanceof UnsupportedGrantTypeError) {

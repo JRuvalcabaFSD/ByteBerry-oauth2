@@ -1,53 +1,13 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "CommonJS",
-    "lib": ["ES2022"],
-    "strict": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "removeComments": true,
-    "noEmitOnError": true,
-    "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "allowJs": true,
-    "checkJs": false,
-    "noEmit": false,
-
-    // Path mapping for cleaner imports
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["./*"],
-      "@application": ["./application/index.ts"],
-      "@config": ["./config/index.ts"],
-      "@container": ["./container/index.ts"],
-      "@domain": ["./domain/index.ts"],
-      "@infrastructure": ["./infrastructure/index.ts"],
-      "@interfaces": ["./interfaces/index.ts"],
-      "@presentation": ["./presentation/index.ts"],
-      "@shared": ["./shared/index.ts"]
-    },
-
-    // Additional strict checks
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "exactOptionalPropertyTypes": true,
-
-    // Only node types for build
-    "types": ["node"]
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["tests", "**/*.test.ts", "**/*.spec.ts", "node_modules", "dist", "coverage"]
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"outDir": "./dist",
+		"declaration": true,
+		"declarationMap": true,
+		"removeComments": true,
+		"noEmit": false,
+		"rootDir": "." // ← aquí SÍ puedes poner "." porque hereda paths e include bien configurados
+	},
+	"include": ["src", "generated/prisma"],
+	"exclude": ["node_modules", "dist", "tests", "**/*.spec.ts", "**/*.test.ts"]
 }
