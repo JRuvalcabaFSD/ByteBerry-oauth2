@@ -337,6 +337,7 @@ jobs:
             -e NODE_ENV=test \
             -e PORT=4000 \
             -e LOG_LEVEL=info \
+            -e DATABASE_URL=ignore \
             byteberry-oauth2:pr-${{ github.event.pull_request.number }}
 
           echo "⏳ Waiting for service to start..."
