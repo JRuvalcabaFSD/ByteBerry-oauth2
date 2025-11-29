@@ -7,7 +7,8 @@ on:
     branches: [main]
 
 env:
-  NODE_VERSION: '22.18.0'
+  NODE_VERSION: "22.22.1"
+  DATABASE_URL: "postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public"
 
 jobs:
   docs:
@@ -30,7 +31,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile
@@ -40,6 +41,9 @@ jobs:
         with:
           path: node_modules
           key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Generate Prisma Client
+        run: pnpm prisma generate
 
       - name: 🏗️ Generate documentation
         run: pnpm run docs:ci

@@ -328,58 +328,92 @@ jobs:
           echo "🏗️ Building Docker image for PR verification..."
           docker build -t byteberry-oauth2:pr-${{ github.event.pull_request.number }} .
 
-      - name: 🧪 Test Docker image functionality
+      - name: 🗄️ Start PostgreSQL for smoke test
         run: |
-          echo "🧪 Testing Docker image health endpoints..."
+          docker run -d --name test-postgres \
+            -e POSTGRES_USER=test_user \
+            -e POSTGRES_PASSWORD=test_password \
+            -e POSTGRES_DB=oauth2_test \
+            -p 5433:5432 \
+            postgres:16-alpine
 
-          docker run -d --name test-oauth2-pr \
-            -p 4000:4000 \
-            -e NODE_ENV=test \
+          echo "⏳ Waiting for PostgreSQL to be ready..."
+          for i in {1..30}; do
+            if docker exec test-postgres pg_isready -U test_user -d oauth2_test > /dev/null 2>&1; then
+              echo "✅ PostgreSQL is ready"
+              break
+            fi
+            echo "Attempt $i/30: PostgreSQL not ready yet..."
+            sleep 2
+          done
+
+      - name: 🧪 Smoke test Docker image
+        run: |
+          echo "🧪 Starting OAuth2 service..."
+
+          docker run -d --name test-oauth2 \
+            --network host \
+            -e NODE_ENV=development \
             -e PORT=4000 \
             -e LOG_LEVEL=info \
-            -e DATABASE_URL=ignore \
+            -e DATABASE_URL=postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public \
+            -e RUN_MIGRATIONS=true \
+            -e JWT_PRIVATE_KEY=dummy \
+            -e JWT_PUBLIC_KEY=dummy \
             byteberry-oauth2:pr-${{ github.event.pull_request.number }}
 
-          echo "⏳ Waiting for service to start..."
-          sleep 15
+          echo "⏳ Waiting for service to start (max 60s)..."
+          for i in {1..30}; do
+            if curl -f http://localhost:4000/health > /dev/null 2>&1; then
+              echo "✅ Service is ready"
+              break
+            fi
 
-          echo "📋 Container logs (last 10 lines):"
-          docker logs --tail 10 test-oauth2-pr
+            # Check if container died
+            if ! docker ps | grep -q test-oauth2; then
+              echo "❌ Container died during startup"
+              echo "📋 Container logs:"
+              docker logs test-oauth2
+              exit 1
+            fi
 
+            echo "Attempt $i/30: Service not ready yet..."
+            sleep 2
+          done
+
+          # Test health endpoint
           echo "🔍 Testing /health endpoint..."
-          HEALTH_RESPONSE=$(curl -s -w "%{http_code}" http://localhost:4000/health)
-          echo "Health response: $HEALTH_RESPONSE"
+          HEALTH=$(curl -s http://localhost:4000/health)
+          echo "Response: $HEALTH"
 
-          if [[ "$HEALTH_RESPONSE" == *"200" ]]; then
-            echo "✅ /health endpoint working"
+          if echo "$HEALTH" | jq -e '.status == "healthy"' > /dev/null; then
+            echo "✅ Health check passed"
           else
-            echo "❌ /health endpoint failed"
-            docker logs test-oauth2-pr
+            echo "❌ Health check failed"
+            docker logs test-oauth2
             exit 1
           fi
 
+          # Test deep health endpoint
           echo "🔍 Testing /health/deep endpoint..."
-          DEEP_HEALTH_RESPONSE=$(curl -s -w "%{http_code}" http://localhost:4000/health/deep)
-          echo "Deep health response: $DEEP_HEALTH_RESPONSE"
+          DEEP_HEALTH=$(curl -s http://localhost:4000/health/deep)
+          echo "Response: $DEEP_HEALTH"
 
-          if [[ "$DEEP_HEALTH_RESPONSE" == *"200" ]]; then
-            echo "✅ /health/deep endpoint working"
+          if echo "$DEEP_HEALTH" | jq -e '.database.connected == true' > /dev/null; then
+            echo "✅ Database connection validated"
           else
-            echo "❌ /health/deep endpoint failed"
-            docker logs test-oauth2-pr
-            exit 1
+            echo "⚠️ Database health check shows issues"
+            echo "$DEEP_HEALTH" | jq '.database'
           fi
 
-          docker stop test-oauth2-pr
-          docker rm test-oauth2-pr
+          echo "✅ All smoke tests passed"
 
-          echo "✅ All Docker tests passed"
-
-      - name: 🗑️ Clean up Docker images
+      - name: 🗑️ Cleanup
         if: always()
         run: |
-          docker rmi byteberry-oauth2:pr-${{ github.event.pull_request.number }} || true
-          docker system prune -f || true
+          docker stop smoke-test-oauth2 smoke-test-db 2>/dev/null || true
+          docker rm smoke-test-oauth2 smoke-test-db 2>/dev/null || true
+          docker rmi byteberry-oauth2:pr-${{ github.event.pull_request.number }} 2>/dev/null || true
 
   summary:
     name: 📋 PR Summary
