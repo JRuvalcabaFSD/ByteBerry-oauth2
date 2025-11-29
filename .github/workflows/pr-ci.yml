@@ -21,7 +21,7 @@ concurrency:
 
 env:
   NODE_VERSION: "22.21.1"
-  DATABASE_URL: "ignore"
+  DATABASE_URL: "postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public"
 
 jobs:
   setup:
@@ -186,6 +186,7 @@ jobs:
           path: dist/
 
       - name: 🔧 Setup test environment
+
         run: |
           cp .env.test.example .env.test
           # Override DATABASE_URL for CI
