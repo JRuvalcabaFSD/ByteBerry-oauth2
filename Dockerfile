@@ -55,6 +55,7 @@ RUN chmod +x /tmp/update-version.sh && /tmp/update-version.sh && rm /tmp/update-
 
 # Generate Prisma client
 ENV DATABASE_URL=ignore
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 RUN npx prisma generate
 # Build TypeScript
 RUN pnpm build
