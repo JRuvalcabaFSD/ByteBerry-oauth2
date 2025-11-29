@@ -10,7 +10,7 @@ permissions:
   packages: write
 
 env:
-  NODE_VERSION: '22.18.0'
+  NODE_VERSION: "22.18.0"
   REGISTRY: docker.io
   IMAGE_NAME: jruvalcabafsd/byteberry-oauth2
 
@@ -51,7 +51,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile
@@ -70,6 +70,7 @@ jobs:
       - name: 📊 Run Prisma migrations
         run: |
           export NODE_ENV=test
+          export DATABASE_URL="ignore"
           pnpm prisma migrate deploy --schema=./prisma/schema.prisma
           pnpm prisma generate
 
@@ -219,7 +220,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile
