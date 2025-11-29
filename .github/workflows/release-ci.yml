@@ -128,6 +128,7 @@ jobs:
           else
             echo "next-version=$NEXT" >> $GITHUB_OUTPUT
             echo "📋 Planned next version: $NEXT"
+          fi
 
   docker:
     name: 🐳 Build & Push Docker
