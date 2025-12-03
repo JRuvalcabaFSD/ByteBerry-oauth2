@@ -1,0 +1,10 @@
+{
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"typescript.preferences.useAliasesForWorkspaceTsdk": true,
+	"typescript.suggest.paths.enabled": true,
+	"typescript.preferences.includePackageJsonAutoImports": "auto",
+	"files.exclude": {
+		"dist": true,
+		"**/node_modules": true
+	}
+}

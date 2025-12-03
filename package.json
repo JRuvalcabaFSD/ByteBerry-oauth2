@@ -1,0 +1,45 @@
+{
+	"name": "oauth2-server",
+	"version": "0.0.0",
+	"description": "Servidor OAuth2 con Authorization Code + PKCE, JWT RS256, refresh tokens y JWKS",
+	"main": "dist/app.js",
+	"type": "module",
+	"engines": {
+		"node": ">=20.21.1",
+		"npm": ">=10.20.0"
+	},
+	"scripts": {
+		"dev": "tsx src/app.ts",
+		"build": "tsc && tsc-alias",
+		"start": "node dist/app.js",
+		"clean": "rm -rf dist",
+		"test": "vitest",
+		"test:watch": "vitest --watch",
+		"test:ui": "vitest --ui"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.20.0",
+	"devDependencies": {
+		"@eslint/js": "^9.39.1",
+		"@eslint/json": "^0.14.0",
+		"@eslint/markdown": "^7.5.1",
+		"@types/node": "^24.10.1",
+		"@vitest/coverage-v8": "^4.0.15",
+		"@vitest/ui": "^4.0.15",
+		"eslint": "^9.39.1",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-prettier": "^5.5.4",
+		"globals": "^16.5.0",
+		"jiti": "^2.6.1",
+		"prettier": "^3.7.3",
+		"ts-node": "^10.9.2",
+		"tsc-alias": "^1.8.16",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.48.1",
+		"vite-tsconfig-paths": "^5.1.4",
+		"vitest": "^4.0.15"
+	}
+}
