@@ -43,6 +43,7 @@ export interface IConfig {
 	readonly nodeEnv: NodeEnv;
 	readonly port: number;
 	readonly version: string;
+	readonly serviceName: string;
 	readonly logLevel: LogLevel;
 	readonly logRequests: boolean;
 	readonly jwtIssuer: string;

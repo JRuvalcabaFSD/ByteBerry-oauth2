@@ -1,4 +1,4 @@
-import { Container, createConfig, criticalServices, Token } from '@container';
+import { Container, createClockService, createConfig, createWintonLoggerService, criticalServices, Token } from '@container';
 import { IContainer } from '@interfaces';
 import { ContainerCreationError } from '@shared';
 
@@ -8,14 +8,16 @@ export function bootstrapContainer(): IContainer {
 
 	registerCoreServices(container);
 
-	validate(container, criticalServices());
+	validate(container, criticalServices);
 
 	return container;
 }
 
 //TODO documentar
 function registerCoreServices(c: IContainer): void {
-	c.register('Config', createConfig);
+	c.registerSingleton('Config', createConfig);
+	c.registerSingleton('Clock', createClockService);
+	c.registerSingleton('Logger', createWintonLoggerService);
 }
 
 /**
@@ -32,7 +34,7 @@ function registerCoreServices(c: IContainer): void {
  */
 
 function validate(container: IContainer, services: string[]): void {
-	Object.values(services).forEach((token) => {
+	services.forEach((token) => {
 		if (!container.isRegistered(token as Token)) throw new ContainerCreationError(token as Token);
 	});
 }

@@ -27,7 +27,9 @@
 		"sourceMap": true,
 		"noEmitOnError": false,
 		"isolatedModules": true,
-		"noEmit": false
+		"noEmit": false,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true
 	},
 	"include": ["src", "tests", "test/vitest-globals.d.ts"],
 	"exclude": ["node_modules", "dist"]

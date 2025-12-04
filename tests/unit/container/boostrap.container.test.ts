@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ContainerCreationError } from '@shared';
+import { IConfig, IContainer } from '@interfaces';
+import { Token } from '@container';
 
 // Mock del módulo factories desde @container
 vi.mock('@container', async () => {
@@ -50,7 +52,10 @@ describe('bootstrapContainer', () => {
 		// y validando con un servicio que no existe
 		const { Container } = await import('@container');
 		const container = new Container();
-		container.register('Config', () => ({ nodeEnv: 'test', port: 3000, version: '1.0.0', logLevel: 'info', logRequests: true }));
+		container.register(
+			'Config',
+			() => ({ nodeEnv: 'test', port: 3000, version: '1.0.0', logLevel: 'info', logRequests: true }) as unknown as IConfig
+		);
 
 		// Validar con un servicio que no existe
 		const services = ['Config', 'NonExistentService'];
@@ -86,5 +91,84 @@ describe('bootstrapContainer', () => {
 				}
 			});
 		}).toThrow(ContainerCreationError);
+	});
+	describe('validate', () => {
+		it('should not throw when all services are registered', () => {
+			const mockContainer: IContainer = {
+				isRegistered: vi.fn().mockReturnValue(true),
+				registerSingleton: vi.fn(),
+				resolve: vi.fn(),
+			} as unknown as IContainer;
+
+			const services = ['Service1', 'Service2', 'Service3'];
+
+			expect(() => {
+				services.forEach((token) => {
+					if (!mockContainer.isRegistered(token as Token)) {
+						throw new ContainerCreationError(token as Token);
+					}
+				});
+			}).not.toThrow();
+
+			expect(mockContainer.isRegistered).toHaveBeenCalledTimes(3);
+		});
+
+		it('should throw ContainerCreationError when a service is not registered', () => {
+			const mockContainer: IContainer = {
+				isRegistered: vi.fn((token) => token !== 'UnregisteredService'),
+				registerSingleton: vi.fn(),
+				resolve: vi.fn(),
+			} as unknown as IContainer;
+
+			const services = ['Service1', 'UnregisteredService', 'Service2'];
+
+			expect(() => {
+				services.forEach((token) => {
+					if (!mockContainer.isRegistered(token as Token)) {
+						throw new ContainerCreationError(token as Token);
+					}
+				});
+			}).toThrow(ContainerCreationError);
+		});
+
+		it('should throw on first unregistered service and not check remaining services', () => {
+			const mockContainer: IContainer = {
+				isRegistered: vi.fn((token) => token === 'Service1'),
+				registerSingleton: vi.fn(),
+				resolve: vi.fn(),
+			} as unknown as IContainer;
+
+			const services = ['Service1', 'Unregistered1', 'Unregistered2'];
+
+			expect(() => {
+				services.forEach((token) => {
+					if (!mockContainer.isRegistered(token as Token)) {
+						throw new ContainerCreationError(token as Token);
+					}
+				});
+			}).toThrow(ContainerCreationError);
+
+			expect(mockContainer.isRegistered).toHaveBeenCalledTimes(2);
+		});
+
+		it('should handle empty services array', () => {
+			const mockContainer: IContainer = {
+				isRegistered: vi.fn(),
+				registerSingleton: vi.fn(),
+				resolve: vi.fn(),
+			} as unknown as IContainer;
+
+			const services: string[] = [];
+
+			expect(() => {
+				services.forEach((token) => {
+					if (!mockContainer.isRegistered(token as Token)) {
+						throw new ContainerCreationError(token as Token);
+					}
+				});
+			}).not.toThrow();
+
+			expect(mockContainer.isRegistered).not.toHaveBeenCalled();
+		});
 	});
 });

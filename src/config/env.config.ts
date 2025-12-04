@@ -12,6 +12,7 @@ export class Config implements IConfig {
 	public readonly logLevel: LogLevel;
 	public readonly logRequests: boolean;
 	public readonly version: string;
+	public readonly serviceName: string;
 	public readonly jwtIssuer: string;
 
 	//TODO documentar
@@ -21,6 +22,7 @@ export class Config implements IConfig {
 
 			this.nodeEnv = env.get('NODE_ENV').default('development').asEnum(['development', 'production', 'test']) as NodeEnv;
 			this.port = env.get('PORT').default(4000).asPortNumber();
+			this.serviceName = env.get('SERVICE_NAME').default('ByteBerry-OAuth2').asString();
 
 			const { logLevel, logRequest } = this.getLoggerEnvs();
 

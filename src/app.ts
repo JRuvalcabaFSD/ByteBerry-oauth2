@@ -1,3 +1,4 @@
+import { withLoggerContext } from '@shared';
 import { bootstrapContainer } from './container/bootstrap.container.js';
 import { handledServicesError } from './shared/errors/handled.services.error.js';
 
@@ -11,8 +12,7 @@ import { handledServicesError } from './shared/errors/handled.services.error.js'
 async function main() {
 	const container = bootstrapContainer();
 
-	const config = container.resolve('Config');
+	const ctxLogger = withLoggerContext(container.resolve('Logger'), 'main');
 
-	// eslint-disable-next-line no-console
-	console.log({ config });
+	ctxLogger.info('Service initialized successfully');
 }

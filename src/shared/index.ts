@@ -1,4 +1,6 @@
 //Decorators
+export * from './decorators/container.proxy.js';
+export * from './decorators/logger.decorator.js';
 
 //Errors
 export * from './errors/config.errors.js';
