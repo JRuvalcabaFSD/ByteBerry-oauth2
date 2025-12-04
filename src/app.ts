@@ -1,10 +1,18 @@
-import { Config } from '@config';
+import { bootstrapContainer } from './container/bootstrap.container.js';
+import { handledServicesError } from './shared/errors/handled.services.error.js';
 
-(async () => {
-	main();
+(() => {
+	main().catch((error) => {
+		handledServicesError(error);
+		process.exit(1);
+	});
 })();
 
 async function main() {
-	const config = new Config();
-	console.log(config);
+	const container = bootstrapContainer();
+
+	const config = container.resolve('Config');
+
+	// eslint-disable-next-line no-console
+	console.log({ config });
 }

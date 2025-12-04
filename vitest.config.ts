@@ -21,6 +21,7 @@ export default defineConfig({
 				'**/*.config.{ts,js}',
 				'src/main.ts', // si tienes un entrypoint
 				'src/index.ts',
+				'app.ts',
 				'tests/**',
 			],
 			reporter: ['text', 'html', 'clover', 'json', 'lcov'],
