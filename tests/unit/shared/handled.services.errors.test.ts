@@ -68,15 +68,26 @@ describe('handledServicesError', () => {
 		const originalEnv = process.env.NODE_ENV;
 		process.env.NODE_ENV = 'development';
 
-		const containerError: any = {
+		// Crear un error real que tenga stack
+		const error = new Error('Container initialization failed');
+		const containerError: any = Object.assign(error, {
 			errorType: 'container',
-			message: 'Container initialization failed',
-			stack: 'Error: Container initialization failed\n    at Container.resolve',
-		};
+		});
+
 		handledServicesError(containerError);
 
-		expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Container initialization failed'));
-		expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Error: Container initialization failed'));
+		// Verificar que el log contiene todo en una sola llamada
+		const logCall = consoleLogSpy.mock.calls[0][0];
+
+		// Verificar timestamp y namespace
+		expect(logCall).toContain('14:30:45.123 UTC');
+		expect(logCall).toContain('[ByteBerry-OAuth2]');
+
+		// Verificar mensaje
+		expect(logCall).toContain('Container initialization failed');
+
+		// Verificar que el stack trace está incluido
+		expect(logCall).toContain('Error: Container initialization failed');
 
 		process.env.NODE_ENV = originalEnv;
 	});
@@ -91,8 +102,13 @@ describe('handledServicesError', () => {
 		};
 		handledServicesError(containerError);
 
+		// Verificar que contiene el mensaje
 		expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Service resolution failed'));
-		expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('null'));
+
+		// Verificar que NO contiene stack trace (stack es null en producción)
+		const logCall = consoleLogSpy.mock.calls[0][0];
+		expect(logCall).not.toContain('Error:');
+		expect(logCall).not.toContain('at ');
 
 		process.env.NODE_ENV = originalEnv;
 	});

@@ -9,12 +9,13 @@ const HANDLERS = new Map<string, (error: any) => void>([
 		'config',
 		(error: ConfigError) => {
 			const timestamp = getUTCTimestamp();
+			// Leer NODE_ENV en tiempo de ejecución
 			const message = process.env.NODE_ENV === 'production' ? 'Configuration error' : error.message;
 			let stack = null;
 			if (process.env.NODE_ENV === 'development') {
 				stack = getErrStack(error);
 			}
-			console.log(`${timestamp} [ByteBerry-OAuth2] ${message}/n ${stack}`);
+			console.log(`${timestamp} [ByteBerry-OAuth2] ${message}${stack ? `\n${stack}` : ''}`);
 		},
 	],
 	[
@@ -23,10 +24,11 @@ const HANDLERS = new Map<string, (error: any) => void>([
 			const timestamp = getUTCTimestamp();
 			const message = error.message;
 			let stack = null;
+			// Leer NODE_ENV en tiempo de ejecución
 			if (process.env.NODE_ENV === 'development') {
 				stack = getErrStack(error);
 			}
-			console.log(`${timestamp} [ByteBerry-OAuth2] Error: ${message}/n ${stack}`);
+			console.log(`${timestamp} [ByteBerry-OAuth2] ${message}${stack ? `\n${stack}` : ''}`);
 		},
 	],
 ]);
