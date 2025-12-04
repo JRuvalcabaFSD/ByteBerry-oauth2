@@ -17,8 +17,8 @@
 	},
 	"scripts": {
 		"dev": "tsx src/app.ts",
-		"build": "tsc && tsc-alias",
-		"start": "node dist/app.js",
+		"build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+		"start": "node dist/src/app.js",
 		"clean": "rm -rf dist",
 		"audit": "pnpm audit",
 		"audit:fix": "pnpm audit fix",

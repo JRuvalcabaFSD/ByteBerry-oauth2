@@ -103,7 +103,7 @@ describe('handledServicesError', () => {
 		handledServicesError(containerError);
 
 		// Verificar que contiene el mensaje
-		expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Service resolution failed'));
+		expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Container error'));
 
 		// Verificar que NO contiene stack trace (stack es null en producción)
 		const logCall = consoleLogSpy.mock.calls[0][0];

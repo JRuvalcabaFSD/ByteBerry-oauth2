@@ -13,14 +13,15 @@
 		"outDir": "./dist",
 		"baseUrl": ".",
 		"paths": {
-			"@config": ["src/config/index.ts"],
-			"@interfaces": ["src/interfaces/index.ts"],
-			"@domain": ["src/domain/index.ts"],
 			"@application": ["src/application/index.ts"],
+			"@bootstrap": ["src/bootstrap/index.ts"],
+			"@config": ["src/config/index.ts"],
+			"@container": ["src/container/index.ts"],
+			"@domain": ["src/domain/index.ts"],
 			"@infrastructure": ["src/infrastructure/index.ts"],
+			"@interfaces": ["src/interfaces/index.ts"],
 			"@presentation": ["src/presentation/index.ts"],
-			"@shared": ["src/shared/index.ts"],
-			"@container": ["src/container/index.ts"]
+			"@shared": ["src/shared/index.ts"]
 		},
 
 		"declaration": true,

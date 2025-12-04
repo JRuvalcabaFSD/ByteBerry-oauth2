@@ -1,4 +1,12 @@
-import { Container, createClockService, createConfig, createWintonLoggerService, criticalServices, Token } from '@container';
+import {
+	Container,
+	createClockService,
+	createConfig,
+	createGracefulShutdown,
+	createWintonLoggerService,
+	criticalServices,
+	Token,
+} from '@container';
 import { IContainer } from '@interfaces';
 import { ContainerCreationError } from '@shared';
 
@@ -18,6 +26,7 @@ function registerCoreServices(c: IContainer): void {
 	c.registerSingleton('Config', createConfig);
 	c.registerSingleton('Clock', createClockService);
 	c.registerSingleton('Logger', createWintonLoggerService);
+	c.registerSingleton('GracefulShutdown', createGracefulShutdown);
 }
 
 /**

@@ -22,7 +22,20 @@ const HANDLERS = new Map<string, (error: any) => void>([
 		'container',
 		(error: ContainerError) => {
 			const timestamp = getUTCTimestamp();
-			const message = error.message;
+			const message = process.env.NODE_ENV === 'production' ? 'Container error' : error.message;
+			let stack = null;
+			// Leer NODE_ENV en tiempo de ejecución
+			if (process.env.NODE_ENV === 'development') {
+				stack = getErrStack(error);
+			}
+			console.log(`${timestamp} [ByteBerry-OAuth2] ${message}${stack ? `\n${stack}` : ''}`);
+		},
+	],
+	[
+		'bootstrap',
+		(error: ContainerError) => {
+			const timestamp = getUTCTimestamp();
+			const message = process.env.NODE_ENV === 'production' ? 'Bootstrap error' : error.message;
 			let stack = null;
 			// Leer NODE_ENV en tiempo de ejecución
 			if (process.env.NODE_ENV === 'development') {

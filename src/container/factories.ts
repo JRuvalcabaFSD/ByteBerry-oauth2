@@ -1,6 +1,6 @@
 import { IContainer, ILogContext, ILogger } from '@interfaces';
 import { Config } from '@config';
-import { ClockService } from '@infrastructure';
+import { ClockService, GracefulShutdown } from '@infrastructure';
 import { WinstonLoggerService } from 'src/infrastructure/services/winston.logger.service.js';
 
 /**
@@ -42,4 +42,19 @@ export const createClockService = () => new ClockService();
 
 export function createWintonLoggerService(c: IContainer): ILogger {
 	return new WinstonLoggerService(c.resolve('Config'), c.resolve('Clock'));
+}
+
+/**
+ * Factory function that creates and configures a GracefulShutdown instance.
+ *
+ * @param c - The dependency injection container used to resolve dependencies
+ * @returns A new instance of GracefulShutdown initialized with a Logger from the container
+ *
+ * @remarks
+ * This factory function follows the dependency injection pattern by resolving
+ * the Logger dependency from the provided container before instantiating GracefulShutdown.
+ */
+
+export function createGracefulShutdown(c: IContainer): GracefulShutdown {
+	return new GracefulShutdown(c.resolve('Logger'));
 }

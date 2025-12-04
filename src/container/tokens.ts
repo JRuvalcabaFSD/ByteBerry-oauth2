@@ -1,7 +1,8 @@
+import { GracefulShutdown } from '@infrastructure';
 import { IClock, IConfig, ILogger } from '@interfaces';
 
 // El objeto de servicios puede ser redefinido en los tests
-export const services = { Config: {} as IConfig, Clock: {} as IClock, Logger: {} as ILogger };
+export const services = { Config: {} as IConfig, Clock: {} as IClock, Logger: {} as ILogger, GracefulShutdown: {} as GracefulShutdown };
 
 /**
  * Tipo de token válido para los servicios registrados

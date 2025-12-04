@@ -1,6 +1,5 @@
-import { withLoggerContext } from '@shared';
-import { bootstrapContainer } from './container/bootstrap.container.js';
-import { handledServicesError } from './shared/errors/handled.services.error.js';
+import { handledServicesError, withLoggerContext } from '@shared';
+import { bootstrap } from '@bootstrap';
 
 (() => {
 	main().catch((error) => {
@@ -10,7 +9,7 @@ import { handledServicesError } from './shared/errors/handled.services.error.js'
 })();
 
 async function main() {
-	const container = bootstrapContainer();
+	const { container } = await bootstrap();
 
 	const ctxLogger = withLoggerContext(container.resolve('Logger'), 'main');
 
