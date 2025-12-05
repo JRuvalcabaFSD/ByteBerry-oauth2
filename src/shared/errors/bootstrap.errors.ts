@@ -1,25 +1,25 @@
+import { AppError } from '@shared';
+
 /**
- * Custom error class for bootstrap-related errors.
+ * Custom error class for bootstrap-related failures in the application.
  *
- * This error type is used to capture and report errors that occur during the
- * application bootstrap process, providing additional context information.
+ * This error is thrown when critical initialization or startup processes fail,
+ * such as configuration loading, dependency injection setup, or service initialization.
+ * It extends AppError and includes additional context information to help diagnose
+ * bootstrap issues.
  *
- * @extends Error
- *
- * @property {string} erroType - The type identifier for this error, always set to 'bootstrap'
- * @property {Record<string, unknown>} context - Additional contextual information about the error
+ * @extends AppError
  *
  * @example
  * ```typescript
  * throw new BootstrapError(
  *   'Failed to initialize database connection',
- *   { database: 'postgres', host: 'localhost', port: 5432 }
+ *   { host: 'localhost', port: 5432, error: 'Connection timeout' }
  * );
  * ```
  */
 
-export class BootstrapError extends Error {
-	public readonly errorType = 'bootstrap';
+export class BootstrapError extends AppError {
 	public readonly context: Record<string, unknown>;
 
 	/**
@@ -30,8 +30,12 @@ export class BootstrapError extends Error {
 	 */
 
 	constructor(message: string, context: Record<string, unknown>) {
-		super(message);
+		super(message, 'bootstrap');
 		this.name = 'BootstrapError';
 		this.context = context;
+
+		if (Error.captureStackTrace) {
+			Error.captureStackTrace(this, BootstrapError);
+		}
 	}
 }

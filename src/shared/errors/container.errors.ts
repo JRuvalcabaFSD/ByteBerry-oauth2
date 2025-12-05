@@ -1,23 +1,25 @@
+import { AppError } from '@shared';
 import { Token } from '@container';
 
 /**
  * Error thrown when a container operation fails.
  *
- * @remarks
- * This error is specific to dependency injection container operations and includes
- * information about the token that caused the error.
+ * This error is typically thrown during dependency injection operations,
+ * such as when a service cannot be resolved from the container or when
+ * there are issues with token registration.
+ *
+ * @extends AppError
  *
  * @example
  * ```typescript
- * throw new ContainerError('Service not found', MyServiceToken);
+ * throw new ContainerError('Service not found', myToken);
  * ```
  */
 
-export class ContainerError extends Error {
-	public readonly errorType = 'container';
+export class ContainerError extends AppError {
 	public readonly token: Token;
 	constructor(message: string, token: Token) {
-		super(message);
+		super(message, 'container');
 		this.name = 'ContainerError';
 		this.token = token;
 	}

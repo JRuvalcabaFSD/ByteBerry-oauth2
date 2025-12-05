@@ -1,20 +1,23 @@
+import { AppError } from '@shared';
+
 /**
  * Error thrown when a request origin is not allowed by CORS (Cross-Origin Resource Sharing) policy.
  *
- * @remarks
- * This error is thrown when a client attempts to make a request from an origin that is not
- * included in the allowed origins list configured for the application.
+ * @extends AppError
  *
  * @example
  * ```typescript
  * throw new CorsOriginError('https://unauthorized-domain.com');
  * ```
  *
+ * @remarks
+ * This error is typically thrown during HTTP request processing when the request's origin
+ * header does not match any of the allowed origins in the CORS configuration.
+ *
  * @public
  */
 
-export class CorsOriginError extends Error {
-	public readonly errorType = 'cors';
+export class CorsOriginError extends AppError {
 	public readonly origin: string;
 
 	/**
@@ -22,7 +25,7 @@ export class CorsOriginError extends Error {
 	 * @param origin - The origin URL that was not allowed by CORS policy
 	 */
 	constructor(origin: string) {
-		super(`Origin ${origin} not allowed by CORS`);
+		super(`Origin ${origin} not allowed by CORS`, 'http');
 		this.origin = origin;
 		this.name = 'CorsOriginError';
 	}

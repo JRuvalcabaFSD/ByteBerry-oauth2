@@ -1,20 +1,24 @@
+import { AppError } from '@shared';
+
 /**
- * Custom error class for configuration-related errors.
+ * Represents an error that occurs during application configuration.
  *
- * @remarks
- * This error is thrown when there are issues with application configuration,
- * such as missing required values, invalid formats, or validation failures.
+ * This error class extends {@link AppError} and is specifically designed to handle
+ * configuration-related issues. It includes additional context information to help
+ * diagnose configuration problems.
+ *
+ * @extends AppError
  *
  * @example
  * ```typescript
- * throw new ConfigError('Missing API key', { configFile: 'config.json' });
+ * throw new ConfigError(
+ *   'Invalid database configuration',
+ *   { host: 'localhost', port: 3306, attempted: 'connection' }
+ * );
  * ```
- *
- * @public
  */
 
-export class ConfigError extends Error {
-	public readonly errorType = 'config';
+export class ConfigError extends AppError {
 	public context: Record<string, unknown>;
 
 	/**
@@ -24,7 +28,7 @@ export class ConfigError extends Error {
 	 * @param context - Additional context information about the error as key-value pairs
 	 */
 	constructor(message: string, context: Record<string, unknown>) {
-		super(message);
+		super(message, 'config');
 		this.context = context;
 		this.name = 'ConfigError';
 	}

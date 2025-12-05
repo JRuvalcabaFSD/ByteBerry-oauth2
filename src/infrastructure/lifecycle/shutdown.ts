@@ -140,7 +140,7 @@ export class GracefulShutdown {
 
 	@LogContextMethod()
 	private async performShutdown(): Promise<void> {
-		this.logger.info('Starting cleanup process...', { cleanupFunctions: this.cleanupFunctions.length });
+		this.logger.info(`Starting ${this.cleanupFunctions.length} cleanup process...`);
 
 		const promises = this.cleanupFunctions.map(async (cleanup, index) => {
 			try {

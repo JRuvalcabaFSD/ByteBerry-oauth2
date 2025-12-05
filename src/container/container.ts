@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-	CircularDependencyError,
-	ConfigError,
-	ContainerError,
-	getErrMsg,
-	TokenAlreadyRegisteredError,
-	TokenNotRegisteredError,
-} from '@shared';
+import * as errors from '@shared';
+import { getErrMsg } from '@shared';
 import { IContainer, Lifecycle } from '@interfaces';
 import { ServiceMap, Token } from './tokens.js';
 
@@ -82,7 +76,7 @@ export class Container implements IContainer {
 	 */
 
 	public register<K extends keyof ServiceMap>(token: K, factory: (container: IContainer) => ServiceMap[K]): void {
-		if (this.services.has(token)) throw new TokenAlreadyRegisteredError(token);
+		if (this.services.has(token)) throw new errors.TokenAlreadyRegisteredError(token);
 		this.services.set(token, { factory, lifecycle: 'transient' });
 	}
 
@@ -104,7 +98,7 @@ export class Container implements IContainer {
 	 */
 
 	public registerSingleton<K extends keyof ServiceMap>(token: K, factory: (container: IContainer) => ServiceMap[K]): void {
-		if (this.services.has(token)) throw new TokenAlreadyRegisteredError(token);
+		if (this.services.has(token)) throw new errors.TokenAlreadyRegisteredError(token);
 		this.services.set(token, { factory, lifecycle: 'singleton' });
 	}
 
@@ -129,7 +123,7 @@ export class Container implements IContainer {
 	 */
 
 	public registerInstance<K extends keyof ServiceMap>(token: K, instance: ServiceMap[K]): void {
-		if (this.services.has(token)) throw new TokenAlreadyRegisteredError(token);
+		if (this.services.has(token)) throw new errors.TokenAlreadyRegisteredError(token);
 		this.services.set(token, { factory: () => instance, lifecycle: 'singleton', instance });
 	}
 
@@ -154,8 +148,8 @@ export class Container implements IContainer {
 	public resolve<K extends keyof ServiceMap>(token: K): ServiceMap[K] {
 		const registration = this.services.get(token);
 
-		if (!registration) throw new TokenNotRegisteredError(token);
-		if (this.resolutionStack.includes(token)) throw new CircularDependencyError(this.resolutionStack, token);
+		if (!registration) throw new errors.TokenNotRegisteredError(token);
+		if (this.resolutionStack.includes(token)) throw new errors.CircularDependencyError(this.resolutionStack, token);
 		if (registration.lifecycle === 'singleton' && registration.instance !== undefined) return registration.instance as ServiceMap[K];
 
 		this.resolutionStack.push(token);
@@ -168,9 +162,9 @@ export class Container implements IContainer {
 
 			return instance as ServiceMap[K];
 		} catch (error) {
-			if (error instanceof ConfigError) throw error;
-			if (error instanceof CircularDependencyError) throw error;
-			throw new ContainerError(`Failed to resolve service '${token}': ${getErrMsg(error)}`, token);
+			if (error instanceof errors.ConfigError) throw error;
+			if (error instanceof errors.CircularDependencyError) throw error;
+			throw new errors.ContainerError(`Failed to resolve service '${token}': ${getErrMsg(error)}`, token);
 		} finally {
 			this.resolutionStack.pop();
 		}

@@ -1,4 +1,4 @@
-import { BootstrapError, getErrMsg, withLoggerContext } from '@shared';
+import { AppError, BootstrapError, getErrMsg, withLoggerContext } from '@shared';
 import { configureShutdown, GracefulShutdown } from '@infrastructure';
 import { IContainer, ILogger } from '@interfaces';
 import { bootstrapContainer } from '@container';
@@ -34,6 +34,7 @@ export async function bootstrap(): Promise<bootstrapResult> {
 		return { container, shutdown };
 	} catch (error) {
 		const errorMessage = getErrMsg(error);
+		if (error instanceof AppError) throw error;
 		throw new BootstrapError(`Service bootstrap failed: ${getErrMsg(errorMessage)}`, { timeStamp: new Date().toISOString() });
 	}
 }

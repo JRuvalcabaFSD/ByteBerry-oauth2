@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import env from 'env-var';
 
 import { IConfig, LogLevel, NodeEnv } from '@interfaces';
-import { ConfigError, getErrMsg } from '@shared';
+import { AppError, ConfigError, getErrMsg } from '@shared';
 import pkg from '../../package.json' with { type: 'json' };
 
 //TODO documentar
@@ -35,11 +35,14 @@ export class Config implements IConfig {
 			this.jwtIssuer = this.normalizeUrls(env.get('JWT_ISSUER').default('http://localhost:4000').asUrlString());
 			this.version = pkg.version || '0.0.0';
 		} catch (error) {
+			if (error instanceof AppError) throw error;
 			throw new ConfigError(`Failed to validate environment variables: ${getErrMsg(error)}`, {
 				providerNodeEnv: process.env.NODE_ENV,
 				providerPort: process.env.PORT,
 				providerLogLevel: process.env.LOG_LEVEL,
 				providerLogRequests: process.env.LOG_REQUESTS,
+				providerCorsOrigins: process.env.CORS_ORIGINS,
+				providerJwtIssuer: process.env.JWT_ISSUER,
 			});
 		}
 	}

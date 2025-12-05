@@ -3,7 +3,7 @@ import { Server } from 'http';
 
 import { IClock, IConfig, IContainer, IHttpServer, ILogger, ServerInfo } from '@interfaces';
 import * as middlewares from '@infrastructure';
-import { getErrMsg } from '@shared';
+import { AppError, getErrMsg } from '@shared';
 import { createAppRouter } from '@presentation';
 
 /**
@@ -89,6 +89,7 @@ export class HttpServer implements IHttpServer {
 					reject(error);
 				});
 			} catch (error) {
+				if (error instanceof AppError) throw error;
 				this.logger.error('Failed to start Http Server', { error: getErrMsg(error) });
 			}
 		});

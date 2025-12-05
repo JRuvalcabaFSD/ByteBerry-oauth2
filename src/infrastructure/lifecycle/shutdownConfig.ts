@@ -1,6 +1,6 @@
 import { IContainer } from '@interfaces';
 import { GracefulShutdown } from './shutdown.js';
-import { wrapContainerLogger } from '@shared';
+import { getErrMsg, wrapContainerLogger } from '@shared';
 
 /**
  * Configures and initializes the graceful shutdown mechanism for the application.
@@ -25,6 +25,26 @@ export function configureShutdown(container: IContainer): GracefulShutdown {
 	const logger = cnxContainer.resolve('Logger');
 
 	logger.debug('Configuring graceful shutdown');
+
+	//Register Http Service in cleanup function
+	GShutdown.registerCleanup(async () => {
+		logger.debug('Closing Http Server');
+
+		try {
+			const httpServer = container.resolve('HttpServer');
+			if (httpServer && typeof httpServer.stop === 'function') {
+				await httpServer.stop();
+
+				logger.info('Http Server closed');
+			}
+		} catch (error) {
+			logger.error('Failed to stop Http Server', { error: getErrMsg(error) });
+			throw error;
+		}
+	});
+
+	// TODO Register database server in cleanup function
+	// TODO Register redis server in cleanup function
 
 	return GShutdown;
 }

@@ -3,20 +3,19 @@
 
 import { BootstrapError, ConfigError, ContainerError, getErrMsg, getErrStack, getUTCTimestamp } from '@shared';
 
+const Colors = { Red: '\x1b[31m', Yellow: '\x1b[33m', Bold: '\x1b[1m', Reset: '\x1b[0m' };
+
 //TODO documentar
 const HANDLERS = new Map<string, (error: any) => void>([
 	[
 		'config',
 		(error: ConfigError) => {
 			const timestamp = getUTCTimestamp();
-			const message = process.env.NODE_ENV === 'production' ? 'Configuration error' : error.message;
+			const message = error.message;
 			const context = error.context;
-			let stack = null;
-			if (process.env.NODE_ENV === 'development') {
-				stack = getErrStack(error);
-			}
+			const stack = getErrStack(error);
 			console.log(
-				`${timestamp} [ByteBerry-OAuth2] ${message}${context ? `\n${JSON.stringify(context, null, 2)}` : ''}${stack ? `\n${stack}` : ''}`
+				`${timestamp} [ByteBerry-OAuth2] ${Colors.Red}${Colors.Bold}Error:${Colors.Reset} ${message}${context ? `\n${JSON.stringify(context, null, 2)}` : ''}${stack ? `\n${stack}` : ''}`
 			);
 		},
 	],
@@ -29,7 +28,9 @@ const HANDLERS = new Map<string, (error: any) => void>([
 			if (process.env.NODE_ENV === 'development') {
 				stack = getErrStack(error);
 			}
-			console.log(`${timestamp} [ByteBerry-OAuth2] ${message}${stack ? `\n${stack}` : ''}`);
+			console.log(
+				`${timestamp} [ByteBerry-OAuth2] ${Colors.Red}${Colors.Bold}Error:${Colors.Reset} ${message}${stack ? `\n${stack}` : ''}`
+			);
 		},
 	],
 	[
@@ -45,7 +46,7 @@ const HANDLERS = new Map<string, (error: any) => void>([
 				stack = getErrStack(error);
 			}
 			console.log(
-				`${timestamp} [ByteBerry-OAuth2] ${message}${context ? `\n${JSON.stringify(context, null, 2)}` : ''}${stack ? `\n${stack}` : ''}`
+				`${timestamp} [ByteBerry-OAuth2] ${Colors.Red}${Colors.Bold}Error:${Colors.Reset} ${message}${context ? `\n${JSON.stringify(context, null, 2)}` : ''}${stack ? `\n${stack}` : ''}`
 			);
 		},
 	],

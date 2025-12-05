@@ -28,10 +28,10 @@ type ErrorHandler = (error: Error, req: Request, res: Response, config: IConfig)
 //TODO documentar
 const HANDLERS = new Map<string, ErrorHandler>([
 	[
-		'cors',
+		'CorsOriginError',
 		(error, req, res, config) => {
-			res.status(403).json({
-				error: 'Forbidden',
+			res.status(200).json({
+				error: 'Invalid CORS',
 				message: config.isDevelopment() ? error.message : 'Origin not allowed by CORS',
 				requestId: req.requestId || 'unknown',
 				timestamp: new Date().toISOString(),
@@ -96,7 +96,7 @@ export function createErrorMiddleware(logger: ILogger, config: IConfig) {
 			});
 		}
 
-		const handler = (err.erroType && HANDLERS.get(err.errorType)) || defaultHandler;
+		const handler = (err.name && HANDLERS.get(err.name)) || defaultHandler;
 
 		handler(error, req, res, config);
 	};
