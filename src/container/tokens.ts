@@ -1,5 +1,5 @@
 import { GracefulShutdown } from '@infrastructure';
-import { IClock, IConfig, IHttpServer, ILogger, IUuid } from '@interfaces';
+import { IClock, IConfig, IHealthService, IHttpServer, ILogger, IUuid } from '@interfaces';
 
 // El objeto de servicios puede ser redefinido en los tests
 export const services = {
@@ -9,6 +9,7 @@ export const services = {
 	Uuid: {} as IUuid,
 	HttpServer: {} as IHttpServer,
 	GracefulShutdown: {} as GracefulShutdown,
+	HealthService: {} as IHealthService,
 };
 
 /**

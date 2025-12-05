@@ -14,3 +14,4 @@ export * from './lifecycle/shutdownConfig.js';
 export * from './services/clock.service.js';
 export * from './services/winston.logger.service.js';
 export * from './services/uuid.service.js';
+export * from './services/health.service.js';

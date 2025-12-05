@@ -11,33 +11,44 @@ const HANDLERS = new Map<string, (error: any) => void>([
 		'config',
 		(error: ConfigError) => {
 			const timestamp = getUTCTimestamp();
-			const message = error.message;
-			const context = error.context;
-			const stack = getErrStack(error);
-			console.log(
-				`${timestamp} [ByteBerry-OAuth2] ${Colors.Red}${Colors.Bold}Error:${Colors.Reset} ${message}${context ? `\n${JSON.stringify(context, null, 2)}` : ''}${stack ? `\n${stack}` : ''}`
-			);
+			// Leer NODE_ENV en tiempo de ejecución
+			const isDevelopment = process.env.NODE_ENV === 'development';
+			const message = process.env.NODE_ENV === 'production' ? 'Configuration error' : error.message;
+
+			let logMessage = `${timestamp} [ByteBerry-OAuth2] ${message}`;
+
+			// Solo agregar contexto en desarrollo
+			if (isDevelopment && error.context) {
+				logMessage += `\n${JSON.stringify(error.context, null, 2)}`;
+			}
+
+			// Solo agregar stack en desarrollo
+			if (isDevelopment) {
+				const stack = getErrStack(error);
+				if (stack) {
+					logMessage += `\n${stack}`;
+				}
+			}
+
+			console.log(logMessage);
 		},
 	],
 	[
 		'container',
 		(error: ContainerError) => {
 			const timestamp = getUTCTimestamp();
+			// Leer NODE_ENV en tiempo de ejecución
 			const message = process.env.NODE_ENV === 'production' ? 'Container error' : error.message;
 			let stack = null;
 			if (process.env.NODE_ENV === 'development') {
 				stack = getErrStack(error);
 			}
-			console.log(
-				`${timestamp} [ByteBerry-OAuth2] ${Colors.Red}${Colors.Bold}Error:${Colors.Reset} ${message}${stack ? `\n${stack}` : ''}`
-			);
+			console.log(`${timestamp} [ByteBerry-OAuth2] ${message}${stack ? `\n${stack}` : ''}`);
 		},
 	],
 	[
 		'bootstrap',
 		(error: BootstrapError) => {
-			console.log('debug', error);
-
 			const timestamp = getUTCTimestamp();
 			const message = process.env.NODE_ENV === 'production' ? 'Bootstrap error' : error.message;
 			const context = error.context;
@@ -46,7 +57,7 @@ const HANDLERS = new Map<string, (error: any) => void>([
 				stack = getErrStack(error);
 			}
 			console.log(
-				`${timestamp} [ByteBerry-OAuth2] ${Colors.Red}${Colors.Bold}Error:${Colors.Reset} ${message}${context ? `\n${JSON.stringify(context, null, 2)}` : ''}${stack ? `\n${stack}` : ''}`
+				`${timestamp} [ByteBerry-OAuth2] ${Colors.Red}${Colors.Bold}Bootstrap error:${Colors.Reset} ${message}${context ? `\n${JSON.stringify(context, null, 2)}` : ''}${stack ? `\n${stack}` : ''}`
 			);
 		},
 	],

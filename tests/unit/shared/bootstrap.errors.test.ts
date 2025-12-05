@@ -22,7 +22,7 @@ describe('BootstrapError', () => {
 		it('should set erroType to "bootstrap"', () => {
 			const error = new BootstrapError('Test error', {});
 
-			expect(error.erroType).toBe('bootstrap');
+			expect(error.errorType).toBe('bootstrap');
 		});
 	});
 

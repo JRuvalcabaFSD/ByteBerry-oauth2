@@ -8,13 +8,35 @@ export function bootstrapContainer(): IContainer {
 	const container = new Container();
 
 	registerCoreServices(container);
+	registerHttpServices(container);
 
 	validate(container, criticalServices);
 
 	return container;
 }
 
-//TODO documentar
+/**
+ * Registers core services into the dependency injection container.
+ *
+ * This function registers essential singleton services required by the application,
+ * including configuration, clock service, logging, UUID generation, HTTP server,
+ * and graceful shutdown handler.
+ *
+ * @param c - The dependency injection container instance where services will be registered.
+ *
+ * @remarks
+ * All services are registered as singletons, meaning only one instance of each
+ * service will be created and shared throughout the application lifecycle.
+ *
+ * The following services are registered:
+ * - `Config`: Application configuration service
+ * - `Clock`: Clock/time service for time-related operations
+ * - `Logger`: Winston-based logging service
+ * - `Uuid`: UUID generation service
+ * - `HttpServer`: HTTP server instance
+ * - `GracefulShutdown`: Service for handling graceful application shutdown
+ */
+
 function registerCoreServices(c: IContainer): void {
 	c.registerSingleton('Config', factories.createConfig);
 	c.registerSingleton('Clock', factories.createClockService);
@@ -22,6 +44,11 @@ function registerCoreServices(c: IContainer): void {
 	c.registerSingleton('Uuid', factories.createUuidService);
 	c.registerSingleton('HttpServer', factories.createHttpServer);
 	c.registerSingleton('GracefulShutdown', factories.createGracefulShutdown);
+}
+
+//TODO documentar
+function registerHttpServices(c: IContainer): void {
+	c.registerSingleton('HealthService', factories.createHealthService);
 }
 
 /**

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { ILogger } from '@interfaces';
 import { GracefulShutdown } from '@infrastructure';
 
@@ -95,9 +94,7 @@ describe('GracefulShutdown', () => {
 
 			expect(cleanup1).toHaveBeenCalledOnce();
 			expect(cleanup2).toHaveBeenCalledOnce();
-			expect(mockLogger.info).toHaveBeenCalledWith('[GracefulShutdown.performShutdown] Starting cleanup process...', {
-				cleanupFunctions: 2,
-			});
+			expect(mockLogger.info).toHaveBeenCalledWith('[GracefulShutdown.performShutdown] Starting 2 cleanup process...');
 			expect(mockLogger.info).toHaveBeenCalledWith('[GracefulShutdown.performShutdown] Cleanup process completed');
 		});
 

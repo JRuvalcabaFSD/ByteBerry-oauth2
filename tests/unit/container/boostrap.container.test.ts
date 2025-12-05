@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ContainerCreationError } from '@shared';
 import { IConfig, IContainer } from '@interfaces';
+import { ContainerCreationError } from '@shared';
 import { Token } from '@container';
 
 // Mock del módulo factories desde @container

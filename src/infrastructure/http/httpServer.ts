@@ -54,7 +54,7 @@ export class HttpServer implements IHttpServer {
 		this.clock = container.resolve('Clock');
 		this.logger = container.resolve('Logger');
 		this.startMiddlewares();
-		this.app.use(createAppRouter());
+		this.app.use(createAppRouter(this.container));
 		this.setupErroHandler();
 	}
 

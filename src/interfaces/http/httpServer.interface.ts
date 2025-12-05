@@ -1,3 +1,5 @@
+import { Application } from 'express';
+
 /**
  * Represents the runtime information and status of an HTTP server.
  *
@@ -5,9 +7,6 @@
  * @property {boolean} isRunning - Indicates whether the server is currently running.
  * @property {Date} [startTime] - The timestamp when the server was started. Optional field that may be undefined if the server hasn't been started yet.
  */
-
-import { Application } from 'express';
-
 export type ServerInfo = {
 	port: number;
 	isRunning: boolean;

@@ -1,5 +1,5 @@
-import { ClockService, GracefulShutdown, HttpServer, UuidService, WinstonLoggerService } from '@infrastructure';
-import { IClock, IConfig, IContainer, IHttpServer, ILogger, IUuid } from '@interfaces';
+import { ClockService, GracefulShutdown, HealthService, HttpServer, UuidService, WinstonLoggerService } from '@infrastructure';
+import { IClock, IConfig, IContainer, IHealthService, IHttpServer, ILogger, IUuid } from '@interfaces';
 import { Config } from '@config';
 
 /**
@@ -87,4 +87,15 @@ export function createGracefulShutdown(c: IContainer): GracefulShutdown {
 
 export function createHttpServer(c: IContainer): IHttpServer {
 	return new HttpServer(c);
+}
+
+/**
+ * Factory function that creates and returns a new instance of HealthService.
+ *
+ * @param c - The dependency injection container that provides required dependencies
+ * @returns A new instance of IHealthService
+ */
+
+export function createHealthService(c: IContainer): IHealthService {
+	return new HealthService(c);
 }
