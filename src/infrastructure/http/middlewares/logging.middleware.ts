@@ -27,7 +27,7 @@ import { IClock, ILogger } from '@interfaces';
  */
 
 export function createLoggingMiddleware(logger: ILogger, clock: IClock, loggerRequests: boolean) {
-	if (loggerRequests) return (req: Request, res: Response, next: NextFunction) => next();
+	if (!loggerRequests) return (req: Request, res: Response, next: NextFunction) => next();
 
 	return (req: Request, res: Response, next: NextFunction): void => {
 		const startTime = clock.timestamp();

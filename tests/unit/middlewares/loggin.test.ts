@@ -51,9 +51,9 @@ describe('LoggingMiddleware', () => {
 		nextFunction = vi.fn();
 	});
 
-	describe('When logging is disabled (loggerRequests = true)', () => {
+	describe('When logging is disabled (loggerRequests = false)', () => {
 		it('should return no-op middleware', () => {
-			const middleware = createLoggingMiddleware(mockLogger, mockClock, true);
+			const middleware = createLoggingMiddleware(mockLogger, mockClock, false);
 
 			middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
@@ -63,9 +63,9 @@ describe('LoggingMiddleware', () => {
 		});
 	});
 
-	describe('When logging is enabled (loggerRequests = false)', () => {
+	describe('When logging is enabled (loggerRequests = true)', () => {
 		it('should attach child logger to request', () => {
-			const middleware = createLoggingMiddleware(mockLogger, mockClock, false);
+			const middleware = createLoggingMiddleware(mockLogger, mockClock, true);
 
 			middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
@@ -86,7 +86,7 @@ describe('LoggingMiddleware', () => {
 			};
 			mockLogger.child = vi.fn().mockReturnValue(childLogger);
 
-			const middleware = createLoggingMiddleware(mockLogger, mockClock, false);
+			const middleware = createLoggingMiddleware(mockLogger, mockClock, true);
 			middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
 			expect(childLogger.info).toHaveBeenCalledWith('Incoming request', {
@@ -98,7 +98,7 @@ describe('LoggingMiddleware', () => {
 		});
 
 		it('should set startTime on request', () => {
-			const middleware = createLoggingMiddleware(mockLogger, mockClock, false);
+			const middleware = createLoggingMiddleware(mockLogger, mockClock, true);
 
 			middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
@@ -106,7 +106,7 @@ describe('LoggingMiddleware', () => {
 		});
 
 		it('should call next() after setup', () => {
-			const middleware = createLoggingMiddleware(mockLogger, mockClock, false);
+			const middleware = createLoggingMiddleware(mockLogger, mockClock, true);
 
 			middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
@@ -116,7 +116,7 @@ describe('LoggingMiddleware', () => {
 		it('should throw error if requestId is missing', () => {
 			mockRequest.requestId = undefined;
 
-			const middleware = createLoggingMiddleware(mockLogger, mockClock, false);
+			const middleware = createLoggingMiddleware(mockLogger, mockClock, true);
 			middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
 			expect(nextFunction).toHaveBeenCalledWith(
@@ -142,11 +142,10 @@ describe('LoggingMiddleware', () => {
 
 			mockResponse.statusCode = 200;
 
-			const middleware = createLoggingMiddleware(mockLogger, mockClock, false);
+			const middleware = createLoggingMiddleware(mockLogger, mockClock, true);
 			middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
 			// Call the intercepted end function
-			const originalEnd = mockResponse.end as any;
 			const interceptedEnd = (mockResponse as any).end;
 			interceptedEnd.call(mockResponse);
 
@@ -170,7 +169,7 @@ describe('LoggingMiddleware', () => {
 
 			mockResponse.statusCode = 404;
 
-			const middleware = createLoggingMiddleware(mockLogger, mockClock, false);
+			const middleware = createLoggingMiddleware(mockLogger, mockClock, true);
 			middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
 			const interceptedEnd = (mockResponse as any).end;
@@ -194,7 +193,7 @@ describe('LoggingMiddleware', () => {
 			};
 			mockLogger.child = vi.fn().mockReturnValue(childLogger);
 
-			const middleware = createLoggingMiddleware(mockLogger, mockClock, false);
+			const middleware = createLoggingMiddleware(mockLogger, mockClock, true);
 			middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
 			const interceptedEnd = (mockResponse as any).end;
@@ -212,7 +211,7 @@ describe('LoggingMiddleware', () => {
 				socket: { remoteAddress: '192.168.1.1' } as any,
 			} as any;
 
-			const middleware = createLoggingMiddleware(mockLogger, mockClock, false);
+			const middleware = createLoggingMiddleware(mockLogger, mockClock, true);
 			middleware(mockRequestSinIp as Request, mockResponse as Response, nextFunction);
 
 			expect(mockLogger.child).toHaveBeenCalledWith(expect.objectContaining({ ip: '192.168.1.1' }));
@@ -225,7 +224,7 @@ describe('LoggingMiddleware', () => {
 				socket: undefined,
 			} as any;
 
-			const middleware = createLoggingMiddleware(mockLogger, mockClock, false);
+			const middleware = createLoggingMiddleware(mockLogger, mockClock, true);
 			middleware(mockRequestSinIp as Request, mockResponse as Response, nextFunction);
 
 			expect(mockLogger.child).toHaveBeenCalledWith(expect.objectContaining({ ip: 'unknown' }));

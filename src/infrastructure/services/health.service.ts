@@ -84,7 +84,7 @@ export class HealthService implements Interfaces.IHealthService {
 
 			const response = await this.checkHealth('deep', requestId, criticalServices);
 
-			ctxLogger.info('Deep health check completed', {
+			ctxLogger.debug('Deep health check completed', {
 				requestId: response.requestId,
 				status: response.status,
 				responseTime: this.clock.timestamp() - startTime,

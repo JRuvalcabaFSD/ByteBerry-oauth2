@@ -202,7 +202,7 @@ describe('HealthService', () => {
 		it('should log completion with metrics', async () => {
 			await healthService.getDeepHealth(mockRequest as Request, mockResponse as Response);
 
-			expect(mockLogger.info).toHaveBeenCalledWith(
+			expect(mockLogger.debug).toHaveBeenCalledWith(
 				'[HealthService.getDeepHealth] Deep health check completed',
 				expect.objectContaining({
 					requestId: expect.any(String),
