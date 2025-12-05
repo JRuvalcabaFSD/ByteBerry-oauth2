@@ -27,6 +27,9 @@ export async function bootstrap(): Promise<bootstrapResult> {
 		logger.info('Service starting');
 
 		const shutdown = configureShutdown(container);
+		const httpServer = container.resolve('HttpServer');
+
+		await httpServer.start();
 
 		return { container, shutdown };
 	} catch (error) {

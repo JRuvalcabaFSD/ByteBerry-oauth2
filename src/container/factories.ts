@@ -1,7 +1,6 @@
-import { IContainer, ILogContext, ILogger } from '@interfaces';
+import { ClockService, GracefulShutdown, HttpServer, UuidService, WinstonLoggerService } from '@infrastructure';
+import { IClock, IConfig, IContainer, IHttpServer, ILogger, IUuid } from '@interfaces';
 import { Config } from '@config';
-import { ClockService, GracefulShutdown } from '@infrastructure';
-import { WinstonLoggerService } from 'src/infrastructure/services/winston.logger.service.js';
 
 /**
  * Creates and returns a new instance of the Config class.
@@ -14,7 +13,7 @@ import { WinstonLoggerService } from 'src/infrastructure/services/winston.logger
  * ```
  */
 
-export const createConfig = () => new Config();
+export const createConfig = (): IConfig => new Config();
 
 /**
  * Factory function that creates and returns a new instance of ClockService.
@@ -27,7 +26,21 @@ export const createConfig = () => new Config();
  * ```
  */
 
-export const createClockService = () => new ClockService();
+export const createClockService = (): IClock => new ClockService();
+
+/**
+ * Creates and returns a new instance of the UUID service.
+ *
+ * @returns {IUuid} A new UUID service instance that implements the IUuid interface.
+ *
+ * @example
+ * ```ts
+ * const uuidService = createUuidService();
+ * const newId = uuidService.generate();
+ * ```
+ */
+
+export const createUuidService = (): IUuid => new UuidService();
 
 /**
  * Factory function that creates and configures a Winston logger service instance.
@@ -57,4 +70,21 @@ export function createWintonLoggerService(c: IContainer): ILogger {
 
 export function createGracefulShutdown(c: IContainer): GracefulShutdown {
 	return new GracefulShutdown(c.resolve('Logger'));
+}
+
+/**
+ * Creates and returns a new HTTP server instance.
+ *
+ * @param c - The dependency injection container used to initialize the HTTP server
+ * @returns A new instance of IHttpServer
+ *
+ * @example
+ * ```typescript
+ * const container = createContainer();
+ * const server = createHttpServer(container);
+ * ```
+ */
+
+export function createHttpServer(c: IContainer): IHttpServer {
+	return new HttpServer(c);
 }

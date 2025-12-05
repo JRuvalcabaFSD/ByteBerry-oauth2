@@ -6,6 +6,7 @@ export * from './decorators/logger.decorator.js';
 export * from './errors/bootstrap.errors.js';
 export * from './errors/config.errors.js';
 export * from './errors/container.errors.js';
+export * from './errors/cors.error.js';
 export * from './errors/handled.services.error.js';
 
 //Helpers

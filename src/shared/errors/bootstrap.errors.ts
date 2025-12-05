@@ -19,7 +19,7 @@
  */
 
 export class BootstrapError extends Error {
-	public readonly erroType = 'bootstrap';
+	public readonly errorType = 'bootstrap';
 	public readonly context: Record<string, unknown>;
 
 	/**

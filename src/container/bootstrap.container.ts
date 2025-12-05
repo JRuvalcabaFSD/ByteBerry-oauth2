@@ -1,12 +1,5 @@
-import {
-	Container,
-	createClockService,
-	createConfig,
-	createGracefulShutdown,
-	createWintonLoggerService,
-	criticalServices,
-	Token,
-} from '@container';
+import * as factories from '@container';
+import { Container, criticalServices, Token } from '@container';
 import { IContainer } from '@interfaces';
 import { ContainerCreationError } from '@shared';
 
@@ -23,10 +16,12 @@ export function bootstrapContainer(): IContainer {
 
 //TODO documentar
 function registerCoreServices(c: IContainer): void {
-	c.registerSingleton('Config', createConfig);
-	c.registerSingleton('Clock', createClockService);
-	c.registerSingleton('Logger', createWintonLoggerService);
-	c.registerSingleton('GracefulShutdown', createGracefulShutdown);
+	c.registerSingleton('Config', factories.createConfig);
+	c.registerSingleton('Clock', factories.createClockService);
+	c.registerSingleton('Logger', factories.createWintonLoggerService);
+	c.registerSingleton('Uuid', factories.createUuidService);
+	c.registerSingleton('HttpServer', factories.createHttpServer);
+	c.registerSingleton('GracefulShutdown', factories.createGracefulShutdown);
 }
 
 /**

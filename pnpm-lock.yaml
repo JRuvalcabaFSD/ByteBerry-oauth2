@@ -35,9 +35,6 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
-      morgan:
-        specifier: ^1.10.1
-        version: 1.10.1
       pg:
         specifier: ^8.16.3
         version: 8.16.3
@@ -1391,10 +1388,6 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  basic-auth@2.0.1:
-    resolution: {integrity: sha512-NF+epuEdnUYVlGuhaxbbq+dvJttwLnGY+YixlXlME5KpQ5W3CnXA5cVTneY3SPbPDRkcjMbifrwmFYcClgOZeg==}
-    engines: {node: '>= 0.8'}
-
   bcrypt@6.0.0:
     resolution: {integrity: sha512-cU8v/EGSrnH+HnxV2z0J7/blxH8gq7Xh2JFT6Aroax7UohdmiJJlxApMxtKfuI7z68NvvVcmR78k2LbT6efhRg==}
     engines: {node: '>= 18'}
@@ -1717,14 +1710,6 @@ packages:
   dargs@8.1.0:
     resolution: {integrity: sha512-wAV9QHOsNbwnWdNW2FYvE1P56wtgSbM+3SZcdGiWQILwVjACCXDCI3Ai8QlCjMDB8YK5zySiXZYBiwGmNY3lnw==}
     engines: {node: '>=12'}
-
-  debug@2.6.9:
-    resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -3016,16 +3001,9 @@ packages:
   moment@2.30.1:
     resolution: {integrity: sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==}
 
-  morgan@1.10.1:
-    resolution: {integrity: sha512-223dMRJtI/l25dJKWpgij2cMtywuG/WiUKXdvwfbhGKBhy1puASqXwFzmWZ7+K73vUPoR7SS2Qz2cI/g9MKw0A==}
-    engines: {node: '>= 0.8.0'}
-
   mrmime@2.0.1:
     resolution: {integrity: sha512-Y3wQdFg2Va6etvQ5I82yUhGdsKrcYox6p7FfL1LbK2J4V01F9TGlepTIhnK24t7koZibmg82KGglhA1XK5IsLQ==}
     engines: {node: '>=10'}
-
-  ms@2.0.0:
-    resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
@@ -3204,16 +3182,8 @@ packages:
   ohash@2.0.11:
     resolution: {integrity: sha512-RdR9FQrFwNBNXAr4GixM8YaRZRJ5PUWbKYbE5eOsrwAjJW0q2REGcf79oYPsLyskQCZG1PLN+S/K1V00joZAoQ==}
 
-  on-finished@2.3.0:
-    resolution: {integrity: sha512-ikqdkGAAyf/X/gPhXGvfgAytDZtDbr+bkNUJ0N9h5MI/dmdgCs3l6hoHrcUv41sRKew3jIwrp4qQDXiK99Utww==}
-    engines: {node: '>= 0.8'}
-
   on-finished@2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
-    engines: {node: '>= 0.8'}
-
-  on-headers@1.1.0:
-    resolution: {integrity: sha512-737ZY3yNnXy37FHkQxPzt4UZ2UWPWiCZWLvFZ4fu5cueciegX0zGPnrlY6bwRg4FdQOe9YU8MkmJwGhoMybl8A==}
     engines: {node: '>= 0.8'}
 
   once@1.4.0:
@@ -5576,10 +5546,6 @@ snapshots:
 
   base64-js@1.5.1: {}
 
-  basic-auth@2.0.1:
-    dependencies:
-      safe-buffer: 5.1.2
-
   bcrypt@6.0.0:
     dependencies:
       node-addon-api: 8.5.0
@@ -5938,10 +5904,6 @@ snapshots:
       - typescript
 
   dargs@8.1.0: {}
-
-  debug@2.6.9:
-    dependencies:
-      ms: 2.0.0
 
   debug@4.4.3:
     dependencies:
@@ -7457,19 +7419,7 @@ snapshots:
 
   moment@2.30.1: {}
 
-  morgan@1.10.1:
-    dependencies:
-      basic-auth: 2.0.1
-      debug: 2.6.9
-      depd: 2.0.0
-      on-finished: 2.3.0
-      on-headers: 1.1.0
-    transitivePeerDependencies:
-      - supports-color
-
   mrmime@2.0.1: {}
-
-  ms@2.0.0: {}
 
   ms@2.1.3: {}
 
@@ -7571,15 +7521,9 @@ snapshots:
 
   ohash@2.0.11: {}
 
-  on-finished@2.3.0:
-    dependencies:
-      ee-first: 1.1.1
-
   on-finished@2.4.1:
     dependencies:
       ee-first: 1.1.1
-
-  on-headers@1.1.0: {}
 
   once@1.4.0:
     dependencies:

@@ -32,6 +32,6 @@
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true
 	},
-	"include": ["src", "tests", "test/vitest-globals.d.ts"],
+	"include": ["src/**/*", "tests/**/*", "src/shared/@types/**/*", "test/vitest-globals.d.ts"],
 	"exclude": ["node_modules", "dist"]
 }

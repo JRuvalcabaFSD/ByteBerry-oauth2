@@ -47,6 +47,7 @@ export interface IConfig {
 	readonly logLevel: LogLevel;
 	readonly logRequests: boolean;
 	readonly jwtIssuer: string;
+	readonly corsOrigins: string[];
 
 	//OAuth envs
 

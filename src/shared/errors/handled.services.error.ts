@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 
-import { ConfigError, ContainerError, getErrMsg, getErrStack, getUTCTimestamp } from '@shared';
+import { BootstrapError, ConfigError, ContainerError, getErrMsg, getErrStack, getUTCTimestamp } from '@shared';
 
 //TODO documentar
 const HANDLERS = new Map<string, (error: any) => void>([
@@ -9,13 +9,15 @@ const HANDLERS = new Map<string, (error: any) => void>([
 		'config',
 		(error: ConfigError) => {
 			const timestamp = getUTCTimestamp();
-			// Leer NODE_ENV en tiempo de ejecución
 			const message = process.env.NODE_ENV === 'production' ? 'Configuration error' : error.message;
+			const context = error.context;
 			let stack = null;
 			if (process.env.NODE_ENV === 'development') {
 				stack = getErrStack(error);
 			}
-			console.log(`${timestamp} [ByteBerry-OAuth2] ${message}${stack ? `\n${stack}` : ''}`);
+			console.log(
+				`${timestamp} [ByteBerry-OAuth2] ${message}${context ? `\n${JSON.stringify(context, null, 2)}` : ''}${stack ? `\n${stack}` : ''}`
+			);
 		},
 	],
 	[
@@ -24,7 +26,6 @@ const HANDLERS = new Map<string, (error: any) => void>([
 			const timestamp = getUTCTimestamp();
 			const message = process.env.NODE_ENV === 'production' ? 'Container error' : error.message;
 			let stack = null;
-			// Leer NODE_ENV en tiempo de ejecución
 			if (process.env.NODE_ENV === 'development') {
 				stack = getErrStack(error);
 			}
@@ -33,15 +34,19 @@ const HANDLERS = new Map<string, (error: any) => void>([
 	],
 	[
 		'bootstrap',
-		(error: ContainerError) => {
+		(error: BootstrapError) => {
+			console.log('debug', error);
+
 			const timestamp = getUTCTimestamp();
 			const message = process.env.NODE_ENV === 'production' ? 'Bootstrap error' : error.message;
+			const context = error.context;
 			let stack = null;
-			// Leer NODE_ENV en tiempo de ejecución
 			if (process.env.NODE_ENV === 'development') {
 				stack = getErrStack(error);
 			}
-			console.log(`${timestamp} [ByteBerry-OAuth2] ${message}${stack ? `\n${stack}` : ''}`);
+			console.log(
+				`${timestamp} [ByteBerry-OAuth2] ${message}${context ? `\n${JSON.stringify(context, null, 2)}` : ''}${stack ? `\n${stack}` : ''}`
+			);
 		},
 	],
 ]);

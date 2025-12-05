@@ -7,5 +7,23 @@
 		"dist": true,
 		"**/node_modules": true
 	},
-	"cSpell.words": ["Logform", "SSSZ"]
+	"cSpell.words": ["Logform", "SSSZ"],
+	"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit"
+	},
+	"eslint.format.enable": true,
+	"[json]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
+	}
 }

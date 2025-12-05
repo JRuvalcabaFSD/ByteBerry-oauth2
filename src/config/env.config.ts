@@ -14,6 +14,7 @@ export class Config implements IConfig {
 	public readonly version: string;
 	public readonly serviceName: string;
 	public readonly jwtIssuer: string;
+	public readonly corsOrigins: string[];
 
 	//TODO documentar
 	constructor() {
@@ -28,6 +29,9 @@ export class Config implements IConfig {
 
 			this.logLevel = logLevel;
 			this.logRequests = logRequest;
+			this.corsOrigins = this.normalizeUrls(
+				env.get('CORS_ORIGINS').default('http://localhost:5173,http://localhost:4002,http://localhost:4003').asArray()
+			);
 			this.jwtIssuer = this.normalizeUrls(env.get('JWT_ISSUER').default('http://localhost:4000').asUrlString());
 			this.version = pkg.version || '0.0.0';
 		} catch (error) {
