@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Config } from '@config';
+import pkg from '../../../package.json' with { type: 'json' };
 
 // Mock de dotenv
 vi.mock('dotenv', () => ({
@@ -28,7 +29,7 @@ describe('Config', () => {
 			expect(config.port).toBe(4000);
 			expect(config.logLevel).toBe('info');
 			expect(config.logRequests).toBe(true);
-			expect(config.version).toBe('0.0.0');
+			expect(config.version).toBe(pkg.version);
 		});
 
 		it('should load configuration with custom environment values', async () => {
@@ -156,7 +157,7 @@ describe('Config', () => {
 
 		beforeEach(() => {
 			config = new Config();
-			consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
 		});
 
 		it('should normalize single URL with uppercase protocol', () => {
