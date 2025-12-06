@@ -68,14 +68,6 @@ jobs:
           # cp .env.test.example .env.test
           echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public" >> .env.test
 
-      # TODO F2
-      # - name: 📊 Run Prisma migrations
-      #   run: |
-      #     export NODE_ENV=test
-      #     export DATABASE_URL="postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public"
-      #     pnpm prisma migrate deploy --schema=./prisma/schema.prisma
-      #     pnpm prisma generate
-
       - name: 📝 Run full validation
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public
@@ -88,6 +80,7 @@ jobs:
           pnpm build
           pnpm test
           pnpm test:integration
+
       - name: 📦 Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -252,16 +245,18 @@ jobs:
       version: ${{ steps.get-version.outputs.version }}
       tag: ${{ steps.get-version.outputs.tag }}
     steps:
-      - name: ⚙️ Start ssh-agent and add key
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Create GitHub App installation token
+        id: app-token
+        uses: tibdex/github-app-token@v2
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: 📥 Checkout code (via SSH)
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: 📥 Checkout code with App token
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false # IMPORTANTE: evita que GITHUB_TOKEN reescriba el remoto
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: 📦 Setup pnpm
         uses: pnpm/action-setup@v4
@@ -275,46 +270,11 @@ jobs:
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: 🔐 Add github.com to known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-
-      - name: 🔧 Force remote to SSH & configure git
-        run: |
-          git remote set-url origin git@github.com:${{ github.repository }}.git
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: "🔎 Debug: mostrar remote y config git"
-        run: |
-          echo "---- git remote -v ----"
-          git remote -v || true
-          echo "---- remote.origin.url ----"
-          git config --get remote.origin.url || true
-          echo "---- git user ----"
-          git config user.name || true
-          git config user.email || true
-
-      - name: "🔐 Debug: probar autenticación SSH con GitHub"
-        run: |
-          # salida no-fatal: muestra si la clave SSH está autenticando
-          ssh -o StrictHostKeyChecking=no -T git@github.com || true
-
-      - name: "🔁 Debug: dry-run push por SSH"
-        env:
-          GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no -v"
-        run: |
-          # sólo ejecutar --unshallow si el repo es shallow
-          if [ -f .git/shallow ]; then git fetch --unshallow || true; fi
-          git push --tags --dry-run git@github.com:${{ github.repository }} HEAD:main || true
-
       - name: 📦 Run semantic-release (REAL)
         id: sr
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # usado por @semantic-release/github
-          GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no -v" # fuerza uso de SSH para cualquier git interno
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }} # token from GitHub App installation
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           echo "🚀 Running semantic-release to publish..."
           pnpm dlx semantic-release --no-ci
@@ -347,12 +307,18 @@ jobs:
     needs: [release, docker]
     if: needs.release.result == 'success'
     steps:
-      - name: 📥 Checkout code
+      - name: Create GitHub App installation token
+        id: app-token-sync
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: 📥 Checkout code with App token
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          token: ${{ steps.app-token-sync.outputs.token }}
 
       - name: 🔍 Check if sync needed
         id: check
@@ -412,7 +378,7 @@ jobs:
             * Commit: ${{ github.sha }}"
           fi
 
-          # Push develop
+          # Push develop (credentials come from checkout token)
           git push origin develop
           echo "✅ Develop synced with release $RELEASE_TAG"
 
