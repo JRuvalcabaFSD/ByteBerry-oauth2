@@ -71,8 +71,12 @@ describe('HttpServer', () => {
 			close: vi.fn((callback?: Function) => {
 				if (callback) callback();
 			}),
+			address: vi.fn(() => ({
+				port: 4000,
+				family: 'IPv4',
+				address: '127.0.0.1',
+			})),
 		} as any;
-
 		mockApp = {
 			set: vi.fn(),
 			disable: vi.fn(),

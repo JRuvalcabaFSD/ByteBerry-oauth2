@@ -5,10 +5,18 @@ export default defineConfig({
 	test: {
 		globals: true,
 		environment: 'node',
-		include: ['tests/**/*.test.ts'],
+
+		// Incluir tests unitarios e integración
+		include: ['tests/unit/**/*.test.ts', 'tests/integration/**/*.integration.test.ts'],
+
+		// Timeouts más largos para tests de integración
+		testTimeout: 10000,
+		hookTimeout: 10000,
+
+		// Cobertura - deshabilitada por defecto para desarrollo
 		coverage: {
 			provider: 'v8',
-			enabled: true,
+			enabled: false, // Cambiado a false para que no se ejecute por defecto
 			thresholds: {
 				lines: 80,
 				functions: 80,
@@ -19,10 +27,10 @@ export default defineConfig({
 			exclude: [
 				'**/*.d.ts',
 				'**/*.config.{ts,js}',
-				'src/main.ts', // si tienes un entrypoint
-				'src/index.ts',
-				'app.ts',
+				'src/app.ts', // Entry point
 				'tests/**',
+				'**/*.test.ts',
+				'**/*.integration.test.ts',
 			],
 			reporter: ['text', 'html', 'clover', 'json', 'lcov'],
 		},

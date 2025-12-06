@@ -25,5 +25,9 @@
 	},
 	"[javascript]": {
 		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
-	}
+	},
+	"vitest.enable": true,
+	"vitest.commandLine": "pnpm vitest",
+	"vitest.coverage.enabled": false,
+	"vitest.filesWatchMode": "test"
 }

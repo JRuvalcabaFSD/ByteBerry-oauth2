@@ -159,8 +159,17 @@ export class HttpServer implements IHttpServer {
 	 */
 
 	public getServeInfo(): ServerInfo {
+		// Get the actual port if server is running and port was dynamically assigned
+		let actualPort = this.config.port;
+		if (this.server && this.isRunning()) {
+			const address = this.server.address();
+			if (address && typeof address === 'object') {
+				actualPort = address.port;
+			}
+		}
+
 		return {
-			port: this.config.port,
+			port: actualPort,
 			isRunning: this.isRunning(),
 			...(this.startTime && { startTime: this.startTime }),
 		};

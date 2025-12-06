@@ -36,8 +36,11 @@
 		"prebuild": "pnpm run clean",
 		"release": "semantic-release",
 		"start": "node dist/src/app.js",
+		"test:all": "vitest tests/unit tests/integration",
 		"test:coverage": "vitest --coverage",
+		"test:integration": "vitest --config vitest.integration.config.ts",
 		"test:ui": "vitest --ui",
+		"test:unit": "vitest tests/unit",
 		"test:watch": "vitest --watch",
 		"test": "vitest",
 		"type-check": "tsc --noEmit"

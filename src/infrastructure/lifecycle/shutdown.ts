@@ -62,6 +62,10 @@ export class GracefulShutdown {
 	private shutdownPromise?: Promise<void>;
 	public registerCleanupsCount: number = 0;
 
+	private static readonly handlers: Partial<
+		Record<NodeJS.Signals | 'uncaughtException' | 'unhandledRejection', (...args: unknown[]) => void>
+	> = {};
+
 	/**
 	 * Creates an instance of the shutdown handler.
 	 *
@@ -170,10 +174,14 @@ export class GracefulShutdown {
 
 	@LogContextMethod()
 	private setupSignalHandlers(): void {
+		const removeListener = process.off?.bind(process) ?? process.removeListener.bind(process);
 		const signals: NodeJS.Signals[] = ['SIGTERM', 'SIGINT'];
 
 		signals.forEach((signal) => {
-			process.on(signal, () => {
+			const existing = GracefulShutdown.handlers[signal];
+			if (existing) removeListener(signal, existing);
+
+			const handler = () => {
 				this.logger.info(`Received ${signal}, starting graceful shutdown...`);
 				this.shutdown()
 					.then(() => {
@@ -184,17 +192,29 @@ export class GracefulShutdown {
 						this.logger.info('Graceful shutdown failed', { error: getErrMsg(error) });
 						process.exit(1);
 					});
-			});
+			};
+
+			GracefulShutdown.handlers[signal] = handler;
+			process.on(signal, handler);
 		});
 
-		process.on('uncaughtException', (error) => {
+		const uncaughtHandler = (error: unknown) => {
 			this.logger.error(`Uncaught exception`, { error: getErrMsg(error) });
 			this.shutdown().finally(() => process.exit(1));
-		});
-
-		process.on('unhandledRejection', (reason) => {
+		};
+		const unhandledHandler = (reason: unknown) => {
 			this.logger.error(`Unhandled rejection`, { reason: String(reason) });
 			this.shutdown().finally(() => process.exit(1));
-		});
+		};
+
+		const existingUncaught = GracefulShutdown.handlers.uncaughtException;
+		if (existingUncaught) removeListener('uncaughtException', existingUncaught);
+		GracefulShutdown.handlers.uncaughtException = uncaughtHandler;
+		process.on('uncaughtException', uncaughtHandler);
+
+		const existingUnhandled = GracefulShutdown.handlers.unhandledRejection;
+		if (existingUnhandled) removeListener('unhandledRejection', existingUnhandled);
+		GracefulShutdown.handlers.unhandledRejection = unhandledHandler;
+		process.on('unhandledRejection', unhandledHandler);
 	}
 }
