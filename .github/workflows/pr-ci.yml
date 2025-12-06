@@ -78,8 +78,9 @@ jobs:
       - name: 🔍 Run ESLint
         run: pnpm lint
 
-      - name: Generate Prisma Client
-        run: pnpm prisma generate
+      # TODO F2
+      # - name: Generate Prisma Client
+      #   run: pnpm prisma generate
 
       - name: 📏 Check TypeScript types
         run: pnpm type-check
@@ -120,19 +121,19 @@ jobs:
       # - name: Generate Prisma Client
       #   run: pnpm prisma generate
 
-      # - name: 🏗️ Build TypeScript
-      #   run: pnpm build
+      - name: 🏗️ Build TypeScript
+        run: pnpm build
 
-      # - name: 📊 Verify build output
-      #   run: |
-      #     echo "🔍 Checking build artifacts..."
-      #     ls -la dist/
-      #     echo ""
-      #     echo "📦 Build size:"
-      #     du -sh dist/
-      #     echo ""
-      #     echo "📄 Entry point check:"
-      #     [ -f "dist/src/app.js" ] && echo "✅ app.js exists" || exit 1
+      - name: 📊 Verify build output
+        run: |
+          echo "🔍 Checking build artifacts..."
+          ls -la dist/
+          echo ""
+          echo "📦 Build size:"
+          du -sh dist/
+          echo ""
+          echo "📄 Entry point check:"
+          [ -f "dist/src/app.js" ] && echo "✅ app.js exists" || exit 1
 
       - name: 📦 Upload build artifacts
         uses: actions/upload-artifact@v4
