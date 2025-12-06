@@ -154,7 +154,8 @@
 						"pnpm-lock.yaml"
 					],
 					"message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
-					"skipCi": true
+					"skipCi": true,
+					"gitRemote": "git@github.com:JRuvalcabaFSD/ByteBerry-OAuth2.git"
 				}
 			]
 		]
