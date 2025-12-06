@@ -69,6 +69,7 @@
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-prettier": "^5.5.4",
 		"globals": "^16.5.0",
+		"http-server": "^14.1.1",
 		"jiti": "^2.6.1",
 		"jsdoc": "^4.0.5",
 		"prettier": "^3.7.3",
@@ -95,6 +96,7 @@
 		"helmet": "^8.1.0",
 		"jsonwebtoken": "^9.0.2",
 		"pg": "^8.16.3",
+		"rimraf": "^6.1.2",
 		"winston": "^3.18.3",
 		"winston-daily-rotate-file": "^5.0.0"
 	},
