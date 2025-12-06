@@ -256,22 +256,21 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
       - name: 📥 Checkout code (via SSH)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
+          persist-credentials: false # IMPORTANTE: evita que GITHUB_TOKEN reescriba el remoto
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v4
 
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile
@@ -300,21 +299,22 @@ jobs:
 
       - name: "🔐 Debug: probar autenticación SSH con GitHub"
         run: |
-          # prueba de conexión SSH (salida no-fatal)
+          # salida no-fatal: muestra si la clave SSH está autenticando
           ssh -o StrictHostKeyChecking=no -T git@github.com || true
 
       - name: "🔁 Debug: dry-run push por SSH"
         env:
           GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no -v"
         run: |
-          # intentar un push de prueba en modo dry-run para ver si la conexión autorizada permitiría el push
-          git fetch --unshallow || true
+          # sólo ejecutar --unshallow si el repo es shallow
+          if [ -f .git/shallow ]; then git fetch --unshallow || true; fi
           git push --tags --dry-run git@github.com:${{ github.repository }} HEAD:main || true
 
       - name: 📦 Run semantic-release (REAL)
         id: sr
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # seguir usándolo para llamadas a la API de GitHub
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # usado por @semantic-release/github
+          GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no -v" # fuerza uso de SSH para cualquier git interno
         run: |
           echo "🚀 Running semantic-release to publish..."
           pnpm dlx semantic-release --no-ci
@@ -322,15 +322,9 @@ jobs:
       - name: 📋 Get published version
         id: get-version
         run: |
-          # Traer todos los tags
           git fetch --tags
-
-          # Obtener el último tag creado (el que acabó de crear semantic-release)
           TAG=$(git describe --tags --abbrev=0)
-
-          # Extraer versión quitando la "v" del inicio
           VERSION=${TAG#v}
-
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "✅ Published version: $VERSION"
