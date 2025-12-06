@@ -42,8 +42,9 @@ jobs:
           path: node_modules
           key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - name: Generate Prisma Client
-        run: pnpm prisma generate
+      # TODO F2
+      # - name: Generate Prisma Client
+      #   run: pnpm prisma generate
 
       - name: 🏗️ Generate documentation
         run: pnpm run docs:ci
