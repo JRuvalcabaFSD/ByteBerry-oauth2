@@ -44,7 +44,7 @@ export default defineConfig([
 		},
 	},
 	{
-		files: ['tsconfig.json', '.vscode/**/*', '.prettierrc', '.prettierignore', 'package.json', '.github/**/*'],
+		files: ['tsconfig.json', '.vscode/**/*', '.prettierrc', '.prettierignore', 'package.json', '.github/**/*', 'typedoc.json'],
 		rules: {
 			'@typescript-eslint/no-unused-expressions': 'off',
 			'@typescript-eslint/no-unused-vars': 'off',

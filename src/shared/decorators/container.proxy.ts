@@ -15,9 +15,10 @@ import { withLoggerContext } from '@shared';
  * @remarks
  * This shape is commonly used for dependency-injection containers or container proxies that expose a `resolve` method.
  * Implementations may throw if the token cannot be resolved.
+ *
  */
 
-type HasResolve = {
+export type HasResolve = {
 	resolve<T = any>(token: unknown, ...rest: unknown[]): T;
 };
 

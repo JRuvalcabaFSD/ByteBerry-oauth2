@@ -2,7 +2,7 @@
  * Interface for UUID generation and validation services.
  *
  * @interface IUuid
- * @description Provides methods for generating universally unique identifiers (UUIDs)
+ * Provides methods for generating universally unique identifiers (UUIDs)
  * and validating UUID strings.
  */
 
