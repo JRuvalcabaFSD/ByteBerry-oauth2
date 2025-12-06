@@ -1,25 +1,33 @@
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
-import markdown from '@eslint/markdown';
-import json from '@eslint/json';
 import globals from 'globals';
 import js from '@eslint/js';
 
 export default defineConfig([
+	{
+		ignores: [
+			'coverage/**',
+			'.vscode/**',
+			'dist/**',
+			'.github/**',
+			'docs/**',
+			'tests/**',
+			'logs/**',
+			'node_modules/**',
+			'scripts/**',
+			'generated/**',
+		],
+	},
 	{
 		...js.configs.recommended,
 		files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
 		languageOptions: { globals: globals.node },
 	},
 	...tseslint.configs.recommended,
-	{
-		...json.configs.recommended,
-		files: ['**/*.json', '**/*.jsonc'],
-	},
-	...markdown.configs.recommended,
 	eslintPluginPrettierRecommended,
 	{
+		files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
 		rules: {
 			'no-console': 'warn',
 			'@typescript-eslint/no-unused-vars': [
@@ -41,13 +49,6 @@ export default defineConfig([
 					endOfLine: 'auto',
 				},
 			],
-		},
-	},
-	{
-		files: ['tsconfig.json', '.vscode/**/*', '.prettierrc', '.prettierignore', 'package.json', '.github/**/*', 'typedoc.json'],
-		rules: {
-			'@typescript-eslint/no-unused-expressions': 'off',
-			'@typescript-eslint/no-unused-vars': 'off',
 		},
 	},
 ]);
