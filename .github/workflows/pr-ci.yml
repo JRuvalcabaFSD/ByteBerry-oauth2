@@ -191,7 +191,8 @@ jobs:
       - name: 🔧 Setup test environment
 
         run: |
-          cp .env.test.example .env.test
+          # TODO F2
+          # cp .env.test.example .env.test
           # Override DATABASE_URL for CI
           echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public" >> .env.test
 
