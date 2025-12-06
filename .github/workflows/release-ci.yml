@@ -252,29 +252,57 @@ jobs:
       version: ${{ steps.get-version.outputs.version }}
       tag: ${{ steps.get-version.outputs.tag }}
     steps:
-      - name: 📥 Checkout code
+      - name: ⚙️ Start ssh-agent and add key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 📥 Checkout code (via SSH)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          persist-credentials: true
 
-      - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: 🔐 Add github.com to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
 
-      - name: 🔧 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
+      - name: 🔧 Force remote to SSH & configure git
+        run: |
+          git remote set-url origin git@github.com:${{ github.repository }}.git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: 📥 Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: "🔎 Debug: mostrar remote y config git"
+        run: |
+          echo "---- git remote -v ----"
+          git remote -v || true
+          echo "---- remote.origin.url ----"
+          git config --get remote.origin.url || true
+          echo "---- git user ----"
+          git config user.name || true
+          git config user.email || true
+
+      - name: "🔐 Debug: probar autenticación SSH con GitHub"
+        run: |
+          # prueba de conexión SSH (salida no-fatal)
+          ssh -o StrictHostKeyChecking=no -T git@github.com || true
+
+      - name: "🔁 Debug: dry-run push por SSH"
+        env:
+          GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no -v"
+        run: |
+          # intentar un push de prueba en modo dry-run para ver si la conexión autorizada permitiría el push
+          git fetch --unshallow || true
+          git push --tags --dry-run git@github.com:${{ github.repository }} HEAD:main || true
 
       - name: 📦 Run semantic-release (REAL)
         id: sr
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # seguir usándolo para llamadas a la API de GitHub
         run: |
           echo "🚀 Running semantic-release to publish..."
           pnpm dlx semantic-release --no-ci
@@ -310,14 +338,15 @@ jobs:
   sync-develop:
     name: 🔄 Sync develop with release
     runs-on: ubuntu-latest
-    needs: [release]
+    needs: [release, docker]
     if: needs.release.result == 'success'
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: 🔍 Check if sync needed
         id: check
