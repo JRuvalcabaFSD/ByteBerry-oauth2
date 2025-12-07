@@ -61,6 +61,9 @@ RUN dos2unix /tmp/update-version.sh && \
 # Compilar TypeScript
 RUN pnpm build
 
+# Eliminar sourcemaps para producción
+RUN find ./dist -name '*.map' -delete
+
 # ============================================================================
 # Stage 3: Runtime (Imagen Final Mínima)
 # ============================================================================
