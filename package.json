@@ -23,7 +23,7 @@
 		"clean": "rm -rf dist",
 		"commit": "git-cz",
 		"dev": "tsx --watch src/app.ts",
-		"docker:build": "./scripts/docker-build.sh",
+		"docker:build": "TEST_VERSION=2.0.0 ./scripts/docker-build.sh",
 		"docker:run": "docker run --rm -p 4000:4000 --env-file .env jruvalcabafsd/byteberry-oauth2:dev",
 		"docs:build": "pnpm run docs:clean && pnpm run docs:generate",
 		"docs:ci": "pnpm run docs:build && echo 'Documentation generated successfully'",

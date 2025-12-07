@@ -23,6 +23,7 @@ RUN pnpm install --prod --no-frozen-lockfile
 FROM node:22-alpine AS builder
 
 RUN corepack enable && corepack prepare pnpm@10.20.0 --activate
+RUN apk add --no-cache jq dos2unix
 
 WORKDIR /app
 
@@ -53,7 +54,9 @@ ENV APP_VERSION=${VERSION}
 # Script para actualizar version en package.json
 # Inyecta versión
 COPY scripts/update-version.sh /tmp/update-version.sh
-RUN chmod +x scripts/update-version.sh && ./scripts/update-version.sh || true
+RUN dos2unix /tmp/update-version.sh && \
+    chmod +x /tmp/update-version.sh && \
+    /tmp/update-version.sh "${APP_VERSION}"
 
 # Compilar TypeScript
 RUN pnpm build
@@ -62,6 +65,10 @@ RUN pnpm build
 # Stage 3: Runtime (Imagen Final Mínima)
 # ============================================================================
 FROM node:22-alpine AS runtime
+
+# ARG VERSION inyectado desde GitHub Actions
+ARG VERSION=dev
+ENV APP_VERSION=${VERSION}
 
 # Instalar solo dependencias runtime necesarias
 RUN apk add --no-cache dumb-init
