@@ -1,15 +1,21 @@
 import { GracefulShutdown } from '@infrastructure';
-import { IClock, IConfig, IHealthService, IHttpServer, ILogger, IUuid } from '@interfaces';
+import * as interfaces from '@interfaces';
+import { AuthorizationController } from '@presentation';
 
 // El objeto de servicios puede ser redefinido en los tests
 export const services = {
-	Config: {} as IConfig,
-	Clock: {} as IClock,
-	Logger: {} as ILogger,
-	Uuid: {} as IUuid,
-	HttpServer: {} as IHttpServer,
+	Config: {} as interfaces.IConfig,
+	Clock: {} as interfaces.IClock,
+	Logger: {} as interfaces.ILogger,
+	Uuid: {} as interfaces.IUuid,
+	HttpServer: {} as interfaces.IHttpServer,
 	GracefulShutdown: {} as GracefulShutdown,
-	HealthService: {} as IHealthService,
+	HealthService: {} as interfaces.IHealthService,
+	GenerateAuthCodeUseCase: {} as interfaces.IGenerateAuthCodeUseCase,
+	ValidateClientUseCase: {} as interfaces.IValidateClientUseCase,
+	AuthCodeRepository: {} as interfaces.IAuthCodeRepository,
+	OAuthClientRepository: {} as interfaces.IOAthClientRepository,
+	AuthController: {} as AuthorizationController,
 };
 
 /**

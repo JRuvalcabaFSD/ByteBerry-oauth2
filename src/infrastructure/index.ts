@@ -10,6 +10,10 @@ export * from './http/middlewares/security.middleware.js';
 export * from './lifecycle/shutdown.js';
 export * from './lifecycle/shutdownConfig.js';
 
+//Repositories
+export * from './repositories/mockOAuth.client.repository.js';
+export * from './repositories/inMemoryAuth.code.repository.js';
+
 //Services
 export * from './services/clock.service.js';
 export * from './services/winston.logger.service.js';

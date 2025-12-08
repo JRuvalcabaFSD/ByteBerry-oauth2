@@ -2,7 +2,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { IConfig, ILogger } from '@interfaces';
-import { getErrStack, withLoggerContext } from '@shared';
+import { getErrStack, HttpError, OAuthError, withLoggerContext } from '@shared';
 
 /**
  * Type definition for an error handling function in Express middleware.
@@ -28,11 +28,32 @@ type ErrorHandler = (error: Error, req: Request, res: Response, config: IConfig)
 //TODO documentar
 const HANDLERS = new Map<string, ErrorHandler>([
 	[
-		'CorsOriginError',
+		'oauth',
+		(error, req, res, _config) => {
+			const e = error as OAuthError;
+			const requestId = req.requestId || 'unknown';
+			if (e.statusCode === 401) res.setHeader('WWW-Authenticate', 'Bearer');
+			res.status(e.statusCode).json({
+				...e.toJSON(),
+				requestId,
+				timestamp: new Date().toISOString(),
+			});
+		},
+	],
+	[
+		'http',
 		(error, req, res, config) => {
-			res.status(200).json({
-				error: 'Invalid CORS',
-				message: config.isDevelopment() ? error.message : 'Origin not allowed by CORS',
+			const e = error as HttpError;
+			let message: string;
+			if (e.name === 'CorsOriginError') {
+				message = config.isDevelopment() ? e.message : 'Origin not allowed by CORS';
+			}
+
+			message = e.message;
+
+			res.status(e.statusCode).json({
+				error: e.cause,
+				message: message,
 				requestId: req.requestId || 'unknown',
 				timestamp: new Date().toISOString(),
 			});
@@ -96,7 +117,7 @@ export function createErrorMiddleware(logger: ILogger, config: IConfig) {
 			});
 		}
 
-		const handler = (err.name && HANDLERS.get(err.name)) || defaultHandler;
+		const handler = (err.errorType && HANDLERS.get(err.errorType)) || defaultHandler;
 
 		handler(error, req, res, config);
 	};

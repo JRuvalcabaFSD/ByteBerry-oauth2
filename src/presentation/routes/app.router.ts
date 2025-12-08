@@ -2,6 +2,7 @@ import { IContainer } from '@interfaces';
 import { Router, Request, Response } from 'express';
 import { HomeResponse } from 'src/interfaces/http/httpRequest.interface.js';
 import { createHeathRouter } from './health.routes.js';
+import { createOauth2Routes } from './oauth.routes.js';
 
 export function createAppRouter(c: IContainer): Router {
 	const router = Router();
@@ -10,6 +11,9 @@ export function createAppRouter(c: IContainer): Router {
 	const config = c.resolve('Config');
 	const clock = c.resolve('Clock');
 	const healthService = c.resolve('HealthService');
+
+	//OAuth2 routes
+	router.use('/', createOauth2Routes(c.resolve('AuthController')));
 
 	//Health router
 	router.use('/health', createHeathRouter(healthService));
