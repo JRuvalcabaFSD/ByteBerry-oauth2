@@ -52,6 +52,9 @@ export interface IConfig {
 	readonly jwtIssuer: string;
 	readonly jwtAudience: string[];
 	readonly jwtAccessTokenExpiresIn: number;
+	readonly jwtPrivateKey?: string | undefined;
+	readonly jwtPublicKey?: string | undefined;
+	readonly jwtKeyId: string;
 
 	//functions
 	isDevelopment(): boolean;

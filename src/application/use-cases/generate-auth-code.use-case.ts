@@ -114,7 +114,7 @@ export class GenerateAuthCodeUseCase implements IGenerateAuthCodeUseCase {
 				userId: '',
 				redirectUri: command.redirect_uri,
 				codeChallenge,
-				expirationMinutes: 0.5,
+				expirationMinutes: 1,
 				scope: command.scope,
 				state: command.state,
 			});

@@ -1,6 +1,7 @@
 import { GracefulShutdown } from '@infrastructure';
 import * as interfaces from '@interfaces';
 import { AuthorizationController, TokenController } from '@presentation';
+import { IKeyLoader } from 'src/interfaces/services/rsa-key-loader.interface.js';
 
 // El objeto de servicios puede ser redefinido en los tests
 export const services = {
@@ -15,6 +16,7 @@ export const services = {
 	JwtService: {} as interfaces.IJwtService,
 	PkceVerifierService: {} as interfaces.IPKceVerifierService,
 	HashService: {} as interfaces.IHashService,
+	RsaKeyLoaderService: {} as IKeyLoader,
 	GenerateAuthCodeUseCase: {} as interfaces.IGenerateAuthCodeUseCase,
 	ValidateClientUseCase: {} as interfaces.IValidateClientUseCase,
 	ExchangeCodeFotTokenUseCase: {} as interfaces.IExchangeCodeForTokenUseCase,

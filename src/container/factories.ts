@@ -3,8 +3,8 @@ import * as Interfaces from '@interfaces';
 import { Config } from '@config';
 import { ExchangeCodeForTokenUseCase, GenerateAuthCodeUseCase, PkceVerifierService, ValidateClientUseCase } from '@application';
 import { AuthorizationController, TokenController } from '@presentation';
-import { TokenRepository } from 'src/infrastructure/repositories/token.repository.js';
-import { NodeHashService } from 'src/infrastructure/services/sha256-hash.service.js';
+import { NodeHashService, TokenRepository } from '@infrastructure';
+import { RsaKeyLoaderService } from 'src/infrastructure/services/rsa-key-loader.service.js';
 
 /**
  * Creates and returns a new instance of the Config class.
@@ -186,22 +186,84 @@ export function createAuthController(c: Interfaces.IContainer): AuthorizationCon
 	return new AuthorizationController(c.resolve('GenerateAuthCodeUseCase'));
 }
 
+/**
+ * Factory function that creates and returns a new TokenRepository instance.
+ *
+ * This function resolves the Logger dependency from the provided container
+ * and injects it into the TokenRepository constructor.
+ *
+ * @param c - The dependency injection container that provides access to registered services
+ * @returns A new instance of TokenRepository with its dependencies resolved
+ */
+
 export function createTokenRepository(c: Interfaces.IContainer): Interfaces.ITokenRepository {
 	return new TokenRepository(c.resolve('Logger'));
 }
 
+/**
+ * Factory function that creates and configures a JWT service instance.
+ *
+ * @param c - The dependency injection container used to resolve dependencies
+ * @returns A configured IJwtService instance with JWT issuer, token expiration, audience settings,
+ *          RSA key loader service, and logger
+ *
+ * @remarks
+ * This factory resolves the following dependencies from the container:
+ * - Config: Provides JWT configuration (issuer, access token expiration, audience)
+ * - RsaKeyLoaderService: Service for loading RSA keys used in JWT signing/verification
+ * - Logger: Logging service for the JWT service
+ */
+
 export function createJwtService(c: Interfaces.IContainer): Interfaces.IJwtService {
 	const { jwtIssuer, jwtAccessTokenExpiresIn, jwtAudience } = c.resolve('Config');
-	return new Services.JwtService(jwtIssuer, jwtAccessTokenExpiresIn, jwtAudience, c.resolve('Logger'));
+	return new Services.JwtService(jwtIssuer, jwtAccessTokenExpiresIn, jwtAudience, c.resolve('RsaKeyLoaderService'), c.resolve('Logger'));
 }
+
+/**
+ * Creates and configures a PKCE (Proof Key for Code Exchange) verifier service instance.
+ *
+ * @param c - The dependency injection container used to resolve service dependencies
+ * @returns A new instance of IPKceVerifierService configured with HashService and Logger dependencies
+ *
+ * @remarks
+ * This factory function resolves the required dependencies (HashService and Logger) from the
+ * provided container and injects them into the PkceVerifierService constructor.
+ */
 
 export function createPkceVerifierService(c: Interfaces.IContainer): Interfaces.IPKceVerifierService {
 	return new PkceVerifierService(c.resolve('HashService'), c.resolve('Logger'));
 }
 
+/**
+ * Creates and returns a new instance of the hash service.
+ *
+ * @returns {Interfaces.IHashService} A new hash service instance that implements the IHashService interface.
+ *
+ * @example
+ * ```typescript
+ * const hashService = createHashService();
+ * ```
+ */
+
 export function createHashService(): Interfaces.IHashService {
 	return new NodeHashService();
 }
+
+/**
+ * Factory function to create an instance of `ExchangeCodeForTokenUseCase`.
+ *
+ * This use case handles the exchange of an authorization code for an access token,
+ * typically as part of the OAuth2 authorization flow. It resolves and injects the required
+ * dependencies from the provided container:
+ * - `AuthCodeRepository`: Manages authorization codes.
+ * - `TokenRepository`: Handles token storage and retrieval.
+ * - `Logger`: Used for logging operations.
+ * - `JwtService`: Provides JWT-related functionality.
+ * - `PkceVerifierService`: Verifies PKCE code challenges.
+ *
+ * @param c - The dependency injection container used to resolve required services.
+ * @returns An instance of `IExchangeCodeForTokenUseCase`.
+ */
 
 export function createExchangeCodeFotTokenUseCase(c: Interfaces.IContainer): Interfaces.IExchangeCodeForTokenUseCase {
 	return new ExchangeCodeForTokenUseCase(
@@ -213,6 +275,24 @@ export function createExchangeCodeFotTokenUseCase(c: Interfaces.IContainer): Int
 	);
 }
 
+/**
+ * Factory function to create an instance of {@link TokenController}.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies.
+ * @returns A new instance of {@link TokenController} initialized with the resolved `ExchangeCodeFotTokenUseCase`.
+ */
+
 export function createTokenController(c: Interfaces.IContainer): TokenController {
 	return new TokenController(c.resolve('ExchangeCodeFotTokenUseCase'));
+}
+
+/**
+ * Factory function to create an instance of `RsaKeyLoaderService`.
+ *
+ * @param c - The dependency injection container used to resolve required services.
+ * @returns An instance of `Interfaces.IKeyLoader` initialized with configuration from the container.
+ */
+
+export function createRsaKeyLoaderService(c: Interfaces.IContainer): Interfaces.IKeyLoader {
+	return new RsaKeyLoaderService(c.resolve('Config'));
 }

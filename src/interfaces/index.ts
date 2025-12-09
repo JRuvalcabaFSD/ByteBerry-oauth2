@@ -20,6 +20,7 @@ export * from './services/jwt-service.interface.js';
 export * from './services/logger-service.interface.js';
 export * from './services/pkce-verifier-service.interface.js';
 export * from './services/uuid-service.interface.js';
+export * from './services/rsa-key-loader.interface.js';
 
 //Use Cases
 export * from './use-case/generate-auth-code.use-case.interface.ts.js';

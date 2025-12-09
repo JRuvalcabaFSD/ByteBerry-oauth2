@@ -1,6 +1,7 @@
 import { IJwtPayload, IJwtService, ILogger } from '@interfaces';
 import { getErrMsg, InvalidTokenError } from '@shared';
 import jwt, { SignOptions } from 'jsonwebtoken';
+import { IKeyLoader } from 'src/interfaces/services/rsa-key-loader.interface.js';
 
 const { JsonWebTokenError, sign, TokenExpiredError, verify, decode } = jwt;
 
@@ -34,8 +35,7 @@ const { JsonWebTokenError, sign, TokenExpiredError, verify, decode } = jwt;
  */
 
 export class JwtService implements IJwtService {
-	private readonly algorithm = 'HS256'; // TODO remover al crear llaves
-	// private readonly algorithm = 'RS256';
+	private readonly algorithm = 'RS256';
 
 	/**
 	 * Creates an instance of the JWT service.
@@ -50,6 +50,7 @@ export class JwtService implements IJwtService {
 		private readonly issuer: string,
 		private readonly expiresIn: number,
 		private readonly audience: string | string[] | undefined,
+		private readonly KeysLoader: IKeyLoader,
 		private readonly logger: ILogger
 	) {}
 
@@ -87,9 +88,8 @@ export class JwtService implements IJwtService {
 		this.logger.debug('Generating JWT access token', { sub: payload.sub, expiresIn: this.expiresIn });
 
 		try {
-			// TODO Implementar keys Provider
-			const privateKey = 'Temporal Key';
-			const keyId = 'Key-T-001';
+			const privateKey = this.KeysLoader.getPrivateKey();
+			const keyId = this.KeysLoader.getKeyId();
 
 			const tokenPayload: Omit<IJwtPayload, 'iat' | 'exp'> = {
 				sub: payload.sub,
@@ -141,8 +141,7 @@ export class JwtService implements IJwtService {
 		this.logger.debug('Verifying JWT token');
 
 		try {
-			// TODO implementar key provider
-			const publicKey = 'Temporal Key';
+			const publicKey = this.KeysLoader.getPublicKey();
 
 			const decoded = verify(token, publicKey, { algorithms: [this.algorithm], issuer: this.issuer });
 
