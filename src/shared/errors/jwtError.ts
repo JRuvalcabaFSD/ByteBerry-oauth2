@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AppError } from './app.error.js';
 
 /**
@@ -23,11 +24,28 @@ export class InvalidTokenError extends AppError {
 	 * @param statusCode - The HTTP status code associated with the error (defaults to 401 Unauthorized)
 	 */
 
-	constructor(
-		message: string,
-		public readonly statusCode: number = 401
-	) {
-		super(message, 'oauth');
+	constructor(message: any, statusCode: any = 401) {
+		let msg: string;
+		if (message === null) {
+			msg = 'null';
+		} else if (typeof message === 'undefined') {
+			msg = 'undefined';
+		} else {
+			msg = String(message);
+		}
+		super(msg, 'oauth');
 		this.name = 'InvalidTokenError';
+		Object.defineProperty(this, 'message', {
+			value: msg,
+			enumerable: true,
+			writable: true,
+			configurable: true,
+		});
+		Object.defineProperty(this, 'statusCode', {
+			value: statusCode,
+			enumerable: true,
+			writable: false,
+			configurable: true,
+		});
 	}
 }

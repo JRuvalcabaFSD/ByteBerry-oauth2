@@ -29,7 +29,7 @@ import { ParsedQs } from 'qs';
 
 export class TokenRequestCommand {
 	private constructor(
-		public readonly grand_type: string,
+		public readonly grant_type: string,
 		public readonly code: string,
 		public readonly redirect_uri: string,
 		public readonly client_id: string,
@@ -72,7 +72,7 @@ export class TokenRequestCommand {
 		if (query.grant_type !== 'authorization_code') throw new InvalidRequestError('Only authorization_code grant type is supported');
 
 		return new TokenRequestCommand(
-			query.grand_type as string,
+			query.grant_type as string,
 			query.code as string,
 			query.redirect_uri as string,
 			query.client_id as string,

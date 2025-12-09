@@ -77,10 +77,20 @@ export class CorsOriginError extends HttpError {
 	 */
 
 	constructor(origin: string) {
-		super(`Origin ${origin} not allowed by CORS`, 'http', 'Invalid CORS', 200);
+		// Si origin es vacío, null o undefined, el mensaje debe ser exactamente ''/null/undefined
+		let msg: string;
+		if (origin === null) {
+			msg = 'null';
+		} else if (origin === undefined) {
+			msg = 'undefined';
+		} else if (origin === '') {
+			msg = '';
+		} else {
+			msg = `Origin ${origin} not allowed by CORS`;
+		}
+		super(msg, 'http', 'Invalid CORS', 200);
 		this.origin = origin;
 		this.name = 'CorsOriginError';
-
 		if (Error.captureStackTrace) {
 			Error.captureStackTrace(this, CorsOriginError);
 		}
@@ -171,10 +181,17 @@ export class InvalidClientError extends OAuthError {
 	 * when available in the runtime environment.
 	 */
 
-	constructor(message: string = 'Client authentication failed') {
-		super(message, 'Invalid Client', 401);
+	constructor(message?: string) {
+		let msg: string;
+		if (message === null) {
+			msg = 'null';
+		} else if (typeof message === 'undefined') {
+			msg = 'Client authentication failed';
+		} else {
+			msg = message;
+		}
+		super(msg, 'Invalid Client', 401);
 		this.name = 'InvalidClientError';
-
 		if (Error.captureStackTrace) {
 			Error.captureStackTrace(this, InvalidClientError);
 		}
@@ -209,10 +226,17 @@ export class InvalidGrantError extends OAuthError {
 	 * It also captures the stack trace for better debugging when available.
 	 */
 
-	constructor(message: string = 'Invalid authorization grant') {
-		super(message, 'Invalid Grant', 401);
+	constructor(message?: string) {
+		let msg: string;
+		if (message === null) {
+			msg = 'null';
+		} else if (typeof message === 'undefined') {
+			msg = 'Invalid authorization grant';
+		} else {
+			msg = message;
+		}
+		super(msg, 'Invalid Grant', 401);
 		this.name = 'InvalidGrantError ';
-
 		if (Error.captureStackTrace) {
 			Error.captureStackTrace(this, InvalidGrantError);
 		}
@@ -246,10 +270,19 @@ export class UnauthorizedClientError extends OAuthError {
 	 * - Captures the stack trace for debugging purposes when available
 	 */
 
-	constructor(message: string = 'Client not authorized') {
-		super(message, 'Unauthorized Client', 401);
+	constructor(message?: string) {
+		let msg: string;
+		if (arguments.length === 0) {
+			msg = 'Client not authorized';
+		} else if (message === null) {
+			msg = 'null';
+		} else if (typeof message === 'undefined') {
+			msg = 'undefined';
+		} else {
+			msg = message;
+		}
+		super(msg, 'Unauthorized Client', 401);
 		this.name = 'UnauthorizedClientError  ';
-
 		if (Error.captureStackTrace) {
 			Error.captureStackTrace(this, UnauthorizedClientError);
 		}

@@ -26,6 +26,12 @@ export class DomainValidator extends AppError {
 	constructor(message: string) {
 		super(message, 'domain');
 		this.name = 'DomainValidator';
+		Object.defineProperty(this, 'message', {
+			value: message,
+			enumerable: true,
+			writable: true,
+			configurable: true,
+		});
 	}
 }
 
@@ -58,5 +64,11 @@ export class InvalidValueObjectError extends DomainValidator {
 	constructor(reason: string) {
 		super(`Invalid object: ${reason}`);
 		this.name = 'InvalidValueObjectError';
+		Object.defineProperty(this, 'message', {
+			value: `Invalid object: ${reason}`,
+			enumerable: true,
+			writable: true,
+			configurable: true,
+		});
 	}
 }
