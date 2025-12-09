@@ -101,7 +101,7 @@ export class AuthCodeEntity {
 
 	static create(params: AuthCodeParams): AuthCodeEntity {
 		const expiresAt = new Date();
-		expiresAt.setMinutes(expiresAt.getMinutes() + (params.expirationMinutes || 5));
+		expiresAt.setMinutes(expiresAt.getMinutes() + (params.expirationMinutes || 0.5));
 
 		return new AuthCodeEntity(
 			params.code,

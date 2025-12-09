@@ -1,6 +1,6 @@
 import { IContainer } from '@interfaces';
 import { Router, Request, Response } from 'express';
-import { HomeResponse } from 'src/interfaces/http/httpRequest.interface.js';
+import { HomeResponse } from 'src/interfaces/http/http-request.interface.js';
 import { createHeathRouter } from './health.routes.js';
 import { createOauth2Routes } from './oauth.routes.js';
 

@@ -4,7 +4,7 @@ import { Config } from '@config';
 import { ExchangeCodeForTokenUseCase, GenerateAuthCodeUseCase, PkceVerifierService, ValidateClientUseCase } from '@application';
 import { AuthorizationController, TokenController } from '@presentation';
 import { TokenRepository } from 'src/infrastructure/repositories/token.repository.js';
-import { NodeHashService } from 'src/infrastructure/services/node-hash.service.js';
+import { NodeHashService } from 'src/infrastructure/services/sha256-hash.service.js';
 
 /**
  * Creates and returns a new instance of the Config class.

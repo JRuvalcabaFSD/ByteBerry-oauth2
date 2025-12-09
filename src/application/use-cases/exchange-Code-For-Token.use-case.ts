@@ -118,8 +118,10 @@ export class ExchangeCodeForTokenUseCase implements Interfaces.IExchangeCodeForT
 				this.logger.warn('Attempt to reuse authorization code', { code: request.code });
 				throw new InvalidGrantError('Authorization code already used');
 			}
-			if (authCode.isExpired()) throw new InvalidGrantError('Authorization code already used');
-			this.logger.warn('Authorization code expired', { code: request.code });
+			if (authCode.isExpired()) {
+				this.logger.warn('Authorization code expired', { code: request.code });
+				throw new InvalidGrantError('Authorization code expired');
+			}
 
 			let clientId: ClientIdVO;
 			let codeVerifier: CodeVerifierVO;

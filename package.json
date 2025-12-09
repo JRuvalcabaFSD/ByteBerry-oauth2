@@ -32,6 +32,8 @@
 		"docs:generate": "typedoc --entryPointStrategy expand --out docs src --exclude '**/*.test.ts' --exclude '**/*.spec.ts' --exclude '**/__tests__/**' --exclude '**/__mocks__/**'",
 		"docs:serve": "http-server docs -p 8080 -o -c-1",
 		"docs:watch": "nodemon --watch src --ext ts --exec \"pnpm run docs:build\"",
+		"generate:keys": "node scripts/generate-keys.mjs",
+		"generate:pkce": " node ./scripts/generate-pkce.cjs",
 		"lint:fix": "eslint . --fix",
 		"lint": "eslint .",
 		"prebuild": "pnpm run clean",

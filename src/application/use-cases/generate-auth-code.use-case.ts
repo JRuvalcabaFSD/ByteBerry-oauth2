@@ -3,7 +3,7 @@ import * as crypto from 'crypto';
 import type { IAuthCodeRepository, IGenerateAuthCodeUseCase, ILogger, IValidateClientUseCase } from '@interfaces';
 import { AuthCodeEntity, ClientIdVO, CodeChallengeVO } from '@domain';
 import { getErrMsg, InvalidRequestError, LogContextClass, LogContextMethod, OAuthError } from '@shared';
-import { AuthCodeRequestCommand } from '../commands/authCode.request.command.js';
+import { AuthCodeRequestCommand } from '../commands/auth-code.request.command.js';
 import { AuthResponseDto } from '@application';
 
 /**
@@ -114,7 +114,7 @@ export class GenerateAuthCodeUseCase implements IGenerateAuthCodeUseCase {
 				userId: '',
 				redirectUri: command.redirect_uri,
 				codeChallenge,
-				expirationMinutes: 5,
+				expirationMinutes: 0.5,
 				scope: command.scope,
 				state: command.state,
 			});
