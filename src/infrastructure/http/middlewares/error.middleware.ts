@@ -49,10 +49,10 @@ const HANDLERS = new Map<string, ErrorHandler>([
 				message = config.isDevelopment() ? e.message : 'Origin not allowed by CORS';
 			}
 
-			message = e.message;
+			message = message ?? e.message;
 
 			res.status(e.statusCode).json({
-				error: e.cause,
+				error: e.errorCause,
 				message: message,
 				requestId: req.requestId || 'unknown',
 				timestamp: new Date().toISOString(),

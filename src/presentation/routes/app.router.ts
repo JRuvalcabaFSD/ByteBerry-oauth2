@@ -13,7 +13,7 @@ export function createAppRouter(c: IContainer): Router {
 	const healthService = c.resolve('HealthService');
 
 	//OAuth2 routes
-	router.use('/', createOauth2Routes(c.resolve('AuthController'), c.resolve('TokenController')));
+	router.use('/', createOauth2Routes(c.resolve('AuthController'), c.resolve('TokenController'), c.resolve('JwksController')));
 
 	//Health router
 	router.use('/health', createHeathRouter(healthService));

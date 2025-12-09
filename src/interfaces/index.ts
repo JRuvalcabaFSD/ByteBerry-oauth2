@@ -21,8 +21,10 @@ export * from './services/logger-service.interface.js';
 export * from './services/pkce-verifier-service.interface.js';
 export * from './services/uuid-service.interface.js';
 export * from './services/rsa-key-loader.interface.js';
+export * from './services/jwks-service.interface.js';
 
 //Use Cases
 export * from './use-case/generate-auth-code.use-case.interface.ts.js';
 export * from './use-case/validate-client-usecase.interface.js';
 export * from './use-case/exchange-code-for-token.use-case.interface.ts.js';
+export * from './use-case/get-jwks.use-case.interface.js';

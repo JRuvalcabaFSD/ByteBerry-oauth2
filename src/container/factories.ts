@@ -2,7 +2,7 @@ import * as Services from '@infrastructure';
 import * as Interfaces from '@interfaces';
 import { Config } from '@config';
 import { ExchangeCodeForTokenUseCase, GenerateAuthCodeUseCase, PkceVerifierService, ValidateClientUseCase } from '@application';
-import { AuthorizationController, TokenController } from '@presentation';
+import { AuthorizationController, JwksController, TokenController } from '@presentation';
 import { NodeHashService, TokenRepository } from '@infrastructure';
 import { RsaKeyLoaderService } from 'src/infrastructure/services/rsa-key-loader.service.js';
 
@@ -295,4 +295,15 @@ export function createTokenController(c: Interfaces.IContainer): TokenController
 
 export function createRsaKeyLoaderService(c: Interfaces.IContainer): Interfaces.IKeyLoader {
 	return new RsaKeyLoaderService(c.resolve('Config'));
+}
+
+/**
+ * Factory function to create an instance of {@link JwksController}.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies.
+ * @returns A new instance of {@link JwksController} initialized with the resolved `GetJwksUseCase`.
+ */
+
+export function createJwksController(c: Interfaces.IContainer): JwksController {
+	return new JwksController(c.resolve('GetJwksUseCase'));
 }

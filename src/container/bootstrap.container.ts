@@ -67,6 +67,9 @@ function registerOAuthServices(c: IContainer): void {
 	c.registerSingleton('HashService', factories.createHashService);
 	c.registerSingleton('TokenController', factories.createTokenController);
 	c.registerSingleton('RsaKeyLoaderService', factories.createRsaKeyLoaderService);
+	c.registerSingleton('GetJwksUseCase', factories.createGetJwksUseCase);
+	c.registerSingleton('JwksService', factories.createJwksService);
+	c.registerSingleton('JwksController', factories.createJwksController);
 }
 
 /**

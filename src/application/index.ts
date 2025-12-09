@@ -14,3 +14,4 @@ export * from './services/pkce-verifier.service.js';
 export * from './use-cases/generate-auth-code.use-case.js';
 export * from './use-cases/validate-client.use-case.js';
 export * from './use-cases/exchange-Code-For-Token.use-case.js';
+export * from './use-cases/get-jwks.use-case.js';
