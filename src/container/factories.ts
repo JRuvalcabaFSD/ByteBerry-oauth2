@@ -1,29 +1,10 @@
-import {
-	ClockService,
-	GracefulShutdown,
-	HealthService,
-	HttpServer,
-	InMemoryAuthCodeRepository,
-	MockOAuthClientRepository,
-	UuidService,
-	WinstonLoggerService,
-} from '@infrastructure';
-import {
-	IAuthCodeRepository,
-	IClock,
-	IConfig,
-	IContainer,
-	IGenerateAuthCodeUseCase,
-	IHealthService,
-	IHttpServer,
-	ILogger,
-	IOAthClientRepository,
-	IUuid,
-	IValidateClientUseCase,
-} from '@interfaces';
+import * as Services from '@infrastructure';
+import * as Interfaces from '@interfaces';
 import { Config } from '@config';
-import { GenerateAuthCodeUseCase, ValidateClientUseCase } from '@application';
-import { AuthorizationController } from '@presentation';
+import { ExchangeCodeForTokenUseCase, GenerateAuthCodeUseCase, PkceVerifierService, ValidateClientUseCase } from '@application';
+import { AuthorizationController, TokenController } from '@presentation';
+import { TokenRepository } from 'src/infrastructure/repositories/token.repository.js';
+import { NodeHashService } from 'src/infrastructure/services/node-hash.service.js';
 
 /**
  * Creates and returns a new instance of the Config class.
@@ -36,7 +17,7 @@ import { AuthorizationController } from '@presentation';
  * ```
  */
 
-export const createConfig = (): IConfig => new Config();
+export const createConfig = (): Interfaces.IConfig => new Config();
 
 /**
  * Factory function that creates and returns a new instance of ClockService.
@@ -49,7 +30,7 @@ export const createConfig = (): IConfig => new Config();
  * ```
  */
 
-export const createClockService = (): IClock => new ClockService();
+export const createClockService = (): Interfaces.IClock => new Services.ClockService();
 
 /**
  * Creates and returns a new instance of the UUID service.
@@ -63,7 +44,7 @@ export const createClockService = (): IClock => new ClockService();
  * ```
  */
 
-export const createUuidService = (): IUuid => new UuidService();
+export const createUuidService = (): Interfaces.IUuid => new Services.UuidService();
 
 /**
  * Factory function that creates and configures a Winston logger service instance.
@@ -76,8 +57,8 @@ export const createUuidService = (): IUuid => new UuidService();
  * and injects them into the WinstonLoggerService constructor.
  */
 
-export function createWintonLoggerService(c: IContainer): ILogger {
-	return new WinstonLoggerService(c.resolve('Config'), c.resolve('Clock'));
+export function createWintonLoggerService(c: Interfaces.IContainer): Interfaces.ILogger {
+	return new Services.WinstonLoggerService(c.resolve('Config'), c.resolve('Clock'));
 }
 
 /**
@@ -91,8 +72,8 @@ export function createWintonLoggerService(c: IContainer): ILogger {
  * the Logger dependency from the provided container before instantiating GracefulShutdown.
  */
 
-export function createGracefulShutdown(c: IContainer): GracefulShutdown {
-	return new GracefulShutdown(c.resolve('Logger'));
+export function createGracefulShutdown(c: Interfaces.IContainer): Services.GracefulShutdown {
+	return new Services.GracefulShutdown(c.resolve('Logger'));
 }
 
 /**
@@ -108,8 +89,8 @@ export function createGracefulShutdown(c: IContainer): GracefulShutdown {
  * ```
  */
 
-export function createHttpServer(c: IContainer): IHttpServer {
-	return new HttpServer(c);
+export function createHttpServer(c: Interfaces.IContainer): Interfaces.IHttpServer {
+	return new Services.HttpServer(c);
 }
 
 /**
@@ -119,8 +100,8 @@ export function createHttpServer(c: IContainer): IHttpServer {
  * @returns A new instance of IHealthService
  */
 
-export function createHealthService(c: IContainer): IHealthService {
-	return new HealthService(c);
+export function createHealthService(c: Interfaces.IContainer): Interfaces.IHealthService {
+	return new Services.HealthService(c);
 }
 
 /**
@@ -136,7 +117,7 @@ export function createHealthService(c: IContainer): IHealthService {
  * - Logger: Logging service for operation tracking
  */
 
-export function createGenerateAuthCodeUseCase(c: IContainer): IGenerateAuthCodeUseCase {
+export function createGenerateAuthCodeUseCase(c: Interfaces.IContainer): Interfaces.IGenerateAuthCodeUseCase {
 	return new GenerateAuthCodeUseCase(c.resolve('AuthCodeRepository'), c.resolve('ValidateClientUseCase'), c.resolve('Logger'));
 }
 
@@ -158,7 +139,7 @@ export function createGenerateAuthCodeUseCase(c: IContainer): IGenerateAuthCodeU
  * ```
  */
 
-export function createValidateClientUseCase(c: IContainer): IValidateClientUseCase {
+export function createValidateClientUseCase(c: Interfaces.IContainer): Interfaces.IValidateClientUseCase {
 	return new ValidateClientUseCase(c.resolve('OAuthClientRepository'), c.resolve('Logger'));
 }
 
@@ -174,8 +155,8 @@ export function createValidateClientUseCase(c: IContainer): IValidateClientUseCa
  */
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function createAuthCodeRepository(c: IContainer): IAuthCodeRepository {
-	return new InMemoryAuthCodeRepository();
+export function createAuthCodeRepository(c: Interfaces.IContainer): Interfaces.IAuthCodeRepository {
+	return new Services.InMemoryAuthCodeRepository();
 }
 
 /**
@@ -190,8 +171,8 @@ export function createAuthCodeRepository(c: IContainer): IAuthCodeRepository {
  */
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function createOAuthClientRepository(c: IContainer): IOAthClientRepository {
-	return new MockOAuthClientRepository();
+export function createOAuthClientRepository(c: Interfaces.IContainer): Interfaces.IOAthClientRepository {
+	return new Services.MockOAuthClientRepository();
 }
 
 /**
@@ -201,6 +182,37 @@ export function createOAuthClientRepository(c: IContainer): IOAthClientRepositor
  * @returns A new instance of AuthorizationController with resolved dependencies
  */
 
-export function createAuthController(c: IContainer): AuthorizationController {
+export function createAuthController(c: Interfaces.IContainer): AuthorizationController {
 	return new AuthorizationController(c.resolve('GenerateAuthCodeUseCase'));
+}
+
+export function createTokenRepository(c: Interfaces.IContainer): Interfaces.ITokenRepository {
+	return new TokenRepository(c.resolve('Logger'));
+}
+
+export function createJwtService(c: Interfaces.IContainer): Interfaces.IJwtService {
+	const { jwtIssuer, jwtAccessTokenExpiresIn, jwtAudience } = c.resolve('Config');
+	return new Services.JwtService(jwtIssuer, jwtAccessTokenExpiresIn, jwtAudience, c.resolve('Logger'));
+}
+
+export function createPkceVerifierService(c: Interfaces.IContainer): Interfaces.IPKceVerifierService {
+	return new PkceVerifierService(c.resolve('HashService'), c.resolve('Logger'));
+}
+
+export function createHashService(): Interfaces.IHashService {
+	return new NodeHashService();
+}
+
+export function createExchangeCodeFotTokenUseCase(c: Interfaces.IContainer): Interfaces.IExchangeCodeForTokenUseCase {
+	return new ExchangeCodeForTokenUseCase(
+		c.resolve('AuthCodeRepository'),
+		c.resolve('TokenRepository'),
+		c.resolve('Logger'),
+		c.resolve('JwtService'),
+		c.resolve('PkceVerifierService')
+	);
+}
+
+export function createTokenController(c: Interfaces.IContainer): TokenController {
+	return new TokenController(c.resolve('ExchangeCodeFotTokenUseCase'));
 }

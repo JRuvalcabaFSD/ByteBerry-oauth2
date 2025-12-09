@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { GenerateAuthCodeCommand } from '@application';
+import { AuthCodeRequestCommand } from '@application';
 import { IGenerateAuthCodeUseCase } from '@interfaces';
 import { InvalidRequestError } from '@shared';
 
@@ -9,7 +9,7 @@ export class AuthorizationController {
 
 	public handle = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 		try {
-			const request = GenerateAuthCodeCommand.fromQuery(req.query);
+			const request = AuthCodeRequestCommand.fromQuery(req.query);
 			const result = await this.usecase.execute(request);
 
 			let redirectUrl: URL;

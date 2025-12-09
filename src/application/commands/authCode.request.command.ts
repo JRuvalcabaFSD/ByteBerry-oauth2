@@ -26,13 +26,13 @@ import { InvalidRequestError } from '@shared';
  *   scope: 'read write',
  *   state: 'xyz'
  * };
- * const command = GenerateAuthCodeCommand.fromQuery(query);
+ * const command = AuthCodeRequestCommand.fromQuery(query);
  * ```
  *
  * @throws {InvalidRequestError} When required parameters are missing or invalid
  */
 
-export class GenerateAuthCodeCommand {
+export class AuthCodeRequestCommand {
 	/**
 	 * Creates an instance of the authorization code generation command.
 	 *
@@ -56,14 +56,14 @@ export class GenerateAuthCodeCommand {
 	) {}
 
 	/**
-	 * Creates a GenerateAuthCodeCommand instance from URL query parameters.
+	 * Creates a AuthCodeRequestCommand instance from URL query parameters.
 	 *
 	 * This method validates OAuth2 authorization request parameters according to the
 	 * Authorization Code Flow with PKCE (Proof Key for Code Exchange) specification.
 	 *
 	 * @param query - Parsed query string parameters from the authorization request
 	 *
-	 * @returns A new GenerateAuthCodeCommand instance with validated parameters
+	 * @returns A new AuthCodeRequestCommand instance with validated parameters
 	 *
 	 * @throws {InvalidRequestError} When required parameters are missing or invalid:
 	 * - If query is empty or undefined
@@ -88,11 +88,11 @@ export class GenerateAuthCodeCommand {
 	 *   scope: 'read write',
 	 *   state: 'xyz'
 	 * };
-	 * const command = GenerateAuthCodeCommand.fromQuery(query);
+	 * const command = AuthCodeRequestCommand.fromQuery(query);
 	 * ```
 	 */
 
-	public static fromQuery(query: ParsedQs): GenerateAuthCodeCommand {
+	public static fromQuery(query: ParsedQs): AuthCodeRequestCommand {
 		if (!query || Object.keys(query).length === 0) throw new InvalidRequestError('Missing required parameters');
 		if (query.response_type !== 'code') throw new InvalidRequestError('Only response_type=code is supported');
 		if (!query.client_id) throw new InvalidRequestError('Client Id is required');
@@ -103,7 +103,7 @@ export class GenerateAuthCodeCommand {
 		const scope = typeof query.scope === 'string' && query.scope.trim() !== '' ? query.scope.trim() : undefined;
 		const state = typeof query.state === 'string' ? query.state : undefined;
 
-		return new GenerateAuthCodeCommand(
+		return new AuthCodeRequestCommand(
 			query.client_id as string,
 			query.response_type as string,
 			query.redirect_uri as string,

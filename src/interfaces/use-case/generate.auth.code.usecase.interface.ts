@@ -1,4 +1,4 @@
-import { AuthResponseDto, GenerateAuthCodeCommand } from '@application';
+import { AuthResponseDto, AuthCodeRequestCommand } from '@application';
 
 /**
  * Use case interface for generating OAuth2 authorization codes.
@@ -24,9 +24,9 @@ export interface IGenerateAuthCodeUseCase {
 	/**
 	 * Executes the use case to generate an authorization code.
 	 *
-	 * @param {GenerateAuthCodeCommand} request - The authentication request containing necessary parameters.
+	 * @param {AuthCodeRequestCommand} request - The authentication request containing necessary parameters.
 	 * @return {*}  {Promise<AuthResponseDto>} A promise that resolves to an authentication response with the generated authorization code.
 	 * @memberof IGenerateAuthCodeUseCase
 	 */
-	execute(request: GenerateAuthCodeCommand): Promise<AuthResponseDto>;
+	execute(request: AuthCodeRequestCommand): Promise<AuthResponseDto>;
 }

@@ -126,6 +126,16 @@ export class AuthCodeEntity {
 	}
 
 	/**
+	 * Checks if the authorization code has expired.
+	 *
+	 * @returns {boolean} True if the current date is past the expiration date, false otherwise.
+	 */
+
+	public isExpired(): boolean {
+		return new Date() > this.expiresAt;
+	}
+
+	/**
 	 * Marks the authorization code as used.
 	 *
 	 * @remarks

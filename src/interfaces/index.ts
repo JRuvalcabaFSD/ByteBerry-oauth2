@@ -8,15 +8,20 @@ export * from './container/container.interface.js';
 export * from './http/httpServer.interface.js';
 
 //Repositories
-export * from './repositories/auth.code.repository.js';
-export * from './repositories/oauth.client.repository.js';
+export * from './repositories/auth.code.repository.interface.js';
+export * from './repositories/oauth.client.repository.interface.js';
+export * from './repositories/token.repository.interface.js';
 
 //Services
 export * from './services/clock.service.interface.js';
+export * from './services/hash-service.interface.js';
 export * from './services/health.service.interface.js';
+export * from './services/jwt.service.interface.js';
 export * from './services/logger.service.interface.js';
+export * from './services/pkceVerifierService.interface.js';
 export * from './services/uuid.service.interface.js';
 
 //Use Cases
 export * from './use-case/generate.auth.code.usecase.interface.js';
 export * from './use-case/validate.client.usecase.interface.js';
+export * from './use-case/exchange.codeForToken.usecase.interface.js';

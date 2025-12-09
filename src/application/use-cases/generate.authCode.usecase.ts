@@ -3,7 +3,7 @@ import * as crypto from 'crypto';
 import type { IAuthCodeRepository, IGenerateAuthCodeUseCase, ILogger, IValidateClientUseCase } from '@interfaces';
 import { AuthCodeEntity, ClientIdVO, CodeChallengeVO } from '@domain';
 import { getErrMsg, InvalidRequestError, LogContextClass, LogContextMethod, OAuthError } from '@shared';
-import { GenerateAuthCodeCommand } from '../commands/generate.authCode.command.js';
+import { AuthCodeRequestCommand } from '../commands/authCode.request.command.js';
 import { AuthResponseDto } from '@application';
 
 /**
@@ -74,7 +74,7 @@ export class GenerateAuthCodeUseCase implements IGenerateAuthCodeUseCase {
 	 */
 
 	@LogContextMethod()
-	public async execute(command: GenerateAuthCodeCommand): Promise<AuthResponseDto> {
+	public async execute(command: AuthCodeRequestCommand): Promise<AuthResponseDto> {
 		this.logger.debug('Generating authorization code', { client_id: command.client_id });
 
 		try {

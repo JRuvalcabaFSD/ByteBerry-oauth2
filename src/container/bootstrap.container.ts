@@ -1,3 +1,4 @@
+import { ExchangeCodeForTokenUseCase } from '@application';
 import * as factories from '@container';
 import { Container, criticalServices, Token } from '@container';
 import { IContainer } from '@interfaces';
@@ -59,6 +60,12 @@ function registerOAuthServices(c: IContainer): void {
 	c.registerSingleton('AuthCodeRepository', factories.createAuthCodeRepository);
 	c.registerSingleton('OAuthClientRepository', factories.createOAuthClientRepository);
 	c.registerSingleton('AuthController', factories.createAuthController);
+	c.registerSingleton('TokenRepository', factories.createTokenRepository);
+	c.registerSingleton('JwtService', factories.createJwtService);
+	c.registerSingleton('PkceVerifierService', factories.createPkceVerifierService);
+	c.registerSingleton('ExchangeCodeFotTokenUseCase', factories.createExchangeCodeFotTokenUseCase);
+	c.registerSingleton('HashService', factories.createHashService);
+	c.registerSingleton('TokenController', factories.createTokenController);
 }
 
 /**

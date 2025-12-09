@@ -9,5 +9,5 @@
 		"coverage": true,
 		"logs": true
 	},
-	"cSpell.words": ["Logform", "SSSZ", "usecase"]
+	"cSpell.words": ["keyid", "Logform", "SSSZ", "usecase"]
 }
