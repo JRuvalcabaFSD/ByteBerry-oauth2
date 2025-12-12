@@ -200,7 +200,7 @@ jobs:
           echo "🧪 Testing published images..."
 
           echo "Testing AMD64 image..."
-          docker run --rm --platform linux/amd64 \
+          docker run --rm --platform linux/amd64 -e NODE_ENV=development \
             ${{ steps.vars.outputs.image-tag }} \
             node -e "console.log('✅ AMD64 image working - version ${{ steps.vars.outputs.version }}')"
 
