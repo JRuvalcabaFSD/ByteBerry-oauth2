@@ -206,11 +206,18 @@ jobs:
       - name: Generate JWT test keys
         run: pnpm generate:keys
 
-      - name: 🧪 Run all tests
+      - name: 🧪 Run unit tests with coverage
         run: |
           export NODE_ENV=test
           export CI=true
-          pnpm test:all
+          pnpm test:unit
+
+      - name: 🧪 Run integration tests
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public
+          NODE_ENV: test
+          CI: true
+        run: pnpm test:integration
 
       - name: 📊 Display coverage summary
         run: |
