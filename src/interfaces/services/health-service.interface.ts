@@ -13,6 +13,21 @@ import { NodeEnv } from '@interfaces';
 export type IDependencyResponse = { status: 'healthy' | 'unhealthy'; message: string; responseTime?: number };
 
 /**
+ * Represents the health check response for a JWKS (JSON Web Key Set) service.
+ *
+ * @property status - Indicates the health status of the JWKS service. Can be 'healthy' or 'unhealthy'.
+ * @property message - A descriptive message providing additional information about the health status.
+ * @property keyCount - The number of keys currently available in the JWKS.
+ * @property responseTime - The time taken to perform the health check.
+ */
+export interface IJwksHealthResponse {
+	status: 'healthy' | 'unhealthy';
+	message: string;
+	keyCount: number;
+	responseTime: number;
+}
+
+/**
  * Represents the system health information response containing memory usage and uptime statistics.
  *
  * @property {Object} memory - Memory usage statistics
@@ -51,6 +66,7 @@ export interface IHealthResponse {
 //TODO documentar
 export interface IDeepHealthResponse extends IHealthResponse {
 	dependencies: Record<string, unknown>;
+	jwks: IJwksHealthResponse;
 	// TODO F2
 	// database: IDatabaseHealthResponse;
 	system: ISystemInfoResponse;
