@@ -44,12 +44,11 @@ const HANDLERS = new Map<string, ErrorHandler>([
 		'http',
 		(error, req, res, config) => {
 			const e = error as HttpError;
-			let message: string;
+			// Inicializa message con el valor por defecto
+			let message: string = e.message;
 			if (e.name === 'CorsOriginError') {
 				message = config.isDevelopment() ? e.message : 'Origin not allowed by CORS';
 			}
-
-			message = message ?? e.message;
 
 			res.status(e.statusCode).json({
 				error: e.errorCause,

@@ -1,4 +1,3 @@
-import { ExchangeCodeForTokenUseCase } from '@application';
 import * as factories from '@container';
 import { Container, criticalServices, Token } from '@container';
 import { IContainer } from '@interfaces';
