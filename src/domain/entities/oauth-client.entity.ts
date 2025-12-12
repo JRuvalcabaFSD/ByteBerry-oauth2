@@ -12,6 +12,8 @@
  * @property {Date} [createdAt] - Timestamp when the client was created
  */
 
+/** @internal */
+/** @ignore */
 interface OAuthClientParams {
 	id: string;
 	clientId: string;

@@ -10,6 +10,8 @@
  * @property {string} [scope] - Optional space-delimited list of scopes granted by this token.
  */
 
+/** @internal */
+/** @ignore */
 interface TokenParams {
 	tokenId: string;
 	userId: string;

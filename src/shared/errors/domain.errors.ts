@@ -55,10 +55,9 @@ export class DomainValidator extends AppError {
 
 export class InvalidValueObjectError extends DomainValidator {
 	/**
-	 * Creates an instance of InvalidValueObjectError.
+	 * Constructs a new `InvalidValueObjectError` with a detailed reason.
 	 *
-	 * @param valueObjectName - The name of the value object that is invalid
-	 * @param reason - The reason why the value object is invalid
+	 * @param reason - The specific reason why the value object is considered invalid.
 	 */
 
 	constructor(reason: string) {

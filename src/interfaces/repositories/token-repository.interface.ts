@@ -43,7 +43,7 @@ export interface ITokenRepository {
 	/**
 	 * Blacklists a token by its ID.
 	 *
-	 * @param {string} token - The ID of the token to be blacklisted.
+	 * @param {string} tokenId - The ID of the token to be blacklisted.
 	 * @return {*}  {Promise<void>} - A promise that resolves when the token is blacklisted.
 	 * @memberof ITokenRepository
 	 */

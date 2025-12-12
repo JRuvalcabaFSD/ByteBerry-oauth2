@@ -29,7 +29,7 @@
 		"docs:ci": "pnpm run docs:build && echo 'Documentation generated successfully'",
 		"docs:clean": "rimraf docs",
 		"docs:dev": "pnpm run docs:build && pnpm run docs:serve",
-		"docs:generate": "typedoc --entryPointStrategy expand --out docs src --exclude '**/*.test.ts' --exclude '**/*.spec.ts' --exclude '**/__tests__/**' --exclude '**/__mocks__/**' --skipErrorChecking",
+		"docs:generate": "typedoc --options typedoc.json",
 		"docs:serve": "http-server docs -p 8080 -o -c-1",
 		"docs:watch": "nodemon --watch src --ext ts --exec \"pnpm run docs:build\"",
 		"generate:keys": "node scripts/generate-keys.mjs",

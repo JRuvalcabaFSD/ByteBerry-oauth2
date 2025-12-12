@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
+  "extends": ["typedoc/tsdoc.json"],
+  "tagDefinitions": [
+    { "tagName": "@interface", "syntaxKind": "block" },
+    { "tagName": "@method",    "syntaxKind": "block" },
+    { "tagName": "@memberof",  "syntaxKind": "block" },
+    { "tagName": "@implements","syntaxKind": "block" },
+    { "tagName": "@todo",      "syntaxKind": "block" },
+    { "tagName": "@private",   "syntaxKind": "modifier" }
+  ]
+}

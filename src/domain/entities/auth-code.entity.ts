@@ -14,6 +14,8 @@ import { ClientIdVO, CodeChallengeVO } from '@domain';
  * @property {string | undefined} [state] - Optional opaque value used to maintain state between the request and callback
  */
 
+/** @internal */
+/** @ignore */
 interface AuthCodeParams {
 	code: string;
 	userId: string;
@@ -99,7 +101,7 @@ export class AuthCodeEntity {
 	 * @returns A new AuthCodeEntity instance with an expiration date set based on the provided or default expiration minutes
 	 */
 
-	static create(params: AuthCodeParams): AuthCodeEntity {
+	public static create(params: AuthCodeParams): AuthCodeEntity {
 		const expiresAt = new Date();
 		expiresAt.setMinutes(expiresAt.getMinutes() + (params.expirationMinutes || 1));
 
