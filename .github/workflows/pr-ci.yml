@@ -203,6 +203,9 @@ jobs:
       #     pnpm prisma migrate deploy --schema=./prisma/schema.prisma
       #     pnpm prisma generate
 
+      - name: Generate JWT test keys
+        run: pnpm generate:keys
+
       - name: 🧪 Run all tests
         run: |
           export NODE_ENV=test
