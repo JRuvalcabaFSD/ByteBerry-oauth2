@@ -68,6 +68,9 @@ jobs:
           # cp .env.test.example .env.test
           echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public" >> .env.test
 
+      - name: Generate JWT test keys
+        run: pnpm generate:keys
+
       - name: 📝 Run full validation
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5433/oauth2_test?schema=public
