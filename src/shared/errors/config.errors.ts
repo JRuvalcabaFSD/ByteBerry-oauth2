@@ -31,5 +31,9 @@ export class ConfigError extends AppError {
 		super(message, 'config');
 		this.context = context;
 		this.name = 'ConfigError';
+
+		if (Error.captureStackTrace) {
+			Error.captureStackTrace(this, ConfigError);
+		}
 	}
 }

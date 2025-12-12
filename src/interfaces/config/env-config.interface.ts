@@ -46,10 +46,15 @@ export interface IConfig {
 	readonly serviceName: string;
 	readonly logLevel: LogLevel;
 	readonly logRequests: boolean;
-	readonly jwtIssuer: string;
 	readonly corsOrigins: string[];
 
 	//OAuth envs
+	readonly jwtIssuer: string;
+	readonly jwtAudience: string[];
+	readonly jwtAccessTokenExpiresIn: number;
+	readonly jwtPrivateKey?: string | undefined;
+	readonly jwtPublicKey?: string | undefined;
+	readonly jwtKeyId: string;
 
 	//functions
 	isDevelopment(): boolean;

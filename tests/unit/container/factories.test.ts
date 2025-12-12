@@ -39,28 +39,48 @@ describe('Factories', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		mockContainer = {
-			resolve: vi.fn((key: string) => {
-				if (key === 'Config') return createConfig();
-				if (key === 'Clock') return createClockService();
-				if (key === 'Logger')
-					return {
-						info: vi.fn(),
-						error: vi.fn(),
-						warn: vi.fn(),
-						debug: vi.fn(),
-						child: vi.fn(),
-					};
-				if (key === 'Uuid') return createUuidService();
-				if (key === 'HealthService')
-					return {
-						getHealth: vi.fn(),
-						getDeepHealth: vi.fn(),
-						checkHealth: vi.fn(),
-					};
-				return null;
-			}),
-		} as any;
+ 		mockContainer = {
+ 			resolve: vi.fn((key: string) => {
+ 				if (key === 'Config') return createConfig();
+ 				if (key === 'Clock') return createClockService();
+ 				if (key === 'Logger')
+ 					return {
+ 						info: vi.fn(),
+ 						error: vi.fn(),
+ 						warn: vi.fn(),
+ 						debug: vi.fn(),
+ 						child: vi.fn(),
+ 					};
+ 				if (key === 'Uuid') return createUuidService();
+ 				if (key === 'HealthService')
+ 					return {
+ 						getHealth: vi.fn(),
+ 						getDeepHealth: vi.fn(),
+ 						checkHealth: vi.fn(),
+ 					};
+ 				if (key === 'JwksService')
+ 					return {
+ 						getJwks: vi.fn(),
+ 					};
+ 				if (key === 'JwksController')
+ 					return {
+ 						handle: vi.fn(),
+ 					};
+ 				if (key === 'GetJwksUseCase')
+ 					return {
+ 						execute: vi.fn(),
+ 					};
+ 				if (key === 'AuthController')
+ 					return {
+ 						handle: vi.fn(),
+ 					};
+ 				if (key === 'TokenController')
+ 					return {
+ 						handle: vi.fn(),
+ 					};
+ 				return null;
+ 			}),
+ 		} as any;
 	});
 
 	describe('createConfig', () => {

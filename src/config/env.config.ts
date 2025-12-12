@@ -15,25 +15,45 @@ export class Config implements IConfig {
 	public readonly serviceName: string;
 	public readonly jwtIssuer: string;
 	public readonly corsOrigins: string[];
+	public readonly jwtAudience: string[];
+	public readonly jwtAccessTokenExpiresIn: number;
+	public readonly jwtPrivateKey?: string | undefined;
+	public readonly jwtPublicKey?: string | undefined;
+	public readonly jwtKeyId: string;
 
 	//TODO documentar
 	constructor() {
 		try {
 			dotenv.config({ override: false });
 
+			// ========================================
+			// Core environments
+			// ========================================
 			this.nodeEnv = env.get('NODE_ENV').default('development').asEnum(['development', 'production', 'test']) as NodeEnv;
 			this.port = env.get('PORT').default(4000).asPortNumber();
 			this.serviceName = env.get('SERVICE_NAME').default('ByteBerry-OAuth2').asString();
+			this.version = pkg.version || '0.0.0';
+			this.corsOrigins = this.normalizeUrls(
+				env.get('CORS_ORIGINS').default('http://localhost:5173,http://localhost:4002,http://localhost:4003').asArray()
+			);
 
+			// ========================================
+			// Logs environments
+			// ========================================
 			const { logLevel, logRequest } = this.getLoggerEnvs();
 
 			this.logLevel = logLevel;
 			this.logRequests = logRequest;
-			this.corsOrigins = this.normalizeUrls(
-				env.get('CORS_ORIGINS').default('http://localhost:5173,http://localhost:4002,http://localhost:4003').asArray()
-			);
+
+			// ========================================
+			// JWT environments
+			// ========================================
 			this.jwtIssuer = this.normalizeUrls(env.get('JWT_ISSUER').default('http://localhost:4000').asUrlString());
-			this.version = pkg.version || '0.0.0';
+			this.jwtAudience = env.get('JWT_AUDIENCE').default('byteberry-expenses,byteberry-bff').asArray();
+			this.jwtAccessTokenExpiresIn = env.get('JWT_ACCESS_TOKEN_EXPIRES_IN').default(900).asIntPositive();
+			this.jwtPrivateKey = this.validateJWtPrivateKey();
+			this.jwtPublicKey = this.validateJWtPublicKey();
+			this.jwtKeyId = env.get('JWT_KEY_ID').default('default-key-1').asString();
 		} catch (error) {
 			if (error instanceof AppError) throw error;
 			throw new ConfigError(`Failed to validate environment variables: ${getErrMsg(error)}`, {
@@ -169,5 +189,55 @@ export class Config implements IConfig {
 			logLevel: env.get('LOG_LEVEL').default('info').asEnum(['debug', 'info', 'warn', 'error']) as LogLevel,
 			logRequest: env.get('LOG_REQUESTS').default('true').asBoolStrict(),
 		};
+	}
+
+	/**
+	 * Validates and retrieves the JWT private key from the environment configuration.
+	 *
+	 * This method checks if the private key is present and ensures it is in PEM format
+	 * with the proper headers. If the key is missing or incorrectly formatted, it throws
+	 * a `ConfigError`. If valid, it replaces escaped newline characters (`\n`) with actual
+	 * newline characters and returns the formatted key.
+	 *
+	 * @returns {string | undefined} The validated and formatted JWT private key, or `undefined` if not present.
+	 * @throws {ConfigError} If the private key is present but not in PEM format with proper headers.
+	 */
+
+	private validateJWtPrivateKey(): string | undefined {
+		const privateKey = env.get('JWT_PRIVATE_KEY').asString();
+
+		if (!privateKey) return undefined;
+		if (!privateKey.includes('BEGIN PRIVATE KEY'))
+			throw new ConfigError('JWT_PRIVATE_KEY must be in PEM format with proper headers', {
+				hasPrivateKey: !!privateKey,
+				keyFormat: 'Invalid - missing PEM headers',
+			});
+
+		return privateKey.replace(/\\n/g, '\n');
+	}
+
+	/**
+	 * Validates and retrieves the JWT public key from the configuration.
+	 *
+	 * This method checks if the public key is present and ensures it is in PEM format
+	 * with the proper "BEGIN PUBLIC KEY" header. If the key is missing or improperly formatted,
+	 * it throws a `ConfigError`. If valid, it replaces escaped newline characters (`\n`)
+	 * with actual newline characters and returns the formatted public key string.
+	 *
+	 * @returns {string | undefined} The validated and formatted JWT public key, or `undefined` if not present.
+	 * @throws {ConfigError} If the public key is present but not in the correct PEM format.
+	 */
+
+	private validateJWtPublicKey(): string | undefined {
+		const publicKey = env.get('JWT_PUBLIC_KEY').asString();
+
+		if (!publicKey) return undefined;
+		if (!publicKey.includes('BEGIN PUBLIC KEY'))
+			throw new ConfigError('JWT_PUBLIC_KEY must be in PEM format with proper headers', {
+				hasPrivateKey: !!publicKey,
+				keyFormat: 'Invalid - missing PEM headers',
+			});
+
+		return publicKey.replace(/\\n/g, '\n');
 	}
 }

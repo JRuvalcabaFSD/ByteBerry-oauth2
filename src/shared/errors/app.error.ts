@@ -10,7 +10,7 @@
  * - `http`: Errors related to HTTP requests or responses
  */
 
-export type ErrorType = 'bootstrap' | 'config' | 'container' | 'http';
+export type ErrorType = 'bootstrap' | 'config' | 'container' | 'http' | 'oauth' | 'domain';
 
 /**
  * Custom application error class that extends the native Error class.

@@ -9,6 +9,7 @@ export function bootstrapContainer(): IContainer {
 
 	registerCoreServices(container);
 	registerHttpServices(container);
+	registerOAuthServices(container);
 
 	validate(container, criticalServices);
 
@@ -49,6 +50,25 @@ function registerCoreServices(c: IContainer): void {
 //TODO documentar
 function registerHttpServices(c: IContainer): void {
 	c.registerSingleton('HealthService', factories.createHealthService);
+}
+
+//TODO documentar
+function registerOAuthServices(c: IContainer): void {
+	c.registerSingleton('GenerateAuthCodeUseCase', factories.createGenerateAuthCodeUseCase);
+	c.registerSingleton('ValidateClientUseCase', factories.createValidateClientUseCase);
+	c.registerSingleton('AuthCodeRepository', factories.createAuthCodeRepository);
+	c.registerSingleton('OAuthClientRepository', factories.createOAuthClientRepository);
+	c.registerSingleton('AuthController', factories.createAuthController);
+	c.registerSingleton('TokenRepository', factories.createTokenRepository);
+	c.registerSingleton('JwtService', factories.createJwtService);
+	c.registerSingleton('PkceVerifierService', factories.createPkceVerifierService);
+	c.registerSingleton('ExchangeCodeFotTokenUseCase', factories.createExchangeCodeFotTokenUseCase);
+	c.registerSingleton('HashService', factories.createHashService);
+	c.registerSingleton('TokenController', factories.createTokenController);
+	c.registerSingleton('RsaKeyLoaderService', factories.createRsaKeyLoaderService);
+	c.registerSingleton('GetJwksUseCase', factories.createGetJwksUseCase);
+	c.registerSingleton('JwksService', factories.createJwksService);
+	c.registerSingleton('JwksController', factories.createJwksController);
 }
 
 /**

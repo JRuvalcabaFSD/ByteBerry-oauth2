@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ByteBerry Expenses Api - Service - Release Testing Script
+# ByteBerry OAuth2 Api - Service - Release Testing Script
 # Tests semantic-release configuration and Docker build locally
 
 set -e
@@ -111,7 +111,7 @@ test_conventional_commits() {
     fi
 
     print_info "Conventional commit examples:"
-    echo "  feat(expenses): add CRUD operations"
+    echo "  feat(oauth): add CRUD operations"
     echo "  fix(health): resolve deep health check"
     echo "  feat(api)!: breaking change in API"
 }
@@ -126,7 +126,7 @@ test_docker_build() {
     fi
 
     print_info "Starting Docker build process..."
-    docker build -t byteberry-expenses:test-release . >/dev/null 2>&1 &
+    docker build -t byteberry-oauth:test-release . >/dev/null 2>&1 &
     local build_pid=$!
     show_progress_spinner "Building Docker image" $build_pid
     wait $build_pid || {
@@ -136,7 +136,7 @@ test_docker_build() {
     print_success "Docker build completed successfully"
 
     print_info "Testing Docker image..."
-    docker run --rm byteberry-expenses:test-release node --version >/dev/null 2>&1 &
+    docker run --rm -e NODE_ENV=development byteberry-oauth:test-release node --version >/dev/null 2>&1 &
     local test_pid=$!
     show_progress_spinner "Verifying Node.js version in container" $test_pid
     wait $test_pid || {
@@ -146,7 +146,7 @@ test_docker_build() {
     print_success "Docker image test passed"
 
     print_info "Cleaning up test image..."
-    docker rmi byteberry-expenses:test-release >/dev/null 2>&1 || true
+    docker rmi byteberry-oauth:test-release >/dev/null 2>&1 || true
     print_success "Docker cleanup completed"
 }
 
@@ -300,7 +300,7 @@ generate_report() {
 
 # Main execution
 main() {
-    echo "🧪 ByteBerry Expenses Api - Service - Release Testing"
+    echo "🧪 ByteBerry OAuth2 Api - Service - Release Testing"
     echo "=========================================="
     echo ""
 

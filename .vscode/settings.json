@@ -5,32 +5,10 @@
 	"typescript.preferences.includePackageJsonAutoImports": "auto",
 	"files.exclude": {
 		"dist": true,
-		"**/node_modules": true
+		"**/node_modules": true,
+		"coverage": true,
+		"logs": true,
+		"keys": true
 	},
-	"cSpell.words": ["Logform", "SSSZ"],
-	"editor.defaultFormatter": "dbaeumer.vscode-eslint",
-	"editor.formatOnSave": true,
-	"editor.codeActionsOnSave": {
-		"source.fixAll.eslint": "explicit"
-	},
-	"eslint.format.enable": true,
-	"[json]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[jsonc]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[typescript]": {
-		"editor.defaultFormatter": "vscode.typescript-language-features"
-	},
-	"[javascript]": {
-		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
-	},
-	"vitest.enable": true,
-	"vitest.commandLine": "pnpm vitest",
-	"vitest.coverage.enabled": false,
-	"vitest.filesWatchMode": "test",
-	"[github-actions-workflow]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	}
+	"cSpell.words": ["keyid", "Logform", "SSSZ", "usecase"]
 }

@@ -82,13 +82,13 @@ get_version() {
 build_dev() {
     local platform=${1:-linux/amd64}
 
-    print_info "Building development image for ${platform}..."
+		local INJECTED_VERSION=${TEST_VERSION:-$VERSION}
 
-		VERSION="0.0.0.-dev"
+    print_info "Building development image for ${platform} (Simulated version: ${INJECTED_VERSION})..."
 
     docker buildx build \
         --platform ${platform} \
-				--build-arg VERSION="${VERSION}" \
+				--build-arg VERSION="${INJECTED_VERSION}" \
         --tag ${IMAGE_NAME}:dev \
         --load \
         .

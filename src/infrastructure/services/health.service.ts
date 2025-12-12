@@ -89,6 +89,9 @@ export class HealthService implements Interfaces.IHealthService {
 				status: response.status,
 				responseTime: this.clock.timestamp() - startTime,
 				dependenciesCount: Object.keys(response.dependencies).length,
+				jwksAvailable: response.jwks.status === 'healthy',
+				jwksKeyCount: response.jwks.keyCount,
+				jwksResponseTime: response.jwks.responseTime,
 				// TODO F2
 				// databaseConnected: response.database?.connected ?? false,
 			});
@@ -134,6 +137,7 @@ export class HealthService implements Interfaces.IHealthService {
 	): Promise<Interfaces.IHealthResponse | Interfaces.IDeepHealthResponse> {
 		const dependencies = await this.checkDependencies(services);
 		const systemInfo = this.getSystemInfo();
+		const jwksHealth = await this.checkJwksAvailability();
 		const overallStatus = this.determineOverallStatus(dependencies);
 
 		const response: Partial<Interfaces.IDeepHealthResponse> = {
@@ -148,6 +152,7 @@ export class HealthService implements Interfaces.IHealthService {
 
 		if (type === 'deep') {
 			response.dependencies = dependencies;
+			response.jwks = jwksHealth;
 			// TODO F2
 			// response.database = await this.checkDatabaseHealth();
 			response.system = systemInfo;
@@ -357,6 +362,130 @@ export class HealthService implements Interfaces.IHealthService {
 				uptime: 0,
 				error: 'Health check system failure',
 			});
+		}
+	}
+
+	/**
+	 * Checks the availability and validity of the JWKS (JSON Web Key Set) service.
+	 *
+	 * This method performs a health check on the JWKS service by:
+	 * - Resolving the JWKS service from the dependency container.
+	 * - Fetching the JWKS and validating its structure and contents.
+	 * - Ensuring the presence of required key fields and supported key types/algorithms.
+	 * - Measuring and logging the response time and any issues encountered.
+	 *
+	 * @returns {Promise<Interfaces.IJwksHealthResponse>} A promise that resolves to an object describing the health status of the JWKS service, including status, message, key count, and response time.
+	 *
+	 * @remarks
+	 * The method logs detailed warnings and errors for various unhealthy states, such as missing service, invalid response structure, empty key set, malformed keys, or unsupported key types/algorithms.
+	 * If the JWKS service is operational and returns valid RSA keys, the status is reported as 'healthy'.
+	 */
+
+	private async checkJwksAvailability(): Promise<Interfaces.IJwksHealthResponse> {
+		const startTime = this.clock.timestamp();
+		const ctxLogger = withLoggerContext(this.logger, 'HealthService.checkJwksAvailability');
+
+		try {
+			const jwksService = this.c.resolve('JwksService');
+
+			if (!jwksService) {
+				const responseTime = this.clock.timestamp() - startTime;
+				ctxLogger.warn('JWKS Service not available in container', { responseTime });
+				return {
+					status: 'unhealthy',
+					message: 'JWKS Service is not register or resolvable in container',
+					keyCount: 0,
+					responseTime,
+				};
+			}
+
+			const jwksResponse = await jwksService.getJwks();
+
+			if (!jwksResponse || !jwksResponse.keys || !Array.isArray(jwksResponse.keys)) {
+				const responseTime = this.clock.timestamp() - startTime;
+				ctxLogger.warn('JWKS Service returned invalid response structure', {
+					responseTime,
+					hasResponse: !!jwksResponse,
+					hasKeys: !!jwksResponse?.keys,
+					isKeyArray: Array.isArray(jwksResponse.keys),
+				});
+
+				return {
+					status: 'unhealthy',
+					message: 'JWKS Service returned invalid response structure',
+					keyCount: 0,
+					responseTime,
+				};
+			}
+
+			const keyCount = jwksResponse.keys.length;
+			const responseTime = this.clock.timestamp() - startTime;
+
+			if (keyCount === 0) {
+				ctxLogger.warn('JWKS Service returned empty key set', { responseTime });
+				return {
+					status: 'unhealthy',
+					message: 'JWKS Service returned empty key set - not cryptographic keys',
+					keyCount: 0,
+					responseTime,
+				};
+			}
+
+			const firstKey = jwksResponse.keys[0];
+			const requiredFields = ['kty', 'kid', 'use', 'alg', 'n', 'e'];
+			const hasRequiredFields = requiredFields.every((field) => Object.prototype.hasOwnProperty.call(firstKey, field));
+
+			if (!hasRequiredFields) {
+				const missingFields = requiredFields.filter((field) => !Object.prototype.hasOwnProperty.call(firstKey, field));
+				ctxLogger.warn('JWKS contains malformed keys', { responseTime, keyCount, missingFields, firstKeyFields: Object.keys(firstKey) });
+				return {
+					status: 'unhealthy',
+					message: `JWKS contains malformed keys missing required fields: ${missingFields.join(', ')}}`,
+					keyCount,
+					responseTime,
+				};
+			}
+
+			if (firstKey.kty !== 'RSA' || firstKey.alg !== 'RS256') {
+				ctxLogger.warn('JWKS contains unsupported key type or algorithm', {
+					responseTime,
+					keyCount,
+					keyType: firstKey.kty,
+					algorithm: firstKey.alg,
+				});
+
+				return {
+					status: 'unhealthy',
+					message: `JWKS contains unsupported key type (${firstKey.kty})or algorithm (${firstKey.alg})`,
+					keyCount,
+					responseTime,
+				};
+			}
+
+			ctxLogger.debug('JWKS availability check successful', { responseTime, keyCount, keyIds: jwksResponse.keys.map((k) => k.kid) });
+
+			return {
+				status: 'healthy',
+				message: `JWKS Service operational with ${keyCount} valid RSA keys${keyCount === 1 ? '' : 's'} for JWT operations`,
+				keyCount,
+				responseTime,
+			};
+		} catch (error) {
+			const responseTime = this.clock.timestamp() - startTime;
+			const errorMessage = getErrMsg(error);
+
+			ctxLogger.error('JWKS availability check failed', {
+				error: errorMessage,
+				responseTime,
+				stack: error instanceof Error ? error.stack : undefined,
+			});
+
+			return {
+				status: 'unhealthy',
+				message: `JWKS service check failed: ${errorMessage}`,
+				keyCount: 0,
+				responseTime,
+			};
 		}
 	}
 }

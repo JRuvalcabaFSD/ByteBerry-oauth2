@@ -23,11 +23,16 @@ RUN pnpm install --prod --no-frozen-lockfile
 FROM node:22-alpine AS builder
 
 RUN corepack enable && corepack prepare pnpm@10.20.0 --activate
+RUN apk add --no-cache jq dos2unix
 
 WORKDIR /app
 
 # Copiar archivos de dependencias
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# Instalar TODAS las dependencias
+RUN pnpm install
+
 # TODO F2
 # COPY prisma ./prisma/
 
@@ -35,8 +40,6 @@ COPY tsconfig*.json ./
 COPY src ./src
 COPY scripts ./scripts
 
-# Instalar TODAS las dependencias
-RUN pnpm install
 
 # TODO F2
 # DATABASE_URL dummy para Prisma generate
@@ -53,22 +56,31 @@ ENV APP_VERSION=${VERSION}
 # Script para actualizar version en package.json
 # Inyecta versión
 COPY scripts/update-version.sh /tmp/update-version.sh
-RUN chmod +x scripts/update-version.sh && ./scripts/update-version.sh || true
+RUN dos2unix /tmp/update-version.sh && \
+	chmod +x /tmp/update-version.sh && \
+	/tmp/update-version.sh "${APP_VERSION}"
 
 # Compilar TypeScript
 RUN pnpm build
+
+# Eliminar sourcemaps para producción
+RUN find ./dist -name '*.map' -delete
 
 # ============================================================================
 # Stage 3: Runtime (Imagen Final Mínima)
 # ============================================================================
 FROM node:22-alpine AS runtime
 
+# ARG VERSION inyectado desde GitHub Actions
+ARG VERSION=dev
+ENV APP_VERSION=${VERSION}
+
 # Instalar solo dependencias runtime necesarias
 RUN apk add --no-cache dumb-init
 
 # Crear usuario no-root
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 -G nodejs
+	adduser -S nodejs -u 1001 -G nodejs
 
 WORKDIR /app
 
@@ -92,22 +104,17 @@ COPY --from=builder --chown=nodejs:nodejs /app/package.json ./
 # Copiar archivos necesarios para runtime
 # COPY --chown=nodejs:nodejs prisma ./prisma/
 
-# TODO F1
-#COPY --chown=nodejs:nodejs scripts/docker-entrypoint.sh ./scripts/
 
+# Copiar scripts necesarios
+COPY --chown=nodejs:nodejs scripts/docker-entrypoint.sh ./scripts/
 COPY --chown=nodejs:nodejs scripts/healthCheck.cjs ./scripts/
-
-# TODO F1
-# COPY --chown=nodejs:nodejs scripts/generate-keys.js ./scripts/
-
-# TODO F1
-# Hacer scripts ejecutables
-# RUN chmod +x scripts/docker-entrypoint.sh && \
-# 		chmod +x scripts/healthCheck.cjs && \
-# 		chmod +x scripts/generate-keys.js
+COPY --chown=nodejs:nodejs scripts/generate-keys.mjs ./scripts/
 
 # Hacer scripts ejecutables
-RUN chmod +x scripts/healthCheck.cjs
+RUN chmod +x scripts/docker-entrypoint.sh && \
+	chmod +x scripts/healthCheck.cjs && \
+	chmod +x scripts/generate-keys.mjs && \
+	chmod +x scripts/healthCheck.cjs
 
 # Cambiar a usuario no-root
 USER nodejs
@@ -119,14 +126,13 @@ EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
 	CMD ["node", "scripts/healthCheck.cjs"]
 
-# TODO F1
 # Entry point
-# ENTRYPOINT ["/usr/bin/dumb-init", "--", "./scripts/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "./scripts/docker-entrypoint.sh"]
 
 
 # Variables de entorno por defecto
 ENV NODE_ENV=production \
-    PORT=4000
+	PORT=4000
 
 # Comando de inicio
 CMD ["node", "dist/src/app.js"]

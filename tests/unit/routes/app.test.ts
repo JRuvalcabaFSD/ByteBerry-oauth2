@@ -44,7 +44,12 @@ describe('AppRouter', () => {
 				if (token === 'Config') return mockConfig;
 				if (token === 'Clock') return mockClock;
 				if (token === 'HealthService') return mockHealthService;
-				return null;
+				if (token === 'AuthController') return { handle: vi.fn() };
+				if (token === 'TokenController') return { handle: vi.fn() };
+				if (token === 'JwksController') return { handle: vi.fn() };
+				if (token === 'JwksService') return { getJwks: vi.fn() };
+				if (token === 'GetJwksUseCase') return { execute: vi.fn() };
+				return { handle: vi.fn() };
 			}),
 		} as any;
 
