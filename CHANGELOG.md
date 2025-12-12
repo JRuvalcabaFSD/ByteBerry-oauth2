@@ -1,3 +1,29 @@
+# [1.1.0](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/compare/v1.0.0...v1.1.0) (2025-12-12)
+
+
+### Bug Fixes
+
+*  change version variable in update script ([22c1ca7](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/22c1ca703a0eb3a33e9d8e19d56ea41f0b9afe6e))
+* **ci:** set NODE_ENV to development for AMD64 image testing ([de757dc](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/de757dcdf793b680c87711d44c9175f6c2134dd6))
+* rename all files for clean architecture ([5f1841e](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/5f1841eafe37a8375e1f126b8527ec1ea0148fb1))
+* update settings to exclude coverage and logs, remove sourcemaps in production build ([be3815f](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/be3815fea42fb86e9690a42dd89d414bbb577488))
+* update the Docker build script and version injection in package.json ([b7d0032](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/b7d00327474a2162a105446c43b64e8245bcd188))
+
+
+### Features
+
+* add RsaKeyLoaderService for managing RSA keys and update JWT service to use it ([c4b9464](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/c4b94641e722a82bf39a0a9625774fee95916e2b)), closes [#T059](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/issues/T059) [#16](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/issues/16)
+* **health:** add JWKS health check and response interface ([84427a2](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/84427a264ea2eea95275edeec3fc276865953547)), closes [#T066](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/issues/T066) [#20](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/issues/20)
+* implement JWKS retrieval functionality with JwksService and GetJwksUseCase ([b6bde41](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/b6bde418476d31a1e283c14811173d47fd012925)), closes [#T060](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/issues/T060) [#17](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/issues/17)
+* Implement OAuth2 Authorization Code Flow with PKCE ([8a8eecd](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/8a8eecdb1782aa448db136702478f9e6713fde10)), closes [#T057](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/issues/T057)
+* Implement OAuth2 Token Exchange Flow with PKCE Verification ([48a7e5b](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/48a7e5b26b9edb3c7803d8f50ae3ac60bea7987b)), closes [#T059](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/issues/T059) [#14](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/issues/14)
+* **tests:** add comprehensive unit tests for error handling and hashing services ([be35f83](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/be35f83f401007fa0bc4869046788ced0f0c3a04)), closes [#T062](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/issues/T062) [#19](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/issues/19)
+* **tests:** add step to generate JWT test keys in CI workflow ([565b5b1](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/565b5b13575f7773e4be39c26fb1982a9751aeb6))
+* **tests:** add step to generate JWT test keys in CI workflow ([71488c3](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/71488c3834d06bab23e6917a506a120a5a55bfe7))
+* **tests:** enhance CI workflow to run unit and integration tests separately with coverage ([d5f4de9](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/d5f4de9c58bca25325dd9dde7822090e8f2f7509))
+* **tests:** update CI workflow to run all tests in a single step ([07abd92](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/07abd9260fe60e4c8631f3190910987c0a0127d1))
+* update Dockerfile and scripts for improved key management and entry point configuration ([2949f10](https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2/commit/2949f10d8ac5092c17ba2de51e9ec5de63746b5f))
+
 # 1.0.0 (2025-12-06)
 
 
