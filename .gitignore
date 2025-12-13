@@ -217,3 +217,5 @@ docs/
 
 # JWT Keys
 keys/
+
+/generated/prisma

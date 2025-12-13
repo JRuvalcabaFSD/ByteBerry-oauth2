@@ -26,6 +26,21 @@ export function configureShutdown(container: IContainer): GracefulShutdown {
 
 	logger.debug('Configuring graceful shutdown');
 
+	//Register database server in cleanup function
+	GShutdown.registerCleanup(async () => {
+		logger.debug('Closing database connection');
+
+		try {
+			const DbConfig = container.resolve('DbConfig');
+			if (DbConfig && typeof DbConfig.disconnect === 'function') {
+				await DbConfig.disconnect();
+			}
+		} catch (error) {
+			logger.error('Failed to stop Http Server', { error: getErrMsg(error) });
+			throw error;
+		}
+	});
+
 	//Register Http Service in cleanup function
 	GShutdown.registerCleanup(async () => {
 		logger.debug('Closing Http Server');
@@ -43,7 +58,6 @@ export function configureShutdown(container: IContainer): GracefulShutdown {
 		}
 	});
 
-	// TODO Register database server in cleanup function
 	// TODO Register redis server in cleanup function
 
 	return GShutdown;

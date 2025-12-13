@@ -20,6 +20,9 @@ export class Config implements IConfig {
 	public readonly jwtPrivateKey?: string | undefined;
 	public readonly jwtPublicKey?: string | undefined;
 	public readonly jwtKeyId: string;
+	public readonly connectionString: string;
+	public readonly poolMin: number;
+	public readonly poolMax: number;
 
 	//TODO documentar
 	constructor() {
@@ -54,6 +57,13 @@ export class Config implements IConfig {
 			this.jwtPrivateKey = this.validateJWtPrivateKey();
 			this.jwtPublicKey = this.validateJWtPublicKey();
 			this.jwtKeyId = env.get('JWT_KEY_ID').default('default-key-1').asString();
+
+			// ========================================
+			// Database environments
+			// ========================================
+			this.connectionString = env.get('DATABASE_URL').required().asString();
+			this.poolMin = env.get('DATABASE_POOL_MIN').default(2).asIntPositive();
+			this.poolMax = env.get('DATABASE_POOL_MAX').default(10).asIntPositive();
 		} catch (error) {
 			if (error instanceof AppError) throw error;
 			throw new ConfigError(`Failed to validate environment variables: ${getErrMsg(error)}`, {

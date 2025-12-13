@@ -10,6 +10,7 @@ export function bootstrapContainer(): IContainer {
 	registerCoreServices(container);
 	registerHttpServices(container);
 	registerOAuthServices(container);
+	registerDatabase(container);
 
 	validate(container, criticalServices);
 
@@ -69,6 +70,10 @@ function registerOAuthServices(c: IContainer): void {
 	c.registerSingleton('GetJwksUseCase', factories.createGetJwksUseCase);
 	c.registerSingleton('JwksService', factories.createJwksService);
 	c.registerSingleton('JwksController', factories.createJwksController);
+}
+
+function registerDatabase(c: IContainer): void {
+	c.registerSingleton('DbConfig', factories.createDbConfig);
 }
 
 /**

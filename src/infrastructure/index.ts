@@ -20,6 +20,7 @@ export * from './services/clock.service.js';
 export * from './services/health.service.js';
 export * from './services/jwks.service.js';
 export * from './services/jwt.service.js';
+export * from './services/rsa-key-loader.service.js';
 export * from './services/sha256-hash.service.js';
 export * from './services/uuid.service.js';
 export * from './services/winston-logger.service.js';

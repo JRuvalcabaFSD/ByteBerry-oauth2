@@ -1,10 +1,10 @@
-import { GetJwksUseCase } from '@application';
-import { GracefulShutdown, JwksService } from '@infrastructure';
 import * as interfaces from '@interfaces';
 import { AuthorizationController, JwksController, TokenController } from '@presentation';
-import { IKeyLoader } from 'src/interfaces/services/rsa-key-loader.interface.js';
+import { GracefulShutdown, JwksService } from '@infrastructure';
+import { GetJwksUseCase } from '@application';
+import { DataBaseConfig } from '@config';
 
-// El objeto de servicios puede ser redefinido en los tests
+//TODO documentar
 export const services = {
 	// Core Services
 	Clock: {} as interfaces.IClock,
@@ -14,12 +14,16 @@ export const services = {
 	HttpServer: {} as interfaces.IHttpServer,
 	Logger: {} as interfaces.ILogger,
 	Uuid: {} as interfaces.IUuid,
+
 	// Services
 	JwtService: {} as interfaces.IJwtService,
 	PkceVerifierService: {} as interfaces.IPKceVerifierService,
 	HashService: {} as interfaces.IHashService,
-	RsaKeyLoaderService: {} as IKeyLoader,
+	RsaKeyLoaderService: {} as interfaces.IKeyLoader,
 	JwksService: {} as interfaces.IJwksService,
+
+	//Database
+	DbConfig: {} as DataBaseConfig,
 
 	//Uses cases
 	GenerateAuthCodeUseCase: {} as interfaces.IGenerateAuthCodeUseCase,

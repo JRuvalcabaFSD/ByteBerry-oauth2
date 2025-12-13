@@ -1,10 +1,10 @@
 import * as Services from '@infrastructure';
 import * as Interfaces from '@interfaces';
-import { Config } from '@config';
+
 import { ExchangeCodeForTokenUseCase, GenerateAuthCodeUseCase, PkceVerifierService, ValidateClientUseCase } from '@application';
 import { AuthorizationController, JwksController, TokenController } from '@presentation';
-import { NodeHashService, TokenRepository } from '@infrastructure';
-import { RsaKeyLoaderService } from 'src/infrastructure/services/rsa-key-loader.service.js';
+import { NodeHashService, RsaKeyLoaderService, TokenRepository } from '@infrastructure';
+import { Config, DataBaseConfig } from '@config';
 
 /**
  * Creates and returns a new instance of the Config class.
@@ -18,6 +18,18 @@ import { RsaKeyLoaderService } from 'src/infrastructure/services/rsa-key-loader.
  */
 
 export const createConfig = (): Interfaces.IConfig => new Config();
+
+/**
+ * Creates and returns a new instance of `DataBaseConfig` using the database URL
+ * resolved from the container's configuration.
+ *
+ * @param c - The dependency injection container implementing `Interfaces.IContainer`.
+ * @returns A new `DataBaseConfig` instance initialized with the resolved database URL.
+ */
+export function createDbConfig(c: Interfaces.IContainer): DataBaseConfig {
+	const { connectionString, poolMax, poolMin } = c.resolve('Config');
+	return new DataBaseConfig({ connectionString, poolMax, poolMin }, c.resolve('Logger'));
+}
 
 /**
  * Factory function that creates and returns a new instance of ClockService.

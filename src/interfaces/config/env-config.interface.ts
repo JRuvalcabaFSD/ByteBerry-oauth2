@@ -56,6 +56,11 @@ export interface IConfig {
 	readonly jwtPublicKey?: string | undefined;
 	readonly jwtKeyId: string;
 
+	//Database Config
+	readonly connectionString: string;
+	readonly poolMin: number;
+	readonly poolMax: number;
+
 	//functions
 	isDevelopment(): boolean;
 	isProduction(): boolean;
