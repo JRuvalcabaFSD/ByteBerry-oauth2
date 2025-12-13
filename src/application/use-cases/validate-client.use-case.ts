@@ -53,7 +53,7 @@ export class ValidateClientUseCase implements IValidateClientUseCase {
 				this.logger.warn('Invalid redirect URI', { clientId: request.clientId, redirectUri: request.redirectUri });
 			}
 
-			if (request.grandType && !client.supportGrandTypes(request.grandType)) {
+			if (request.grandType && !client.supportsGrantType(request.grandType)) {
 				this.logger.warn('Unsupported grant type', { clientId: request.clientId, grandType: request.grandType });
 				throw new InvalidRequestError('Unsupported grand type');
 			}
@@ -65,7 +65,7 @@ export class ValidateClientUseCase implements IValidateClientUseCase {
 				clientName: client.clientName,
 				isPublic: client.isPublic,
 				redirectUris: client.redirectUris,
-				grandTypes: client.grandTypes,
+				grantTypes: client.grantTypes,
 			};
 		} catch (error) {
 			if (!(error instanceof OAuthError)) {

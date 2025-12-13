@@ -97,7 +97,7 @@ export class GenerateAuthCodeUseCase implements IGenerateAuthCodeUseCase {
 				this.logger.debug('Client validated for authorization', {
 					clientId: clientInfo.clientId,
 					redirectUri: clientInfo.redirectUris,
-					grandType: clientInfo.grandTypes,
+					grandType: clientInfo.grantTypes,
 				});
 
 				clientId = ClientIdVO.create(clientInfo.clientId);

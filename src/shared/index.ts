@@ -11,6 +11,7 @@ export * from './errors/http.error.js';
 export * from './errors/handled-services.error.js';
 export * from './errors/domain.errors.js';
 export * from './errors/jwtError.js';
+export * from './errors/data-base.errors.js';
 
 //Helpers
 export * from './helpers/functions.js';

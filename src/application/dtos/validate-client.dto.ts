@@ -25,7 +25,7 @@ export interface ValidateClientRequestDto {
  * @property {string} clientName - The human-readable name of the client application
  * @property {boolean} isPublic - Indicates whether the client is a public client (true) or confidential client (false)
  * @property {string[]} redirectUris - Array of authorized redirect URIs for the OAuth2 authorization flow
- * @property {string[]} grandTypes - Array of OAuth2 grant types supported by this client (e.g., 'authorization_code', 'client_credentials')
+ * @property {string[]} grantTypes - Array of OAuth2 grant types supported by this client (e.g., 'authorization_code', 'client_credentials')
  */
 
 export interface ValidateClientResponseDto {
@@ -33,5 +33,5 @@ export interface ValidateClientResponseDto {
 	clientName: string;
 	isPublic: boolean;
 	redirectUris: string[];
-	grandTypes: string[];
+	grantTypes: string[];
 }

@@ -7,7 +7,7 @@
  * @property {string | null} [clientSecret] - Secret key for confidential clients (optional, null for public clients)
  * @property {string} clientName - Human-readable name of the client application
  * @property {string[]} redirectUris - List of allowed redirect URIs for OAuth callbacks
- * @property {string[]} grandTypes - Supported OAuth 2.0 grant types (e.g., 'authorization_code', 'client_credentials')
+ * @property {string[]} grantTypes - Supported OAuth 2.0 grant types (e.g., 'authorization_code', 'client_credentials')
  * @property {boolean} [isPublic] - Flag indicating whether the client is public (true) or confidential (false)
  * @property {Date} [createdAt] - Timestamp when the client was created
  */
@@ -20,7 +20,7 @@ interface OAuthClientParams {
 	clientSecret?: string | null;
 	clientName: string;
 	redirectUris: string[];
-	grandTypes: string[];
+	grantTypes: string[];
 	isPublic?: boolean;
 	createdAt?: Date;
 }
@@ -43,7 +43,7 @@ interface OAuthClientParams {
  *   clientSecret: 'secret',
  *   clientName: 'My Application',
  *   redirectUris: ['https://example.com/callback'],
- *   grandTypes: ['authorization_code', 'refresh_token'],
+ *   grantTypes: ['authorization_code', 'refresh_token'],
  *   isPublic: false,
  *   createdAt: new Date()
  * });
@@ -59,7 +59,7 @@ export class OAuthClientEntity {
 	 * @param {string | null} clientSecret - The client secret for confidential clients, or null for public clients.
 	 * @param {string} clientName - The human-readable name of the OAuth client.
 	 * @param {string[]} redirectUris - Array of allowed redirect URIs for OAuth flows.
-	 * @param {string[]} grandTypes - Array of allowed OAuth grant types (e.g., 'authorization_code', 'refresh_token').
+	 * @param {string[]} grantTypes - Array of allowed OAuth grant types (e.g., 'authorization_code', 'refresh_token').
 	 * @param {boolean} isPublic - Flag indicating whether this is a public client (true) or confidential client (false).
 	 * @param {Date} createdAt - The timestamp when the OAuth client was created.
 	 */
@@ -70,7 +70,7 @@ export class OAuthClientEntity {
 		public readonly clientSecret: string | null,
 		public readonly clientName: string,
 		public readonly redirectUris: string[],
-		public readonly grandTypes: string[],
+		public readonly grantTypes: string[],
 		public readonly isPublic: boolean,
 		public readonly createdAt: Date
 	) {}
@@ -84,7 +84,7 @@ export class OAuthClientEntity {
 	 * @param params.clientSecret - Optional client secret for confidential clients
 	 * @param params.clientName - The display name of the OAuth client
 	 * @param params.redirectUris - Array of allowed redirect URIs for the client
-	 * @param params.grandTypes - Array of OAuth grant types supported by the client
+	 * @param params.grantTypes - Array of OAuth grant types supported by the client
 	 * @param params.isPublic - Optional flag indicating if the client is public (defaults to true)
 	 * @param params.createdAt - Optional creation timestamp (defaults to current date)
 	 * @returns A new OAuthClientEntity instance
@@ -97,7 +97,7 @@ export class OAuthClientEntity {
 			params.clientSecret || null,
 			params.clientName,
 			params.redirectUris,
-			params.grandTypes,
+			params.grantTypes,
 			params.isPublic ?? true,
 			params.createdAt || new Date()
 		);
@@ -125,7 +125,7 @@ export class OAuthClientEntity {
 	 * @returns `true` if the grant type is supported by this client, `false` otherwise
 	 */
 
-	public supportGrandTypes(grandType: string): boolean {
-		return this.grandTypes.includes(grandType);
+	public supportsGrantType(grandType: string): boolean {
+		return this.grantTypes.includes(grandType);
 	}
 }

@@ -166,9 +166,8 @@ export function createValidateClientUseCase(c: Interfaces.IContainer): Interface
  * Currently returns an in-memory implementation for storing authorization codes.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function createAuthCodeRepository(c: Interfaces.IContainer): Interfaces.IAuthCodeRepository {
-	return new Services.InMemoryAuthCodeRepository();
+	return new Services.PrismaAuthCodeRepository(c.resolve('DbConfig').getClient(), c.resolve('Logger'));
 }
 
 /**
@@ -182,9 +181,8 @@ export function createAuthCodeRepository(c: Interfaces.IContainer): Interfaces.I
  * Currently returns a mock implementation for testing purposes.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function createOAuthClientRepository(c: Interfaces.IContainer): Interfaces.IOAthClientRepository {
-	return new Services.MockOAuthClientRepository();
+	return new Services.PrismaOAuthClientRepository(c.resolve('DbConfig').getClient(), c.resolve('Logger'));
 }
 
 /**

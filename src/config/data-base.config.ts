@@ -1,7 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '../../generated/prisma/client.js';
 import { Pool } from 'pg';
 import { ILogger } from '@interfaces';
+import { PrismaClient } from '@prisma/client';
 
 export interface DatabaseOptions {
 	connectionString: string;

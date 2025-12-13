@@ -38,7 +38,7 @@ describe('ValidateClientUseCase', () => {
 			clientId: 'test-client-id',
 			clientName: 'Test Client',
 			redirectUris: ['https://example.com/callback'],
-			grandTypes: ['authorization_code', 'refresh_token'],
+			grantTypes: ['authorization_code', 'refresh_token'],
 			isPublic: false
 		});
 
@@ -52,7 +52,7 @@ describe('ValidateClientUseCase', () => {
 				clientName: 'Test Client',
 				isPublic: false,
 				redirectUris: ['https://example.com/callback'],
-				grandTypes: ['authorization_code', 'refresh_token']
+				grantTypes: ['authorization_code', 'refresh_token']
 			});
 
 			expect(mockRepository.findByClientId).toHaveBeenCalledWith('test-client-id');
@@ -73,7 +73,7 @@ describe('ValidateClientUseCase', () => {
 				clientName: 'Test Client',
 				isPublic: false,
 				redirectUris: ['https://example.com/callback'],
-				grandTypes: ['authorization_code', 'refresh_token']
+				grantTypes: ['authorization_code', 'refresh_token']
 			});
 
 			expect(mockRepository.findByClientId).toHaveBeenCalledWith('test-client-id');
@@ -120,7 +120,7 @@ describe('ValidateClientUseCase', () => {
 		it('should throw InvalidRequestError when grant type is not supported', async () => {
 			const clientWithLimitedGrants = OAuthClientEntity.create({
 				...mockClient,
-				grandTypes: ['client_credentials']
+				grantTypes: ['client_credentials']
 			});
 			vi.mocked(mockRepository.findByClientId).mockResolvedValue(clientWithLimitedGrants);
 

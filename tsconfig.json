@@ -21,7 +21,8 @@
 			"@infrastructure": ["src/infrastructure/index.ts"],
 			"@interfaces": ["src/interfaces/index.ts"],
 			"@presentation": ["src/presentation/index.ts"],
-			"@shared": ["src/shared/index.ts"]
+			"@shared": ["src/shared/index.ts"],
+			"@prisma/client": ["./generated/prisma/client.ts"]
 		},
 
 		"declaration": true,
@@ -32,6 +33,11 @@
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true
 	},
-	"include": ["src/**/*", "tests/**/*", "src/shared/@types/**/*", "test/vitest-globals.d.ts"],
+	"include": [
+		"src/**/*",
+		"tests/**/*",
+		"src/shared/@types/**/*",
+		"test/vitest-globals.d.ts"
+	],
 	"exclude": ["node_modules", "dist"]
 }

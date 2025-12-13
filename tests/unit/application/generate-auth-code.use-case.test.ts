@@ -56,7 +56,7 @@ describe('GenerateAuthCodeUseCase', () => {
 				clientName: 'Test Client',
 				isPublic: true,
 				redirectUris: ['https://example.com/callback'],
-				grandTypes: ['authorization_code']
+				grantTypes: ['authorization_code']
 			};
 
 			vi.mocked(mockValidateClient.execute).mockResolvedValue(clientInfo);
@@ -116,7 +116,7 @@ describe('GenerateAuthCodeUseCase', () => {
 				clientName: 'Test Client',
 				isPublic: true,
 				redirectUris: ['https://example.com/callback'],
-				grandTypes: ['authorization_code']
+				grantTypes: ['authorization_code']
 			};
 
 			vi.mocked(mockValidateClient.execute).mockResolvedValue(clientInfo);
@@ -137,7 +137,7 @@ describe('GenerateAuthCodeUseCase', () => {
 				clientName: 'Test Client',
 				isPublic: true,
 				redirectUris: ['https://example.com/callback'],
-				grandTypes: ['authorization_code']
+				grantTypes: ['authorization_code']
 			};
 
 			vi.mocked(mockValidateClient.execute).mockResolvedValue(clientInfo);
@@ -250,7 +250,7 @@ describe('GenerateAuthCodeUseCase', () => {
 				clientName: 'Test Client',
 				isPublic: true,
 				redirectUris: ['https://example.com/callback'],
-				grandTypes: ['authorization_code']
+				grantTypes: ['authorization_code']
 			};
 
 			vi.mocked(mockValidateClient.execute).mockResolvedValue(clientInfo);
@@ -266,7 +266,7 @@ describe('GenerateAuthCodeUseCase', () => {
 				clientName: 'Test Client',
 				isPublic: true,
 				redirectUris: ['https://example.com/callback'],
-				grandTypes: ['authorization_code']
+				grantTypes: ['authorization_code']
 			};
 
 			vi.mocked(mockValidateClient.execute).mockResolvedValue(clientInfo);
@@ -292,7 +292,7 @@ describe('GenerateAuthCodeUseCase', () => {
 			clientName: 'Test Client',
 			isPublic: true,
 			redirectUris: ['https://example.com/callback'],
-			grandTypes: ['authorization_code']
+			grantTypes: ['authorization_code']
 		};
 
 		vi.mocked(mockValidateClient.execute).mockResolvedValue(clientInfo);
@@ -321,7 +321,7 @@ describe('GenerateAuthCodeUseCase', () => {
 				clientName: 'Test Client',
 				isPublic: true,
 				redirectUris: ['https://example.com/callback'],
-				grandTypes: ['authorization_code']
+				grantTypes: ['authorization_code']
 			};
 
 			vi.mocked(mockValidateClient.execute).mockResolvedValue(clientInfo);

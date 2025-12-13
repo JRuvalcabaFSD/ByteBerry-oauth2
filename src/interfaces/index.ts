@@ -11,6 +11,7 @@ export * from './http/http-server.interface.js';
 export * from './repositories/auth-code-repository.interface.js';
 export * from './repositories/oauth-client-repository.interface.js';
 export * from './repositories/token-repository.interface.js';
+export * from './repositories/user.repository.interface.js';
 
 //Services
 export * from './services/clock.service.interface.js';

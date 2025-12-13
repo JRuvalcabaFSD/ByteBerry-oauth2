@@ -10,10 +10,15 @@ export * from './http/middlewares/security.middleware.js';
 export * from './lifecycle/shutdown.js';
 export * from './lifecycle/shutdown-config.js';
 
+//Mappers
+export * from './mappers/prisma.auth-code.mapper.js';
+export * from './mappers/prisma.user.mapper.js';
+
 //Repositories
-export * from './repositories/mock-oauth-client.repository.js';
-export * from './repositories/in-memory-auth-code.repository.js';
+export * from './repositories/prisma.auth-code.repository.js';
 export * from './repositories/token.repository.js';
+export * from './repositories/prisma.oauth-client.repository.js';
+export * from './repositories/prisma.user.repository.js';
 
 //Services
 export * from './services/clock.service.js';
