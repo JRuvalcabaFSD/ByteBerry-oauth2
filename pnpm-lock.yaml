@@ -42,6 +42,9 @@ importers:
       pg:
         specifier: ^8.16.3
         version: 8.16.3
+      prisma:
+        specifier: ^7.1.0
+        version: 7.1.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript@5.9.3)
       rimraf:
         specifier: ^6.1.2
         version: 6.1.2
@@ -130,9 +133,6 @@ importers:
       prettier:
         specifier: ^3.7.3
         version: 3.7.4
-      prisma:
-        specifier: ^7.1.0
-        version: 7.1.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript@5.9.3)
       semantic-release:
         specifier: ^25.0.2
         version: 25.0.2(typescript@5.9.3)

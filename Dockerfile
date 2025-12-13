@@ -10,8 +10,7 @@ WORKDIR /app
 
 # Copiar solo archivos de dependencias
 COPY package.json pnpm-lock.yaml ./
-# TODO F2
-# COPY prisma ./prisma/
+COPY prisma ./prisma/
 
 # Instalar SOLO dependencias de producción
 RUN pnpm install --prod --no-frozen-lockfile
@@ -33,21 +32,21 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # Instalar TODAS las dependencias
 RUN pnpm install
 
-# TODO F2
-# COPY prisma ./prisma/
+
+# Copiar Prisma schema y config para generar cliente
+COPY prisma ./prisma/
+COPY prisma.config.ts ./
 
 COPY tsconfig*.json ./
 COPY src ./src
 COPY scripts ./scripts
 
 
-# TODO F2
 # DATABASE_URL dummy para Prisma generate
-# ENV DATABASE_URL="postgresql://ignore"
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 
-# TODO F2
 # Generar Prisma Client
-# RUN pnpm prisma generate
+RUN pnpm prisma generate
 
 # ARG VERSION inyectado desde GitHub Actions
 ARG VERSION=dev
@@ -75,8 +74,11 @@ FROM node:22-alpine AS runtime
 ARG VERSION=dev
 ENV APP_VERSION=${VERSION}
 
-# Instalar solo dependencias runtime necesarias
-RUN apk add --no-cache dumb-init
+# Instalar dependencias runtime necesarias
+# - dumb-init: manejo correcto de señales
+# - openssl: generación de llaves JWT en development
+# - netcat-openbsd: para wait-for-db (nc command)
+RUN apk add --no-cache dumb-init openssl netcat-openbsd
 
 # Crear usuario no-root
 RUN addgroup -g 1001 -S nodejs && \
@@ -84,15 +86,17 @@ RUN addgroup -g 1001 -S nodejs && \
 
 WORKDIR /app
 
+# Crear directorio para llaves JWT con permisos correctos
+RUN mkdir -p /app/keys && chown -R nodejs:nodejs /app/keys
+
 # Cambiar ownership a usuario nodejs
 RUN chown -R nodejs:nodejs /app
 
 # Copiar node_modules de producción desde stage deps
 COPY --from=deps --chown=nodejs:nodejs /app/node_modules ./node_modules
 
-# TODO F2
 # Copiar Prisma generado
-# COPY --from=builder --chown=nodejs:nodejs /app/generated ./generated
+COPY --from=builder --chown=nodejs:nodejs /app/generated ./generated
 
 # Copiar código compilado desde builder
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
@@ -100,10 +104,9 @@ COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 # Copiar package.json actualizado con versión desde builder
 COPY --from=builder --chown=nodejs:nodejs /app/package.json ./
 
-# TODO F2
-# Copiar archivos necesarios para runtime
-# COPY --chown=nodejs:nodejs prisma ./prisma/
-
+# Copiar archivos necesarios para runtime (migraciones)
+COPY --chown=nodejs:nodejs prisma ./prisma/
+COPY prisma.config.ts ./
 
 # Copiar scripts necesarios
 COPY --chown=nodejs:nodejs scripts/docker-entrypoint.sh ./scripts/
