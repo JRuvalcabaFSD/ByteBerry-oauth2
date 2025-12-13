@@ -80,7 +80,7 @@ export class PrismaUserRepository implements IUserRepository {
 	 * @throws Throws a handled Prisma error if the database operation fails.
 	 */
 
-	public async finByEmail(email: string): Promise<UserEntity | null> {
+	public async findByEmail(email: string): Promise<UserEntity | null> {
 		try {
 			const record = await this.client.user.findUnique({ where: { email } });
 			if (!record) {
@@ -117,6 +117,27 @@ export class PrismaUserRepository implements IUserRepository {
 	}
 
 	/**
+	 * Updates an existing user in the database with the provided user entity data.
+	 *
+	 * @param user - The user entity containing updated information (id, email, username, passwordHash).
+	 * @returns A promise that resolves when the update operation is complete.
+	 * @throws Throws a handled Prisma error if the update operation fails.
+	 */
+
+	public async update(user: UserEntity): Promise<void> {
+		try {
+			await this.client.user.update({
+				where: { id: user.id },
+				data: { email: user.email, username: user.username, password: user.passwordHash },
+			});
+
+			this.logger.info('User update successfully', { id: user.id, email: user.email });
+		} catch (error) {
+			throw handledPrismaError(error);
+		}
+	}
+
+	/**
 	 * Authenticates a user by their email and password.
 	 *
 	 * Attempts to find a user by the provided email and verifies the password.
@@ -133,7 +154,7 @@ export class PrismaUserRepository implements IUserRepository {
 		let isValid: boolean = false;
 
 		try {
-			const user = await this.finByEmail(email);
+			const user = await this.findByEmail(email);
 			if (user && user.hasPassword()) {
 				isValid = await compare(password, user.getPasswordHas()!);
 			}

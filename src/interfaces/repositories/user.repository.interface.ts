@@ -26,7 +26,7 @@ export interface IUserRepository {
 	 * @memberof IUserRepository
 	 */
 
-	finByEmail(email: string): Promise<UserEntity | null>;
+	findByEmail(email: string): Promise<UserEntity | null>;
 
 	/**
 	 * Finds a user by their unique identifier.
@@ -37,6 +37,16 @@ export interface IUserRepository {
 	 */
 
 	findById(id: string): Promise<UserEntity | null>;
+
+	/**
+	 * Updates an existing user's information in the repository.
+	 *
+	 * @param {UserEntity} user - The user entity with updated information.
+	 * @return {*}  {Promise<void>} - A promise that resolves when the user is successfully updated.
+	 * @memberof IUserRepository
+	 */
+
+	update(user: UserEntity): Promise<void>;
 
 	/**
 	 * Authenticates a user using their email and password.
