@@ -6,6 +6,7 @@ export * from './container/container.interface.js';
 
 //Http
 export * from './http/http-server.interface.js';
+export * from './http/http-request.interface.js';
 
 //Services
 export * from './services/clock.service.interface.js';

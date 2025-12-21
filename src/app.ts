@@ -1,5 +1,5 @@
 import { bootstrap } from '@bootstrap';
-import { handledServicesError } from '@shared';
+import { handledServicesError, withLoggerContext } from '@shared';
 
 import dotenv from 'dotenv';
 
@@ -14,7 +14,8 @@ async function main() {
 	dotenv.config({ override: false });
 	const { container } = await bootstrap();
 
-	const server = container.resolve('HttpServer');
+	const ctxLogger = withLoggerContext(container.resolve('Logger'), 'main');
+	const { serviceUrl, port } = container.resolve('Config');
 
-	console.log(`App ruining, HttpServer ruining in port: ${server.getServeInfo().port}`);
+	ctxLogger.info(`service available in the url: ${serviceUrl}:${port}`);
 }

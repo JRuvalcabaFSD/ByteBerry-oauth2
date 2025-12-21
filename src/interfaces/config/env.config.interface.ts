@@ -28,6 +28,7 @@ export interface IConfig {
 	readonly logLevel: LogLevel;
 	readonly logRequests: boolean;
 	readonly corsOrigins: string[];
+	readonly serviceUrl: string;
 
 	//functions
 	isDevelopment(): boolean;

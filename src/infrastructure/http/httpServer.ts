@@ -1,17 +1,43 @@
+import { getErrMsg, LogContextClass, LogContextMethod } from '@shared';
 import express, { Application } from 'express';
 import { Server } from 'http';
 
-import { IClock, IConfig, IContainer, IHttpServer, ServerInfo } from '@interfaces';
-import { AppError } from '@domain';
-import { createSecurityMiddleware } from './middlewares/security.middleware.js';
-import { createCORSMiddleware } from './middlewares/cors.middleware.js';
-import { createRequestIdMiddleware } from './middlewares/requestId.middleware.js';
+import * as Middlewares from '@infrastructure';
 
-//TODO documentar
+import type { IClock, IConfig, IContainer, IHttpServer, ILogger, ServerInfo } from '@interfaces';
+import { createLoggingMiddleware } from '@infrastructure';
+import { createAppRouter } from '@presentation';
+import { AppError } from '@domain';
+
+/**
+ * Represents an HTTP server implementation using Express, providing lifecycle management,
+ * middleware initialization, and runtime information access.
+ *
+ * The `HttpServer` class encapsulates the setup and control of an Express-based HTTP server,
+ * including starting, stopping, and querying server state. It leverages dependency injection
+ * for configuration, logging, and clock services, and applies a set of middlewares for security,
+ * CORS, request identification, logging, and payload parsing.
+ *
+ * @remarks
+ * - The server instance is managed internally and can be started or stopped asynchronously.
+ * - Middleware setup is performed during construction.
+ * - The class exposes methods to check running status, retrieve server information, and access the Express app.
+ *
+ * @example
+ * ```typescript
+ * const server = new HttpServer(container);
+ * await server.start();
+ * // ... handle requests
+ * await server.stop();
+ * ```
+ */
+
+@LogContextClass()
 export class HttpServer implements IHttpServer {
 	private readonly app: Application;
 	private readonly config: IConfig;
 	private readonly clock: IClock;
+	private readonly logger: ILogger;
 	private server: Server | null = null;
 	private startTime: Date | null = null;
 
@@ -19,7 +45,9 @@ export class HttpServer implements IHttpServer {
 		this.app = express();
 		this.config = container.resolve('Config');
 		this.clock = container.resolve('Clock');
+		this.logger = container.resolve('Logger');
 		this.startMiddlewares();
+		this.app.use(createAppRouter(this.container));
 	}
 
 	/**
@@ -33,23 +61,25 @@ export class HttpServer implements IHttpServer {
 	 * - The server's start time is recorded using `this.clock.now()`.
 	 * - Errors emitted by the server are handled and cause the returned promise to reject.
 	 */
+
+	@LogContextMethod()
 	public async start(): Promise<void> {
 		return new Promise((resolve, reject) => {
 			try {
 				this.server = this.app.listen(this.config.port, () => {
 					this.startTime = this.clock.now();
 
-					// TODO Logger
+					this.logger.info('Http Server started successfully');
 					resolve();
 				});
 
 				this.server.on('error', (error) => {
-					// TODO Logger
+					this.logger.error('Http Server failed to start', { error: getErrMsg(error), port: this.config.port });
 					reject(error);
 				});
 			} catch (error) {
 				if (error instanceof AppError) throw error;
-				// TODO Logger
+				this.logger.error('Failed to start Http Server', { error: getErrMsg(error) });
 			}
 		});
 	}
@@ -63,18 +93,18 @@ export class HttpServer implements IHttpServer {
 	 */
 	public async stop(): Promise<void> {
 		if (!this.server) {
-			// TODO Logger
+			this.logger.warn('Http Server stop called but server is not running');
 			return Promise.resolve();
 		}
 
 		return new Promise((resolve, reject) => {
 			this.server?.close((error) => {
 				if (error) {
-					// TODO Logger
+					this.logger.error('Error stopping Http Server', { error: getErrMsg(error) });
 					reject(error);
 				}
 
-				// TODO Logger
+				this.logger.info('Http Server stopped successfully');
 				this.server = null;
 				this.startTime = null;
 				resolve();
@@ -122,14 +152,29 @@ export class HttpServer implements IHttpServer {
 		};
 	}
 
-	//TODO documentar
+	/**
+	 * Initializes and applies all necessary middlewares to the Express application.
+	 *
+	 * This method configures the following middlewares:
+	 * - Sets the 'trust proxy' setting to enable proxy support.
+	 * - Disables the 'x-powered-by' header for security.
+	 * - Applies a custom security middleware.
+	 * - Applies a CORS middleware with the current configuration.
+	 * - Adds a request ID middleware using a UUID provider from the container.
+	 * - Adds a logging middleware with the provided logger, clock, and request logging configuration.
+	 * - Configures the app to parse JSON payloads with a 10MB limit.
+	 * - Configures the app to parse URL-encoded payloads with a 10MB limit.
+	 *
+	 * @private
+	 */
+
 	private startMiddlewares(): void {
 		this.app.set('trust proxy', true);
 		this.app.disable('x-powered-by');
-		this.app.use(createSecurityMiddleware());
-		this.app.use(createCORSMiddleware(this.config));
-		this.app.use(createRequestIdMiddleware(this.container.resolve('UUid')));
-		// TODO Logger middleware
+		this.app.use(Middlewares.createSecurityMiddleware());
+		this.app.use(Middlewares.createCORSMiddleware(this.config));
+		this.app.use(Middlewares.createRequestIdMiddleware(this.container.resolve('UUid')));
+		this.app.use(createLoggingMiddleware(this.logger, this.clock, this.config.logRequests));
 		this.app.use(express.json({ limit: '10mb' }));
 		this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 	}

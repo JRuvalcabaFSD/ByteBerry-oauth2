@@ -45,7 +45,7 @@ export interface ILogEntry {
 	timestamp: string;
 	level: string;
 	service: string;
-	msg: string;
+	message: string;
 	context?: ILogContext;
 	requestId: string;
 }

@@ -1,9 +1,10 @@
 {
-  "name": "oauth2",
-  "version": "0.0.0",
+	"name": "oauth2",
+	"version": "0.0.0",
 	"description": "Servidor OAuth2 con Authorization Code + PKCE, JWT RS256, refresh tokens y JWKS",
 	"main": "dist/app.js",
-	"type": "module",	"repository": {
+	"type": "module",
+	"repository": {
 		"type": "git",
 		"url": "https://github.com/JRuvalcabaFSD/ByteBerry-OAuth2"
 	},
@@ -52,10 +53,10 @@
 		"test": "pnpm test:all",
 		"type-check": "tsc --noEmit -p tsconfig.check.json"
 	},
-  "keywords": [],
-  "author": "Jesús Ruvalcaba",
-  "license": "ISC",
-  "packageManager": "pnpm@10.20.0",
+	"keywords": [],
+	"author": "Jesús Ruvalcaba",
+	"license": "ISC",
+	"packageManager": "pnpm@10.20.0",
 	"devDependencies": {
 		"@commitlint/cli": "^20.1.0",
 		"@commitlint/config-conventional": "^20.0.0",
@@ -66,7 +67,6 @@
 		"@types/cors": "^2.8.19",
 		"@types/express": "^5.0.6",
 		"@types/jsonwebtoken": "^9.0.10",
-		"@types/morgan": "^1.9.10",
 		"@types/node": "^24.10.1",
 		"@types/pg": "^8.15.6",
 		"@types/qs": "^6.14.0",

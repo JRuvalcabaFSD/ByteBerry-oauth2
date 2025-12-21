@@ -27,6 +27,21 @@ export const createClockService = (): Interfaces.IClock => new Constructors.Cloc
 export const createUuidService = (): Interfaces.IUuid => new Constructors.UuidService();
 
 /**
+ * Factory function to create an instance of the WinstonLoggerService.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies.
+ * @returns An instance of ILogger implemented by WinstonLoggerService.
+ *
+ * @remarks
+ * This function resolves the 'Config' and 'Clock' dependencies from the container
+ * and passes them to the WinstonLoggerService constructor.
+ */
+
+export function createLoggerService(c: Interfaces.IContainer): Interfaces.ILogger {
+	return new Constructors.WinstonLoggerService(c.resolve('Config'), c.resolve('Clock'));
+}
+
+/**
  * Creates and returns a new instance of `HttpServer` using the provided container.
  *
  * @param c - The dependency injection container implementing `Interfaces.IContainer`.

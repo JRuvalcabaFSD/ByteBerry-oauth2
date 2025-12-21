@@ -1,7 +1,7 @@
 import { bootstrapContainer } from '@container';
 import { AppError } from '@domain';
-import { IContainer } from '@interfaces';
-import { BootstrapError, getErrMsg } from '@shared';
+import { IContainer, ILogger } from '@interfaces';
+import { BootstrapError, getErrMsg, withLoggerContext } from '@shared';
 
 interface bootstrapResult {
 	container: IContainer;
@@ -9,8 +9,14 @@ interface bootstrapResult {
 }
 
 export async function bootstrap(): Promise<bootstrapResult> {
+	let logger: ILogger | undefined;
+
 	try {
 		const container = bootstrapContainer();
+		logger = withLoggerContext(container.resolve('Logger'), 'bootstrap');
+
+		logger.info('Service starting');
+
 		const httpServer = container.resolve('HttpServer');
 
 		await httpServer.start();

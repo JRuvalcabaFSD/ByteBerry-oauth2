@@ -6,6 +6,7 @@ export const Services = {
 	Config: {} as Interfaces.IConfig,
 	Clock: {} as Interfaces.IClock,
 	UUid: {} as Interfaces.IUuid,
+	Logger: {} as Interfaces.ILogger,
 	HttpServer: {} as Interfaces.IHttpServer,
 };
 
