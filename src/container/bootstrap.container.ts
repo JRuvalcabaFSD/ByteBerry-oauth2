@@ -1,0 +1,44 @@
+import { Container, createClockService, createConfig, createHttpServer, createUuidService, criticalServices, Token } from '@container';
+import { ContainerCreationError } from '@shared';
+import { IContainer } from '@interfaces';
+import { AppError } from '@domain';
+
+//TODO documentar
+export function bootstrapContainer(): IContainer {
+	const container = new Container();
+
+	registerCoreServices(container);
+
+	validate(container, criticalServices);
+
+	return container;
+}
+
+function registerCoreServices(c: IContainer): void {
+	c.registerSingleton('Config', createConfig);
+	c.registerSingleton('Clock', createClockService);
+	c.registerSingleton('UUid', createUuidService);
+	c.registerSingleton('HttpServer', createHttpServer);
+}
+
+/**
+ * Validates that all provided service tokens are registered and can be resolved in the given container.
+ *
+ * @template T - A type that extends Token.
+ * @param c - The container instance implementing the IContainer interface.
+ * @param services - An array of service tokens to validate.
+ * @throws {ContainerCreationError} If any token is not registered or cannot be resolved.
+ */
+
+function validate<T extends Token>(c: IContainer, services: T[]): void {
+	services.forEach((token) => {
+		if (!c.isRegistered(token)) throw new ContainerCreationError(token);
+
+		try {
+			c.resolve(token);
+		} catch (error) {
+			if (error instanceof AppError) throw error;
+			throw new ContainerCreationError(token);
+		}
+	});
+}

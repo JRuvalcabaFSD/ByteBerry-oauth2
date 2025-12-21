@@ -1,7 +1,7 @@
-import dotenv from 'dotenv';
+import { bootstrap } from '@bootstrap';
+import { handledServicesError } from '@shared';
 
-import { Config } from '@container';
-import { handledServicesError } from './shared/errors/handled-services.errors.js';
+import dotenv from 'dotenv';
 
 (() => {
 	main().catch((error) => {
@@ -12,7 +12,9 @@ import { handledServicesError } from './shared/errors/handled-services.errors.js
 
 async function main() {
 	dotenv.config({ override: false });
+	const { container } = await bootstrap();
 
-	const config = new Config();
-	console.log({ config });
+	const server = container.resolve('HttpServer');
+
+	console.log(`App ruining, HttpServer ruining in port: ${server.getServeInfo().port}`);
 }

@@ -23,15 +23,15 @@ export type ErrorType = 'bootstrap' | 'config' | 'container' | 'http' | 'oauth' 
  * throw new AppError('Invalid credentials', ErrorType.Authentication);
  * ```
  *
- * @param message - The error message describing what went wrong.
+ * @param msg - The error message describing what went wrong.
  * @param type - The specific type of the error, represented by `ErrorType`.
  * @property errorType - The type/category of the error.
  */
 
 export class AppError extends Error {
 	public readonly errorType: ErrorType;
-	constructor(message: string, type: ErrorType) {
-		super(message);
+	constructor(msg: string, type: ErrorType) {
+		super(msg);
 		this.name = 'AppError';
 		this.errorType = type;
 

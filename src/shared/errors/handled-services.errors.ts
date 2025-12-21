@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 
+import { BootstrapError, ConfigError, ContainerError, getErrMsg, getErrStack, getUTCTimestamp } from '@shared';
 import { AppError } from '@domain';
-import { ConfigError, getErrMsg, getErrStack, getUTCTimestamp } from '@shared';
 
 const Colors = { Red: '\x1b[31m', Yellow: '\x1b[33m', Bold: '\x1b[1m', Reset: '\x1b[0m' };
 
@@ -18,6 +18,40 @@ const HANDLERS = new Map<string, (error: any) => void>([
 			if (isDevelopment && error.context) {
 				logMessage += `\n${JSON.stringify(error.context, null, 2)}`;
 			}
+
+			// Just add stack in development
+			if (isDevelopment) {
+				const stack = getErrStack(error);
+				if (stack) {
+					logMessage += `\n${stack}`;
+				}
+			}
+
+			console.log(logMessage);
+		},
+	],
+	[
+		'container',
+		(error: ContainerError) => {
+			const isDevelopment = process.env.NODE_ENV === 'development';
+			let logMessage = getMessage(error, 'Container');
+
+			// Just add stack in development
+			if (isDevelopment) {
+				const stack = getErrStack(error);
+				if (stack) {
+					logMessage += `\n${stack}`;
+				}
+			}
+
+			console.log(logMessage);
+		},
+	],
+	[
+		'bootstrap',
+		(error: BootstrapError) => {
+			const isDevelopment = process.env.NODE_ENV === 'development';
+			let logMessage = getMessage(error, 'Bootstrap error');
 
 			// Just add stack in development
 			if (isDevelopment) {
