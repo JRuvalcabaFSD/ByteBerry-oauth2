@@ -46,8 +46,9 @@ export class HttpServer implements IHttpServer {
 		this.config = container.resolve('Config');
 		this.clock = container.resolve('Clock');
 		this.logger = container.resolve('Logger');
-		this.startMiddlewares();
+		this.setupMiddlewares();
 		this.app.use(createAppRouter(this.container));
+		this.setupHandledError();
 	}
 
 	/**
@@ -168,7 +169,7 @@ export class HttpServer implements IHttpServer {
 	 * @private
 	 */
 
-	private startMiddlewares(): void {
+	private setupMiddlewares(): void {
 		this.app.set('trust proxy', true);
 		this.app.disable('x-powered-by');
 		this.app.use(Middlewares.createSecurityMiddleware());
@@ -177,5 +178,17 @@ export class HttpServer implements IHttpServer {
 		this.app.use(createLoggingMiddleware(this.logger, this.clock, this.config.logRequests));
 		this.app.use(express.json({ limit: '10mb' }));
 		this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+	}
+
+	/**
+	 * Configures the Express application to use a custom error-handling middleware.
+	 * The middleware is created using the provided logger and configuration,
+	 * ensuring that handled errors are properly logged and formatted in HTTP responses.
+	 *
+	 * @private
+	 */
+
+	private setupHandledError(): void {
+		this.app.use(Middlewares.createErrorMiddleware(this.logger, this.config));
 	}
 }

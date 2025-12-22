@@ -3,6 +3,7 @@ export * from './http/middlewares/cors.middleware.js';
 export * from './http/middlewares/requestId.middleware.js';
 export * from './http/middlewares/security.middleware.js';
 export * from './http/middlewares/logger.middleware.js';
+export * from './http/middlewares/error.middleware.js';
 
 //Http
 export * from './http/httpServer.js';

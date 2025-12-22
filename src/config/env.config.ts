@@ -27,7 +27,7 @@ export class Config implements IConfig {
 			this.corsOrigins = this.normalizeUrls(
 				env.get('CORS_ORIGINS').default('http://localhost:5173,http://localhost:4003,http://localhost:4002,http://localhost:4001').asArray()
 			);
-			this.serviceUrl = this.normalizeUrls(env.get('SERVICE_URL').default(`http://localhost:${this.port}`).asUrlString());
+			this.serviceUrl = this.normalizeUrls(env.get('SERVICE_URL').default(`http://localhost`).asUrlString());
 
 			// ========================================
 			// Logs environments

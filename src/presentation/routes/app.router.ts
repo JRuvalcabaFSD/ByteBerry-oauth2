@@ -57,7 +57,7 @@ function getRoutesList(type: 'json' | 'text', baseUrl: string): Record<string, u
 	const routes = [
 		{ name: 'home', value: `${baseUrl}/`, text: 'GET /' },
 		{ name: 'health', value: `${baseUrl}/health`, text: 'GET /health' },
-		{ name: 'health', value: `${baseUrl}/health/deep`, text: 'GET /health/deep' },
+		{ name: 'deepHealth', value: `${baseUrl}/health/deep`, text: 'GET /health/deep' },
 	];
 
 	if (type === 'json') {
