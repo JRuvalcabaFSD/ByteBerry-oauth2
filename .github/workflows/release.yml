@@ -72,7 +72,8 @@ jobs:
           pnpm lint
           pnpm audit
           pnpm build
-          pnpm test
+          # Modificar si se agregan tests que requieran DB
+          pnpm test:unit
 
       - name: 📦 Upload build artifacts
         uses: actions/upload-artifact@v4
