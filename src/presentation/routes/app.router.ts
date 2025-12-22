@@ -25,7 +25,7 @@ export function createAppRouter(c: IContainer): Router {
 			timestamp: clock.isoString(),
 			requestId: req.requestId,
 			environment: config.nodeEnv,
-			endpoints: getRoutesList('json', baseurl),
+			endpoints: getRoutesList(baseurl),
 		};
 
 		res.json(homeResponse);
@@ -38,7 +38,7 @@ export function createAppRouter(c: IContainer): Router {
 			message: `Route ${req.method} ${req.originalUrl} not found`,
 			requestId: req.requestId,
 			timestamp: clock.isoString(),
-			endpoints: getRoutesList('json', baseurl),
+			endpoints: getRoutesList(baseurl),
 		});
 	});
 
@@ -46,29 +46,24 @@ export function createAppRouter(c: IContainer): Router {
 }
 
 /**
- * Generates a list of available routes in either JSON or text format.
+ * Generates a mapping of route names to their corresponding URLs based on the provided base URL.
  *
- * @param type - The format of the returned routes list. Use `'json'` to get a record mapping route names to URLs, or `'text'` to get an array of route descriptions.
- * @param baseUrl - The base URL to prepend to each route.
- * @returns If `type` is `'json'`, returns an object mapping route names to their URLs. If `type` is `'text'`, returns an array of route description strings.
+ * @param baseUrl - The base URL to prepend to each route path.
+ * @returns An object where each key is a route name and each value is the full route URL.
  */
 
-function getRoutesList(type: 'json' | 'text', baseUrl: string): Record<string, unknown> | string[] {
+function getRoutesList(baseUrl: string): Record<string, unknown> | string[] {
 	const routes = [
-		{ name: 'home', value: `${baseUrl}/`, text: 'GET /' },
-		{ name: 'health', value: `${baseUrl}/health`, text: 'GET /health' },
-		{ name: 'deepHealth', value: `${baseUrl}/health/deep`, text: 'GET /health/deep' },
+		{ name: 'home', value: `${baseUrl}/` },
+		{ name: 'health', value: `${baseUrl}/health` },
+		{ name: 'deepHealth', value: `${baseUrl}/health/deep` },
 	];
 
-	if (type === 'json') {
-		return routes.reduce(
-			(acc, { name, value }) => {
-				acc[name] = value;
-				return acc;
-			},
-			{} as Record<string, unknown>
-		);
-	} else {
-		return routes.map((item) => item.text);
-	}
+	return routes.reduce(
+		(acc, { name, value }) => {
+			acc[name] = value;
+			return acc;
+		},
+		{} as Record<string, unknown>
+	);
 }

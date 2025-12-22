@@ -25,9 +25,7 @@ export class ContainerError extends AppError {
 		this.token = token;
 		this.name = 'ContainerError';
 
-		if (Error.captureStackTrace) {
-			Error.captureStackTrace(this, ContainerError);
-		}
+		Error.captureStackTrace(this, ContainerError);
 	}
 }
 
@@ -54,9 +52,7 @@ export class ContainerCreationError extends ContainerError {
 		super(`${token} service not registered`, token);
 		this.name = 'ContainerCreationError';
 
-		if (Error.captureStackTrace) {
-			Error.captureStackTrace(this, ContainerCreationError);
-		}
+		Error.captureStackTrace(this, ContainerCreationError);
 	}
 }
 
@@ -88,9 +84,7 @@ export class TokenAlreadyRegisteredError extends ContainerError {
 		super(`Token ${token} is already registered`, token);
 		this.name = 'TokenAlreadyRegisteredError';
 
-		if (Error.captureStackTrace) {
-			Error.captureStackTrace(this, TokenAlreadyRegisteredError);
-		}
+		Error.captureStackTrace(this, TokenAlreadyRegisteredError);
 	}
 }
 
@@ -114,9 +108,7 @@ export class TokenNotRegisteredError extends ContainerError {
 		super(`Token ${token} is not registered`, token);
 		this.name = 'TokenNotRegisteredError';
 
-		if (Error.captureStackTrace) {
-			Error.captureStackTrace(this, TokenNotRegisteredError);
-		}
+		Error.captureStackTrace(this, TokenNotRegisteredError);
 	}
 }
 
@@ -141,8 +133,6 @@ export class CircularDependencyError extends ContainerError {
 		super(`circular dependency detected: ${chainDescription}`, currentToken);
 		this.name = 'CircularDependencyError ';
 
-		if (Error.captureStackTrace) {
-			Error.captureStackTrace(this, CircularDependencyError);
-		}
+		Error.captureStackTrace(this, CircularDependencyError);
 	}
 }

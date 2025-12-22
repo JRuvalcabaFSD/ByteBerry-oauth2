@@ -45,3 +45,9 @@ function validate<T extends Token>(c: IContainer, services: T[]): void {
 		}
 	});
 }
+
+// Exporta solo para testing (no afecta la API pública en producción)
+if (process.env.NODE_ENV === 'test') {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	(module.exports as any).validate = validate;
+}

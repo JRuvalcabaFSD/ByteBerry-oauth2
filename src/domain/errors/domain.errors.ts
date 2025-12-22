@@ -35,8 +35,6 @@ export class AppError extends Error {
 		this.name = 'AppError';
 		this.errorType = type;
 
-		if (Error.captureStackTrace) {
-			Error.captureStackTrace(this, AppError);
-		}
+		Error.captureStackTrace(this, AppError);
 	}
 }

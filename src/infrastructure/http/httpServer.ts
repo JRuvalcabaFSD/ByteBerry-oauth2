@@ -81,6 +81,7 @@ export class HttpServer implements IHttpServer {
 			} catch (error) {
 				if (error instanceof AppError) throw error;
 				this.logger.error('Failed to start Http Server', { error: getErrMsg(error) });
+				reject(error);
 			}
 		});
 	}
