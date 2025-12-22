@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { HomeResponse, IContainer } from '@interfaces';
 import { Router } from 'express';
+import { createHealthRoutes } from './health.routers.js';
 
 //TODO documentar
 export function createAppRouter(c: IContainer): Router {
@@ -8,7 +9,12 @@ export function createAppRouter(c: IContainer): Router {
 
 	const config = c.resolve('Config');
 	const clock = c.resolve('Clock');
+	const healthService = c.resolve('HealthService');
+
 	const baseurl = `${config.serviceUrl}:${config.port}`;
+
+	//Health routes
+	router.use('/health', createHealthRoutes(healthService));
 
 	//Home route
 	router.get('/', (req: Request, res: Response) => {
@@ -48,7 +54,11 @@ export function createAppRouter(c: IContainer): Router {
  */
 
 function getRoutesList(type: 'json' | 'text', baseUrl: string): Record<string, unknown> | string[] {
-	const routes = [{ name: 'home', value: `${baseUrl}/`, text: 'GET /' }];
+	const routes = [
+		{ name: 'home', value: `${baseUrl}/`, text: 'GET /' },
+		{ name: 'health', value: `${baseUrl}/health`, text: 'GET /health' },
+		{ name: 'health', value: `${baseUrl}/health/deep`, text: 'GET /health/deep' },
+	];
 
 	if (type === 'json') {
 		return routes.reduce(

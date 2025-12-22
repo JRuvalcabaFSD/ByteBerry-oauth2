@@ -51,3 +51,14 @@ export function createLoggerService(c: Interfaces.IContainer): Interfaces.ILogge
 export function createHttpServer(c: Interfaces.IContainer): Interfaces.IHttpServer {
 	return new Constructors.HttpServer(c);
 }
+
+/**
+ * Factory function to create an instance of `IHealthService`.
+ *
+ * @param c - The dependency injection container implementing `IContainer`.
+ * @returns An instance of `IHealthService`.
+ */
+
+export function createHealthService(c: Interfaces.IContainer): Interfaces.IHealthService {
+	return new Constructors.HealthService(c);
+}

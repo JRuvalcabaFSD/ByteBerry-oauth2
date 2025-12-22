@@ -57,6 +57,13 @@ export interface ILogEntry {
  * This interface defines the contract for logging services throughout the application.
  * It supports multiple log levels and contextual logging through child logger creation.
  *
+ * @method info - Logs an informational message.
+ * @method warn - Logs a warning message.
+ * @method debug - Logs a debug message.
+ * @method child - Creates a child logger with additional context.
+ * @method log - Logs a message at the specified log level.
+ * @method error - Logs an error message.
+ *
  * @example
  * ```typescript
  * const logger: ILogger = new MyLogger();

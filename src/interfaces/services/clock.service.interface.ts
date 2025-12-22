@@ -8,6 +8,10 @@
  * time information in various formats. It's useful for testing scenarios
  * where time needs to be mocked or controlled.
  *
+ * @method now - Returns the current date and time as a Date object.
+ * @method timestamp - Returns the current time as a Unix timestamp (number of milliseconds since January 1, 1970).
+ * @method isoString - Returns the current date and time as an ISO 8601 formatted string.
+ *
  * @example
  * ```typescript
  * class SystemClock implements IClock {

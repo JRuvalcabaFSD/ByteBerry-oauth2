@@ -8,6 +8,7 @@ export const Services = {
 	UUid: {} as Interfaces.IUuid,
 	Logger: {} as Interfaces.ILogger,
 	HttpServer: {} as Interfaces.IHttpServer,
+	HealthService: {} as Interfaces.IHealthService,
 };
 
 /**

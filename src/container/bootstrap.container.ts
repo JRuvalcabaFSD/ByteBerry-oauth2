@@ -21,6 +21,7 @@ function registerCoreServices(c: IContainer): void {
 	c.registerSingleton('UUid', Factories.createUuidService);
 	c.registerSingleton('Logger', Factories.createLoggerService);
 	c.registerSingleton('HttpServer', Factories.createHttpServer);
+	c.registerSingleton('HealthService', Factories.createHealthService);
 }
 
 /**
