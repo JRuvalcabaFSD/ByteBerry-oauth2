@@ -4,8 +4,9 @@
 	"typescript.suggest.paths.enabled": true,
 	"typescript.preferences.includePackageJsonAutoImports": "auto",
 	"files.exclude": {
+		"**/node_modules": true,
 		"dist": true,
-		"**/node_modules": true
+		"logs": true
 	},
 	"cSpell.words": ["SSSZ"]
 }
