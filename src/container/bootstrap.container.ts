@@ -40,6 +40,7 @@ function registerCoreServices(c: IContainer): void {
 
 function registerUserServices(c: IContainer): void {
 	c.register('UserRepository', Factories.createUserRepository);
+	c.register('SessionRepository', Factories.createSessionRepository);
 }
 
 /**

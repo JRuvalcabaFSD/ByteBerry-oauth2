@@ -8,6 +8,10 @@ export * from './http/middlewares/error.middleware.js';
 //Http
 export * from './http/httpServer.js';
 
+//Repositories
+export * from './repositories/inMemory-session.repository.js';
+export * from './repositories/inMemory-user.repository.js';
+
 //Services
 export * from './services/clock.service.js';
 export * from './services/uuid.service.js';

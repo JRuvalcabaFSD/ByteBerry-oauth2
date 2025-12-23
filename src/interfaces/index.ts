@@ -9,7 +9,8 @@ export * from './http/http-server.interface.js';
 export * from './http/http-request.interface.js';
 
 //Repositories
-export * from './repositories/user.repository.js';
+export * from './repositories/user.repository.interface.js';
+export * from './repositories/session.repository.interface.js';
 
 //Services
 export * from './services/clock.service.interface.js';

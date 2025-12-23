@@ -13,7 +13,7 @@
  * @property updatedAt - The date and time when the user was last updated.
  */
 
-export interface UserProps {
+interface UserProps {
 	id: string;
 	email: string;
 	username: string | null;
@@ -27,82 +27,97 @@ export interface UserProps {
 }
 
 /**
- * Represents a user entity within the domain layer.
- * Encapsulates user-related properties and domain logic such as role checks and password validation.
+ * Represents a user within the system, encapsulating user-related properties and behaviors.
+ *
+ * The `UserEntity` class provides a domain model for user accounts, including identity, authentication,
+ * authorization roles, and account status. It offers methods for password validation, role checking,
+ * and generating a public representation of the user without sensitive information.
+ *
+ * Instances of `UserEntity` are immutable and should be created using the static `create` method.
  *
  * @remarks
- * This class uses a private constructor and a static factory method (`create`) to enforce controlled instantiation.
+ * - The password is stored as a hash in the `passwordHash` property.
+ * - The class supports role-based access checks via `hasRole` and `hasAnyRoles`.
+ * - The `toPublic` method returns a user object suitable for exposure in APIs, omitting sensitive data.
  *
- * @property {string} id - Unique identifier for the user.
- * @property {string} email - User's email address (stored in lowercase and trimmed).
- * @property {string | null} username - Optional username for the user.
- * @property {string} passwordHash - Hashed password for authentication.
- * @property {string | null} fullName - Optional full name of the user.
- * @property {string[]} roles - List of roles assigned to the user.
- * @property {boolean} isActive - Indicates if the user account is active.
- * @property {boolean} emailVerified - Indicates if the user's email has been verified.
- * @property {Date} createdAt - Timestamp of when the user was created.
- * @property {Date} updatedAt - Timestamp of the last update to the user.
+ * @example
+ * ```typescript
+ * const user = UserEntity.create({
+ *   id: '123',
+ *   email: 'user@example.com',
+ *   username: 'user123',
+ *   passwordHash: 'hashedPassword',
+ *   fullName: 'User Example',
+ *   roles: ['user'],
+ *   isActive: true,
+ *   emailVerified: false,
+ *   createdAt: new Date(),
+ *   updatedAt: new Date(),
+ * });
  *
- * @method create - Factory method to instantiate a new UserEntity.
- * @method validatePassword - Validates a plain password against the stored password hash.
- * @method hasRole - Checks if the user has a specific role.
- * @method hasAnyRoles - Checks if the user has any of the specified roles.
- * @method canLogin - Determines if the user is allowed to log in.
- * @method toPublic - Returns a public representation of the user, omitting sensitive fields.
+ * if (user.validatePassword('plainPassword')) {
+ *   // Password is valid
+ * }
+ *
+ * if (user.hasRole('admin')) {
+ *   // User is an admin
+ * }
+ *
+ * const publicUser = user.toPublic();
+ * ```
  */
 
 export class UserEntity {
-	private constructor(
-		public readonly id: string,
-		public readonly email: string,
-		public readonly username: string | null,
-		public readonly passwordHash: string,
-		public readonly fullName: string | null,
-		public readonly roles: string[],
-		public readonly isActive: boolean,
-		public readonly emailVerified: boolean,
-		public readonly createdAt: Date,
-		public readonly updatedAt: Date
-	) {}
+	public readonly id!: string;
+	public readonly email!: string;
+	public readonly username!: string | null;
+	public readonly passwordHash!: string;
+	public readonly fullName!: string | null;
+	public readonly roles!: string[];
+	public readonly isActive!: boolean;
+	public readonly emailVerified!: boolean;
+	public readonly createdAt!: Date;
+	public readonly updatedAt!: Date;
+
+	/**
+	 * Creates a new User entity with the provided properties.
+	 * This constructor is private to enforce controlled instantiation.
+	 *
+	 * @param props - The properties required to create a User entity.
+	 */
+
+	private constructor(props: UserProps) {
+		Object.assign(this, props);
+	}
 
 	/**
 	 * Creates a new instance of the UserEntity with the provided properties.
 	 *
-	 * @param props - The properties required to create a UserEntity.
-	 *   - `id`: The unique identifier for the user.
-	 *   - `email`: The user's email address.
-	 *   - `username`: (Optional) The user's username.
-	 *   - `passwordHash`: The hashed password of the user.
-	 *   - `fullName`: (Optional) The user's full name.
-	 *   - `roles`: (Optional) The roles assigned to the user. Defaults to `['user']`.
-	 *   - `isActive`: (Optional) Indicates if the user is active. Defaults to `true`.
-	 *   - `emailVerified`: (Optional) Indicates if the user's email is verified. Defaults to `false`.
-	 *   - `createdAt`: (Optional) The creation date of the user. Defaults to the current date.
-	 *   - `updatedAt`: (Optional) The last update date of the user. Defaults to the current date.
-	 * @returns A new UserEntity instance with normalized and defaulted properties.
+	 * Normalizes and sets default values for certain fields:
+	 * - Converts the email to lowercase and trims whitespace.
+	 * - Sets `username` and `fullName` to `null` if not provided.
+	 * - Defaults `roles` to `['user']` if not specified.
+	 * - Defaults `isActive` to `true` and `emailVerified` to `false` if not specified.
+	 * - Sets `createdAt` and `updatedAt` to the current date if not provided.
 	 *
-	 * @example
-	 * const user = UserEntity.create({
-	 *   id: '123',
-	 *   email: '
+	 * @param props - The properties required to create a UserEntity.
+	 * @returns A new UserEntity instance with normalized and defaulted properties.
 	 */
 
 	public static create(props: UserProps): UserEntity {
 		const now = new Date();
 
-		return new UserEntity(
-			props.id,
-			props.email.toLowerCase().trim(),
-			props.username ?? null,
-			props.passwordHash,
-			props.fullName ?? null,
-			props.roles ?? ['user'],
-			props.isActive ?? true,
-			props.emailVerified ?? false,
-			props.createdAt ?? now,
-			props.updatedAt ?? now
-		);
+		return new UserEntity({
+			...props,
+			email: props.email.toLowerCase().trim(),
+			username: props.username ?? null,
+			fullName: props.fullName ?? null,
+			roles: props.roles ?? ['user'],
+			isActive: props.isActive ?? true,
+			emailVerified: props.emailVerified ?? false,
+			createdAt: props.createdAt ?? now,
+			updatedAt: props.updatedAt ?? now,
+		} as UserEntity);
 	}
 
 	/**

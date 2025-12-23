@@ -46,26 +46,32 @@ export const MOCK_USERS: UserEntity[] = [
 ];
 
 export class InMemoryUserRepository implements IUserRepository {
-	public async findByEmail(email: string): Promise<UserEntity | undefined> {
+	public async findByEmail(email: string): Promise<UserEntity | null> {
 		const normalizeEmail = email.toLowerCase().trim();
-		return MOCK_USERS.find((user) => user.email === normalizeEmail);
+		const user = MOCK_USERS.find((user) => user.email === normalizeEmail);
+		if (!user) return null;
+		return user;
 	}
-	public async findByUserName(username: string): Promise<UserEntity | undefined> {
+	public async findByUserName(username: string): Promise<UserEntity | null> {
 		const normalizeUsername = username.toLowerCase().trim();
-		return MOCK_USERS.find((user) => user.username === normalizeUsername);
+		const user = MOCK_USERS.find((user) => user.username === normalizeUsername);
+		if (!user) return null;
+		return user;
 	}
-	public async findById(id: string): Promise<UserEntity | undefined> {
-		return MOCK_USERS.find((user) => user.id === id);
+	public async findById(id: string): Promise<UserEntity | null> {
+		const user = MOCK_USERS.find((user) => user.id === id);
+		if (!user) return null;
+		return user;
 	}
-	public async validateCredentials(emailOrUsername: string, password: string): Promise<UserEntity | undefined> {
+	public async validateCredentials(emailOrUsername: string, password: string): Promise<UserEntity | null> {
 		const user = (await this.findByEmail(emailOrUsername)) ?? ((await this.findByUserName(emailOrUsername)) as UserEntity);
 
 		if (!user) {
-			return undefined;
+			return null;
 		}
 
 		if (!user.validatePassword(password)) {
-			return undefined;
+			return null;
 		}
 
 		return user;

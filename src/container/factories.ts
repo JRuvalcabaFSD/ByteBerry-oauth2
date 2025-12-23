@@ -1,7 +1,7 @@
 import * as Constructors from '@infrastructure';
 import * as Interfaces from '@interfaces';
 import { Config } from '@config';
-import { InMemoryUserRepository } from 'src/infrastructure/repositories/inMemory-user.repository.js';
+import { InMemoryUserRepository } from '@infrastructure';
 
 /**
  * Creates and returns a new instance of the `Config` class implementing the `IConfig` interface.
@@ -67,10 +67,21 @@ export function createHealthService(c: Interfaces.IContainer): Interfaces.IHealt
 /**
  * Factory function to create an instance of {@link Interfaces.IUserRepository}.
  *
- * @param _c - The dependency injection container instance.
+ * @param c - The dependency injection container instance.
  * @returns An implementation of {@link Interfaces.IUserRepository} using in-memory storage.
  */
 
-export function createUserRepository(_c: Interfaces.IContainer): Interfaces.IUserRepository {
+export function createUserRepository(): Interfaces.IUserRepository {
 	return new InMemoryUserRepository();
+}
+
+/**
+ * Creates and returns an instance of `ISessionRepository` using the in-memory implementation.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies.
+ * @returns An instance of `ISessionRepository` backed by an in-memory store.
+ */
+
+export function createSessionRepository(c: Interfaces.IContainer): Interfaces.ISessionRepository {
+	return new Constructors.InMemorySessionRepository(c.resolve('Logger'));
 }

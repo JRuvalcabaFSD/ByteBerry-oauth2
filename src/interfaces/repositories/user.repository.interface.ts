@@ -11,28 +11,28 @@ import { UserEntity } from '@domain';
  * @method findByEmail
  * Retrieves a user entity by their email address.
  * @param email - The email address of the user.
- * @returns A promise that resolves to the user entity or undefined if not found.
+ * @returns A promise that resolves to the user entity or null if not found.
  *
  * @method findByUserName
  * Retrieves a user entity by their username.
  * @param username - The username of the user.
- * @returns A promise that resolves to the user entity or undefined if not found.
+ * @returns A promise that resolves to the user entity or null if not found.
  *
  * @method findById
  * Retrieves a user entity by their unique identifier.
  * @param id - The unique identifier of the user.
- * @returns A promise that resolves to the user entity or undefined if not found.
+ * @returns A promise that resolves to the user entity or null if not found.
  *
  * @method validateCredentials
  * Validates user credentials using either email or username and a password.
  * @param emailOrUsername - The email address or username of the user.
  * @param password - The user's password.
- * @returns A promise that resolves to the user entity if credentials are valid, or undefined otherwise.
+ * @returns A promise that resolves to the user entity if credentials are valid, or null otherwise.
  */
 
 export interface IUserRepository {
-	findByEmail(email: string): Promise<UserEntity | undefined>;
-	findByUserName(username: string): Promise<UserEntity | undefined>;
-	findById(id: string): Promise<UserEntity | undefined>;
-	validateCredentials(emailOrUsername: string, password: string): Promise<UserEntity | undefined>;
+	findByEmail(email: string): Promise<UserEntity | null>;
+	findByUserName(username: string): Promise<UserEntity | null>;
+	findById(id: string): Promise<UserEntity | null>;
+	validateCredentials(emailOrUsername: string, password: string): Promise<UserEntity | null>;
 }
