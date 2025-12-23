@@ -13,6 +13,7 @@ export const Services = {
 	//Users
 	UserRepository: {} as Interfaces.IUserRepository,
 	SessionRepository: {} as Interfaces.ISessionRepository,
+	AuthCodeRepository: {} as Interfaces.IAuthCodeRepository,
 };
 
 /**

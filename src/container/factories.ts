@@ -2,6 +2,7 @@ import * as Constructors from '@infrastructure';
 import * as Interfaces from '@interfaces';
 import { Config } from '@config';
 import { InMemoryUserRepository } from '@infrastructure';
+import { InMemoryAuthCodeRepository } from 'src/infrastructure/repositories/inMemory-auth-code.repository.js';
 
 /**
  * Creates and returns a new instance of the `Config` class implementing the `IConfig` interface.
@@ -84,4 +85,15 @@ export function createUserRepository(): Interfaces.IUserRepository {
 
 export function createSessionRepository(c: Interfaces.IContainer): Interfaces.ISessionRepository {
 	return new Constructors.InMemorySessionRepository(c.resolve('Logger'));
+}
+
+/**
+ * Creates and returns a new instance of an in-memory implementation of the `IAuthCodeRepository` interface.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies. *
+ * @returns {Interfaces.IAuthCodeRepository} An instance of `InMemoryAuthCodeRepository` for managing authorization codes in memory.
+ */
+
+export function createAuthCodeRepository(): Interfaces.IAuthCodeRepository {
+	return new InMemoryAuthCodeRepository();
 }
