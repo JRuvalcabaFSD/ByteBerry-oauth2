@@ -9,12 +9,26 @@ export function bootstrapContainer(): IContainer {
 	const container = new Container();
 
 	registerCoreServices(container);
+	registerUserServices(container);
 
 	validate(container, criticalServices);
 
 	return container;
 }
 
+/**
+ * Registers the core singleton services into the provided dependency injection container.
+ *
+ * @param c - The dependency injection container where core services will be registered.
+ *
+ * The following services are registered as singletons:
+ * - 'Config': Application configuration service.
+ * - 'Clock': Time and date utility service.
+ * - 'UUid': UUID generation service.
+ * - 'Logger': Logging service.
+ * - 'HttpServer': HTTP server instance.
+ * - 'HealthService': Application health check service.
+ */
 function registerCoreServices(c: IContainer): void {
 	c.registerSingleton('Config', Factories.createConfig);
 	c.registerSingleton('Clock', Factories.createClockService);
@@ -22,6 +36,10 @@ function registerCoreServices(c: IContainer): void {
 	c.registerSingleton('Logger', Factories.createLoggerService);
 	c.registerSingleton('HttpServer', Factories.createHttpServer);
 	c.registerSingleton('HealthService', Factories.createHealthService);
+}
+
+function registerUserServices(c: IContainer): void {
+	c.register('UserRepository', Factories.createUserRepository);
 }
 
 /**

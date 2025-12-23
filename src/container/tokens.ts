@@ -9,6 +9,9 @@ export const Services = {
 	Logger: {} as Interfaces.ILogger,
 	HttpServer: {} as Interfaces.IHttpServer,
 	HealthService: {} as Interfaces.IHealthService,
+
+	//Users
+	UserRepository: {} as Interfaces.IUserRepository,
 };
 
 /**
