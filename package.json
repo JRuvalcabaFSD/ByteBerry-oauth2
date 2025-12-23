@@ -14,7 +14,7 @@
 	},
 	"scripts": {
 		"build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
-		"ci:all": "./scripts/test.release.sh",
+		"ci:all": "./scripts/test-release.sh",
 		"clean": "rm -rf dist",
 		"commit": "git-cz",
 		"db:down": "docker-compose down -v",
@@ -37,7 +37,7 @@
 		"lint:fix": "eslint . --fix",
 		"lint": "eslint .",
 		"prebuild": "pnpm clean",
-		"quality": "pnpm type-check && pnpm lint && pnpm test",
+		"quality": "pnpm type-check && pnpm lint && pnpm test:unit",
 		"release": "semantic-release",
 		"start": "node dist/src/app.js",
 		"test:all": "pnpm test:unit && pnpm test:integration",
