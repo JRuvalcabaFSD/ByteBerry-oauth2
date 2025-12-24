@@ -21,18 +21,16 @@ interface SessionData {
 }
 
 /**
- * Represents the properties required to create or manage a session.
+ * Defines the properties required to create or represent a session entity.
  *
- * Extends all properties from `SessionData` except for `ttlSeconds`, `userAgent`, `ipAddress`, and `metadata`,
- * which are redefined here as optional or with different types.
+ * Extends all properties from `SessionData` except for `ttlSeconds`, `userAgent`, `ipAddress`, `metadata`, `createdAt`, and `expiresAt`.
  *
  * @property {number} [ttlSeconds] - Optional. The time-to-live for the session in seconds.
  * @property {string | null} [userAgent] - Optional. The user agent string associated with the session, or null if not available.
  * @property {string | null} [ipAddress] - Optional. The IP address from which the session was created, or null if not available.
  * @property {Record<string, unknown>} [metadata] - Optional. Additional metadata associated with the session.
  */
-
-interface SessionProps extends Omit<SessionData, 'ttlSeconds' | 'userAgent' | 'ipAddress' | 'metadata'> {
+interface SessionProps extends Omit<SessionData, 'ttlSeconds' | 'userAgent' | 'ipAddress' | 'metadata' | 'createdAt' | 'expiresAt'> {
 	ttlSeconds?: number;
 	userAgent?: string | null;
 	ipAddress?: string | null;

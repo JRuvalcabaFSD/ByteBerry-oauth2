@@ -10,6 +10,8 @@ export function bootstrapContainer(): IContainer {
 
 	registerCoreServices(container);
 	registerUserServices(container);
+	registerUseCases(container);
+	registerControllers(container);
 
 	validate(container, criticalServices);
 
@@ -39,9 +41,17 @@ function registerCoreServices(c: IContainer): void {
 }
 
 function registerUserServices(c: IContainer): void {
-	c.register('UserRepository', Factories.createUserRepository);
-	c.register('SessionRepository', Factories.createSessionRepository);
-	c.register('AuthCodeRepository', Factories.createAuthCodeRepository);
+	c.registerSingleton('UserRepository', Factories.createUserRepository);
+	c.registerSingleton('SessionRepository', Factories.createSessionRepository);
+	c.registerSingleton('AuthCodeRepository', Factories.createAuthCodeRepository);
+}
+
+function registerUseCases(c: IContainer): void {
+	c.registerSingleton('LoginUserCase', Factories.createLoginUseCase);
+}
+
+function registerControllers(c: IContainer): void {
+	c.registerSingleton('LoginController', Factories.createLoginController);
 }
 
 /**

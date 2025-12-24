@@ -8,7 +8,7 @@
  * - `'oauth'`: Errors specific to OAuth authentication/authorization.
  * - `'domain'`: General domain-specific errors.
  */
-export type ErrorType = 'bootstrap' | 'config' | 'container' | 'http' | 'oauth' | 'domain';
+export type ErrorType = 'bootstrap' | 'config' | 'container' | 'http' | 'oauth' | 'domain' | 'login';
 
 /**
  * Represents a custom application error with a specific error type.

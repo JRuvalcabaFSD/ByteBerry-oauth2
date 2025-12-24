@@ -3,6 +3,8 @@ import * as Interfaces from '@interfaces';
 import { Config } from '@config';
 import { InMemoryUserRepository } from '@infrastructure';
 import { InMemoryAuthCodeRepository } from 'src/infrastructure/repositories/inMemory-auth-code.repository.js';
+import { LoginUseCase } from '@application';
+import { LoginController } from '@presentation';
 
 /**
  * Creates and returns a new instance of the `Config` class implementing the `IConfig` interface.
@@ -96,4 +98,37 @@ export function createSessionRepository(c: Interfaces.IContainer): Interfaces.IS
 
 export function createAuthCodeRepository(): Interfaces.IAuthCodeRepository {
 	return new InMemoryAuthCodeRepository();
+}
+
+/**
+ * Factory function to create an instance of `ILoginUseCase`.
+ *
+ * @param c - The dependency injection container implementing `Interfaces.IContainer`.
+ *            Used to resolve required dependencies for the `LoginUseCase`.
+ * @returns An instance of `ILoginUseCase` initialized with the resolved dependencies.
+ *
+ * @remarks
+ * This function resolves the following dependencies from the container:
+ * - `SessionRepository`
+ * - `UserRepository`
+ * - `UUid`
+ * - `Logger`
+ *
+ * These dependencies are injected into the `LoginUseCase` constructor.
+ */
+
+export function createLoginUseCase(c: Interfaces.IContainer): Interfaces.ILoginUseCase {
+	return new LoginUseCase(c.resolve('SessionRepository'), c.resolve('UserRepository'), c.resolve('UUid'), c.resolve('Logger'));
+}
+
+/**
+ * Factory function to create an instance of {@link LoginController}.
+ *
+ * @param c - The dependency injection container implementing {@link Interfaces.IContainer}.
+ *            Used to resolve required dependencies for the controller.
+ * @returns A new instance of {@link LoginController} with its dependencies injected.
+ */
+
+export function createLoginController(c: Interfaces.IContainer): LoginController {
+	return new LoginController(c.resolve('LoginUserCase'), c.resolve('Logger'));
 }

@@ -4,11 +4,12 @@ import { ILogger, ISessionRepository } from '@interfaces';
 export class InMemorySessionRepository implements ISessionRepository {
 	private readonly sessions = new Map<string, SessionEntity>();
 	private readonly userSessionsIndex = new Map<string, Set<string>>();
-	private readonly logger: ILogger;
 	private cleanupInterval: NodeJS.Timeout | null;
 
-	constructor(logger: ILogger, autoCleanupIntervalMs: number = 5 * 60 * 1000) {
-		this.logger = logger.child({ context: 'InMemorySessionManager' });
+	constructor(
+		private readonly logger: ILogger,
+		autoCleanupIntervalMs: number = 5 * 60 * 1000
+	) {
 		this.cleanupInterval = null;
 		this.startAutoCleanup(autoCleanupIntervalMs);
 	}

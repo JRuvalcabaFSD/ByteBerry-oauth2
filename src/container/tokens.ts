@@ -1,4 +1,5 @@
 import * as Interfaces from '@interfaces';
+import { LoginController } from '@presentation';
 
 //TODO documentar
 export const Services = {
@@ -10,10 +11,16 @@ export const Services = {
 	HttpServer: {} as Interfaces.IHttpServer,
 	HealthService: {} as Interfaces.IHealthService,
 
-	//Users
+	//Repositories
 	UserRepository: {} as Interfaces.IUserRepository,
 	SessionRepository: {} as Interfaces.ISessionRepository,
 	AuthCodeRepository: {} as Interfaces.IAuthCodeRepository,
+
+	//Use Cases
+	LoginUserCase: {} as Interfaces.ILoginUseCase,
+
+	//Controllers
+	LoginController: {} as LoginController,
 };
 
 /**
