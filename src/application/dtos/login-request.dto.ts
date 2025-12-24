@@ -1,3 +1,5 @@
+import { LoginValidationError } from '@shared';
+
 interface LoginRequestData {
 	emailOrUserName: string;
 	password: string;
@@ -14,29 +16,35 @@ export class LoginRequestDTO {
 	public readonly userAgent?: string;
 	public readonly ipAddress?: string;
 
-	constructor(data: LoginRequestData) {
+	private constructor(data: LoginRequestData) {
 		Object.assign(this, data);
 	}
 
-	public validate(): string[] {
+	public static toBody(body: Record<string, string>, ip?: string): LoginRequestDTO {
+		if (!body || Object.keys(body).length === 0) throw new LoginValidationError('Missing required body');
+
 		const errors: string[] = [];
 
-		if (!this.emailOrUserName || this.emailOrUserName.trim().length === 0) {
-			errors.push('Email or username is required');
+		if (!body.emailOrUserName || body.emailOrUserName.trim().length === 0) {
+			errors.push('Email or username is required (field:emailOrUserName)');
 		}
 
-		if (!this.password || this.password.length === 0) {
+		if (!body.password || body.password.length === 0) {
 			errors.push('Password is required');
 		}
 
-		if (this.password && this.password.length < 6) {
-			errors.push('Password must be at least 69 characters');
+		if (body.password && body.password.length < 6) {
+			errors.push('Password must be at least 6 characters');
 		}
 
-		return errors;
-	}
+		if (errors.length > 0) throw new LoginValidationError('Failed validate data', errors);
 
-	public isValid(): boolean {
-		return this.validate().length === 0;
+		return new LoginRequestDTO({
+			emailOrUserName: body.emailOrUserName,
+			password: body.password,
+			rememberMe: body.rememberMe === 'true',
+			userAgent: body.userAgent,
+			ipAddress: ip,
+		});
 	}
 }

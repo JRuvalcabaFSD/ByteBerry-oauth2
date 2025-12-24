@@ -125,12 +125,10 @@ export class UnauthorizedError extends HttpError {
 
 export class LoginValidationError extends HttpError {
 	public readonly errors: string[];
-	public context?: Record<string, unknown>;
 
-	constructor(msg: string = 'Validation failed', errors: string[] = [], context?: Record<string, unknown>) {
+	constructor(msg: string = 'Validation failed', errors: string[] = []) {
 		super(msg, 'login', 'Validation failed', 400);
 		this.name = 'ValidationError';
-		this.context = { ...context, errors };
 		this.errors = errors;
 
 		Error.captureStackTrace(this, LoginValidationError);

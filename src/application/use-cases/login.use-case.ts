@@ -73,12 +73,6 @@ export class LoginUseCase implements ILoginUseCase {
 			ipAddress: request.ipAddress,
 		});
 
-		const validateErrors = request.validate();
-		if (validateErrors.length > 0) {
-			this.logger.warn('Login validation failed', { errors: validateErrors });
-			throw new LoginValidationError('Invalid login request', validateErrors);
-		}
-
 		const user = await this.userRepository.validateCredentials(request.emailOrUserName, request.password);
 
 		if (!user) {

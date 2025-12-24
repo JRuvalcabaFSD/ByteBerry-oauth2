@@ -27,7 +27,7 @@
 
 		"declaration": true,
 		"sourceMap": true,
-		"noEmitOnError": false,
+		"noEmitOnError": true,
 		"isolatedModules": true,
 		"noEmit": false,
 		"experimentalDecorators": true,

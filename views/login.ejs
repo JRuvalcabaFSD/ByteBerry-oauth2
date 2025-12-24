@@ -51,12 +51,12 @@
 			<form id="loginForm" class="space-y-6">
 				<!-- Email/Username Input -->
 				<div>
-					<label for="emailOrUsername" class="block text-sm font-medium text-gray-300 mb-2">
+					<label for="emailOrUserName" class="block text-sm font-medium text-gray-300 mb-2">
 						Email o Usuario
 					</label>
-					<input type="text" id="emailOrUsername" name="emailOrUsername" placeholder="admin@byteberry.dev" required
+					<input type="text" id="emailOrUserName" name="emailOrUserName" placeholder="admin@byteberry.dev" required
 						autocomplete="username"
-						class="w-full px-4 py-3 bg-dark-200 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+						class="w-full px-4 py-3 bg-dark-200 border border-gray-600 rfffounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
 				</div>
 
 				<!-- Password Input -->
@@ -127,7 +127,7 @@
 	</div>
 
 	<script<% if (typeof nonce !=='undefined' ) { %> nonce = "<%= nonce %>" <% } %>>
-				const form = document.getElementById('loginForm');
+		const form = document.getElementById('loginForm');
 		const btnLogin = document.getElementById('btnLogin');
 		const btnText = document.getElementById('btnText');
 		const errorMessage = document.getElementById('errorMessage');
@@ -140,11 +140,29 @@
 			successMessage.classList.add('hidden');
 		}
 
-		function showError(message) {
-			hideMessages();
-			errorText.textContent = message;
-			errorMessage.classList.remove('hidden');
-		}
+		const showError = (message, errors = []) => {
+			const errorDiv = document.getElementById('errorMessage');
+			const errorText = document.getElementById('errorText');
+
+			// Si hay una lista de errores, creamos una lista HTML
+			if (errors && errors.length > 0) {
+						const listHtml = `
+								<p class="font-bold mb-1">${message}</p>
+								<ul class="list-disc list-inside ml-2">
+										${errors.map(err => `<li>${err}</li>`).join('')}
+								</ul>
+						`;
+						errorText.innerHTML = listHtml;
+				} else {
+						// Si no hay array, mostramos solo el mensaje de texto
+						errorText.textContent = message;
+				}
+
+				errorDiv.classList.remove('hidden');
+				setTimeout(() => {
+						errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				}, 100);
+		};
 
 		function showSuccess(message) {
 			hideMessages();
@@ -169,7 +187,7 @@
 				`;
 
 			const formData = new FormData(form);
-			const emailOrUsername = formData.get('emailOrUsername');
+			const emailOrUserName = formData.get('emailOrUserName');
 			const password = formData.get('password');
 			const rememberMe = formData.get('rememberMe') === 'on';
 
@@ -178,7 +196,7 @@
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
-						email: emailOrUsername,
+						emailOrUserName: emailOrUserName,
 						password: password,
 						rememberMe: rememberMe,
 					}),
@@ -188,13 +206,19 @@
 
 				if (response.ok) {
 					showSuccess(data.message || 'Login exitoso');
-					setTimeout(() => {
-						const urlParams = new URLSearchParams(window.location.search);
-						const returnUrl = urlParams.get('return_url') || '/dashboard';
-						window.location.href = returnUrl;
-					}, 1000);
+					// setTimeout(() => {
+					// 	const urlParams = new URLSearchParams(window.location.search);
+					// 	const returnUrl = urlParams.get('return_url') || '/dashboard';
+					// 	window.location.href = returnUrl;
+					// }, 1000);
+					btnLogin.disabled = false;
+					btnText.innerHTML = 'Iniciar Sesión';
 				} else {
-					showError(data.message || data.error || 'Error al iniciar sesión');
+
+					const mainMessage = data.message || 'Error al iniciar sesión';
+					const detailErrors = data.errors || []
+
+					showError(mainMessage, data.errors || []);
 					btnLogin.disabled = false;
 					btnText.textContent = 'Iniciar Sesión';
 				}
@@ -211,7 +235,7 @@
 				const email = element.dataset.email;
 				const password = element.dataset.password;
 
-				document.getElementById('emailOrUsername').value = email;
+				document.getElementById('emailOrUserName').value = email;
 				document.getElementById('password').value = password;
 			});
 		});

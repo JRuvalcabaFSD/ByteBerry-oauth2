@@ -4,7 +4,7 @@
 	"exclude": ["node_modules", "dist", "tests", "test"],
 	"compilerOptions": {
 		"declaration": false,
-		"noEmit": false,
+		"noEmit": true,
 		"sourceMap": false,
 		"noEmitOnError": true,
 		"removeComments": true

@@ -130,6 +130,5 @@ export function createLoginUseCase(c: Interfaces.IContainer): Interfaces.ILoginU
  */
 
 export function createLoginController(c: Interfaces.IContainer): LoginController {
-	const { version } = c.resolve('Config');
-	return new LoginController(c.resolve('LoginUserCase'), c.resolve('Logger'), version);
+	return new LoginController(c.resolve('LoginUserCase'), c.resolve('Logger'), c.resolve('Config'));
 }
