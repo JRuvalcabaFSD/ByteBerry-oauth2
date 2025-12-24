@@ -42,6 +42,8 @@ RUN pnpm install
 COPY tsconfig*.json ./
 COPY src ./src
 COPY scripts ./scripts
+COPY --chown=root:root public/ ./public/
+COPY views ./views
 
 
 # DATABASE_URL dummy para Prisma generate
