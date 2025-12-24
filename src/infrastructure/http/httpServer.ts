@@ -9,7 +9,8 @@ import type { IClock, IConfig, IContainer, IHttpServer, ILogger, ServerInfo } fr
 import { createLoggingMiddleware } from '@infrastructure';
 import { createAppRouter } from '@presentation';
 import { AppError } from '@domain';
-import { join } from 'path';
+import path, { join } from 'path';
+import { fileURLToPath } from 'url';
 
 /**
  * Represents an HTTP server implementation using Express, providing lifecycle management,
@@ -198,10 +199,11 @@ export class HttpServer implements IHttpServer {
 	}
 
 	private setupViewEngine(): void {
-		const rootPath = process.cwd();
+		const __filename = fileURLToPath(import.meta.url);
+		const __dirname = path.dirname(__filename);
 
-		this.app.set('views', join(rootPath, './src/views'));
+		this.app.set('views', join(__dirname, '../../../views'));
 		this.app.set('view engine', 'ejs');
-		this.app.use(express.static(join(rootPath, './public')));
+		this.app.use(express.static(join(__dirname, '../../../public')));
 	}
 }
