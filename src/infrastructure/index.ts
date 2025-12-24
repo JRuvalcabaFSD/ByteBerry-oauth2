@@ -9,6 +9,7 @@ export * from './http/middlewares/error.middleware.js';
 export * from './http/httpServer.js';
 
 //Repositories
+export * from './repositories/inMemory-auth-code.repository.js';
 export * from './repositories/inMemory-session.repository.js';
 export * from './repositories/inMemory-user.repository.js';
 

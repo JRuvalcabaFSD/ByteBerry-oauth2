@@ -1,3 +1,4 @@
+import { UnAuthorizedError } from '@shared';
 import { AppError, ErrorType } from '@domain';
 
 /**
@@ -80,5 +81,59 @@ export class CorsOriginError extends HttpError {
 		if (Error.captureStackTrace) {
 			Error.captureStackTrace(this, CorsOriginError);
 		}
+	}
+}
+
+/**
+ * Represents an HTTP 401 Unauthorized error.
+ *
+ * This error is typically thrown when authentication is required and has failed or has not yet been provided.
+ *
+ * @extends HttpError
+ * @property {Record<string, unknown>=} context - Optional additional context for the error.
+ * @example
+ * throw new UnauthorizedError('Invalid token', { token: 'abc123' });
+ */
+
+export class UnauthorizedError extends HttpError {
+	public readonly context?: Record<string, unknown>;
+
+	constructor(msg: string = 'Unauthorized', context?: Record<string, unknown>) {
+		super(msg, 'login', 'Unauthorized', 401);
+		this.name = 'UnauthorizedError';
+		this.context = context;
+
+		Error.captureStackTrace(this, UnAuthorizedError);
+	}
+}
+
+/**
+ * Represents an HTTP 400 validation error.
+ *
+ * Extends the {@link HttpError} class to provide additional context for validation failures,
+ * including a list of error messages and optional contextual information.
+ *
+ * @example
+ * ```typescript
+ * throw new ValidationError('Invalid input', ['email is required'], { field: 'email' });
+ * ```
+ *
+ * @extends HttpError
+ *
+ * @property errors - An array of validation error messages.
+ * @property context - Optional additional context for the validation error.
+ */
+
+export class ValidationError extends HttpError {
+	public readonly errors: string[];
+	public context?: Record<string, unknown>;
+
+	constructor(msg: string = 'Validation failed', errors: string[] = [], context?: Record<string, unknown>) {
+		super(msg, 'login', 'Validation failed', 400);
+		this.name = 'ValidationError';
+		this.context = { ...context, errors };
+		this.errors = errors;
+
+		Error.captureStackTrace(this, ValidationError);
 	}
 }

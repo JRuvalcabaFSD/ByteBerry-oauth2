@@ -1,5 +1,4 @@
 import * as Interfaces from '@interfaces';
-import { LoginController } from '@presentation';
 
 //TODO documentar
 export const Services = {
@@ -20,7 +19,6 @@ export const Services = {
 	LoginUserCase: {} as Interfaces.ILoginUseCase,
 
 	//Controllers
-	LoginController: {} as LoginController,
 };
 
 /**
