@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { HomeResponse, IContainer } from '@interfaces';
 import { Router } from 'express';
 import { createHealthRoutes } from './health.routers.js';
+import { createAuthRoutes } from './auth.routes.js';
 
 //TODO documentar
 export function createAppRouter(c: IContainer): Router {
@@ -10,8 +11,12 @@ export function createAppRouter(c: IContainer): Router {
 	const config = c.resolve('Config');
 	const clock = c.resolve('Clock');
 	const healthService = c.resolve('HealthService');
+	const loginController = c.resolve('LoginController');
 
 	const baseurl = `${config.serviceUrl}:${config.port}`;
+
+	//Auth
+	router.use('/auth', createAuthRoutes(loginController));
 
 	//Health routes
 	router.use('/health', createHealthRoutes(healthService));

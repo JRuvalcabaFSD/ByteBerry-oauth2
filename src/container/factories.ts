@@ -4,6 +4,7 @@ import * as Interfaces from '@interfaces';
 import { InMemoryAuthCodeRepository, InMemoryUserRepository } from '@infrastructure';
 import { Config } from '@config';
 import { LoginUseCase } from '@application';
+import { LoginController } from '@presentation';
 
 /**
  * Creates and returns a new instance of the `Config` class implementing the `IConfig` interface.
@@ -118,4 +119,17 @@ export function createAuthCodeRepository(): Interfaces.IAuthCodeRepository {
 
 export function createLoginUseCase(c: Interfaces.IContainer): Interfaces.ILoginUseCase {
 	return new LoginUseCase(c.resolve('SessionRepository'), c.resolve('UserRepository'), c.resolve('UUid'), c.resolve('Logger'));
+}
+
+/**
+ * Factory function to create an instance of {@link LoginController}.
+ *
+ * @param c - The dependency injection container implementing {@link Interfaces.IContainer}.
+ *            Used to resolve required dependencies for the controller.
+ * @returns A new instance of {@link LoginController} with its dependencies injected.
+ */
+
+export function createLoginController(c: Interfaces.IContainer): LoginController {
+	const { version } = c.resolve('Config');
+	return new LoginController(c.resolve('LoginUserCase'), c.resolve('Logger'), version);
 }

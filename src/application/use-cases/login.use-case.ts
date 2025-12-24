@@ -1,7 +1,7 @@
 import { LoginRequestDTO, LoginResponseDTO } from '@application';
 import { SessionEntity } from '@domain';
 import type { ILogger, ILoginUseCase, ISessionRepository, IUserRepository, IUuid } from '@interfaces';
-import { LogContextClass, LogContextMethod, LoginValidationError, UnAuthorizedError } from '@shared';
+import { LogContextClass, LogContextMethod, UnauthorizedError, LoginValidationError } from '@shared';
 
 /**
  * Use case for handling user login operations.
@@ -86,12 +86,12 @@ export class LoginUseCase implements ILoginUseCase {
 				emailOrPassword: request.emailOrUserName,
 				ipAddress: request.ipAddress,
 			});
-			throw new UnAuthorizedError('Invalid email/username or password');
+			throw new UnauthorizedError('Invalid email/username or password');
 		}
 
 		if (!user.canLogin()) {
 			this.logger.warn('Login failed - user inactive');
-			throw new UnAuthorizedError('User account is inactive');
+			throw new UnauthorizedError('User account is inactive');
 		}
 
 		const sessionTTl = request.rememberMe ? this.EXTENDED_SESSION_TTL : this.DEFAULT_SESSION_TTL;

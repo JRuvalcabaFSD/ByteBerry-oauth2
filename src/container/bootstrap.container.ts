@@ -50,7 +50,9 @@ function registerUseCases(c: IContainer): void {
 	c.registerSingleton('LoginUserCase', Factories.createLoginUseCase);
 }
 
-function registerControllers(c: IContainer): void {}
+function registerControllers(c: IContainer): void {
+	c.registerSingleton('LoginController', Factories.createLoginController);
+}
 
 /**
  * Validates that all provided service tokens are registered and can be resolved in the given container.

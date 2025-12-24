@@ -1,18 +1,15 @@
-import { getErrMsg, LogContextClass, LogContextMethod } from '@shared';
-import express, { Application } from 'express';
 import { Server } from 'http';
+import express, { Application } from 'express';
+import cookieParser from 'cookie-parser';
 
 import * as Middlewares from '@infrastructure';
 
+import { getErrMsg, LogContextClass, LogContextMethod } from '@shared';
 import type { IClock, IConfig, IContainer, IHttpServer, ILogger, ServerInfo } from '@interfaces';
 import { createLoggingMiddleware } from '@infrastructure';
 import { createAppRouter } from '@presentation';
 import { AppError } from '@domain';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { join } from 'path';
 
 /**
  * Represents an HTTP server implementation using Express, providing lifecycle management,
@@ -185,6 +182,7 @@ export class HttpServer implements IHttpServer {
 		this.app.use(createLoggingMiddleware(this.logger, this.clock, this.config.logRequests));
 		this.app.use(express.json({ limit: '10mb' }));
 		this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+		this.app.use(cookieParser());
 	}
 
 	/**
@@ -200,8 +198,10 @@ export class HttpServer implements IHttpServer {
 	}
 
 	private setupViewEngine(): void {
-		this.app.set('views', join(__dirname, '../views'));
+		const rootPath = process.cwd();
+
+		this.app.set('views', join(rootPath, './src/views'));
 		this.app.set('view engine', 'ejs');
-		this.app.use(express.static(join(__dirname, '../public')));
+		this.app.use(express.static(join(rootPath, './public')));
 	}
 }

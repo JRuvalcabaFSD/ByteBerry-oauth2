@@ -1,4 +1,3 @@
-import { UnAuthorizedError } from '@shared';
 import { AppError, ErrorType } from '@domain';
 
 /**
@@ -103,7 +102,7 @@ export class UnauthorizedError extends HttpError {
 		this.name = 'UnauthorizedError';
 		this.context = context;
 
-		Error.captureStackTrace(this, UnAuthorizedError);
+		Error.captureStackTrace(this, UnauthorizedError);
 	}
 }
 
@@ -124,7 +123,7 @@ export class UnauthorizedError extends HttpError {
  * @property context - Optional additional context for the validation error.
  */
 
-export class ValidationError extends HttpError {
+export class LoginValidationError extends HttpError {
 	public readonly errors: string[];
 	public context?: Record<string, unknown>;
 
@@ -134,6 +133,6 @@ export class ValidationError extends HttpError {
 		this.context = { ...context, errors };
 		this.errors = errors;
 
-		Error.captureStackTrace(this, ValidationError);
+		Error.captureStackTrace(this, LoginValidationError);
 	}
 }
