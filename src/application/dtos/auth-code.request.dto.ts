@@ -87,7 +87,7 @@ export class AuthCodeRequestDTO {
 		if (query.code_challenge_method !== 'S256' && query.code_challenge_method !== 'plain')
 			throw new OAuthValidationError('Code Challenge method must be S256 or plain');
 
-		if (!query.state && query.state.trim().length > 500) throw new OAuthValidationError('state must be less than 500 characters');
+		if (query.state && query.state.trim().length > 500) throw new OAuthValidationError('state must be less than 500 characters');
 
 		try {
 			new URL(query.redirect_uri);

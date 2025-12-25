@@ -50,8 +50,8 @@ export class ValidateClientUseCase implements IValidateClientUseCase {
 				throw new OAuthUnAuthorizedError('Invalid redirect URI');
 			}
 
-			if (!client.supportsGrandType(data.grandType)) {
-				this.logger.warn('Unsupported grand type', { clientId: data.clientId, grandType: data.grandType });
+			if (!client.supportsGrandType(data.grantType)) {
+				this.logger.warn('Unsupported grand type', { clientId: data.clientId, grandType: data.grantType });
 				throw new OAuthUnAuthorizedError('Unsupported grand type');
 			}
 

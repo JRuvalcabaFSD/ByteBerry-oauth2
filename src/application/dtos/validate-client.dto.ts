@@ -14,7 +14,7 @@
 export interface ValidateClientRequestDto {
 	clientId: string;
 	redirectUri: string;
-	grandType: string;
+	grantType: string;
 }
 
 /**
