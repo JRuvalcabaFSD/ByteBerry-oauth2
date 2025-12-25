@@ -6,6 +6,10 @@ declare global {
 			requestId?: string;
 			logger?: ILogger;
 			startTime?: number;
+			user?: {
+				userId: string;
+				sessionId: string;
+			};
 		}
 	}
 }

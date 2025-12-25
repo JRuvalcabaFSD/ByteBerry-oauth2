@@ -1,7 +1,7 @@
+import type { ILogger, ILoginUseCase, ISessionRepository, IUserRepository, IUuid } from '@interfaces';
+import { LogContextClass, LogContextMethod, UnauthorizedError } from '@shared';
 import { LoginRequestDTO, LoginResponseDTO } from '@application';
 import { SessionEntity } from '@domain';
-import type { ILogger, ILoginUseCase, ISessionRepository, IUserRepository, IUuid } from '@interfaces';
-import { LogContextClass, LogContextMethod, UnauthorizedError, LoginValidationError } from '@shared';
 
 /**
  * Use case for handling user login operations.
@@ -73,6 +73,7 @@ export class LoginUseCase implements ILoginUseCase {
 			ipAddress: request.ipAddress,
 		});
 
+		//validate the credentials and obtain the user
 		const user = await this.userRepository.validateCredentials(request.emailOrUserName, request.password);
 
 		if (!user) {
@@ -83,11 +84,13 @@ export class LoginUseCase implements ILoginUseCase {
 			throw new UnauthorizedError('Invalid email/username or password');
 		}
 
+		//validate if the user is active
 		if (!user.canLogin()) {
 			this.logger.warn('Login failed - user inactive');
 			throw new UnauthorizedError('User account is inactive');
 		}
 
+		//Generate the session
 		const sessionTTl = request.rememberMe ? this.EXTENDED_SESSION_TTL : this.DEFAULT_SESSION_TTL;
 
 		const session = SessionEntity.create({
@@ -103,6 +106,7 @@ export class LoginUseCase implements ILoginUseCase {
 			},
 		});
 
+		//Save the session to the database.
 		await this.sessionRepository.save(session);
 
 		this.logger.debug('Login successful', {
@@ -113,6 +117,7 @@ export class LoginUseCase implements ILoginUseCase {
 			rememberMe: request.rememberMe,
 		});
 
+		//Return user and session data
 		return LoginResponseDTO.fromEntities(user, session);
 	}
 }

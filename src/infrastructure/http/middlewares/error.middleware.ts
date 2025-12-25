@@ -2,7 +2,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { IConfig, ILogger } from '@interfaces';
-import { getErrStack, HttpError, LoginValidationError, withLoggerContext } from '@shared';
+import { getErrStack, HttpError, LoginValidationError, OAuthError, withLoggerContext } from '@shared';
 
 /**
  * Type definition for an error handling function in Express middleware.
@@ -55,6 +55,21 @@ const HANDLERS = new Map<string, ErrorHandler>([
 			res.status(e.statusCode).json({
 				error: e.errorCause,
 				errors: e.errors,
+				message: message,
+				requestId: req.requestId || 'unknown',
+				timestamp: new Date().toISOString(),
+			});
+		},
+	],
+	[
+		'oauth',
+		(error, req, res, config) => {
+			const e = error as OAuthError;
+			// Inicializa message con el valor por defecto
+			const message = config.isDevelopment() ? e.message : 'Origin not allowed by CORS';
+
+			res.status(e.statusCode).json({
+				error: e.errorCause,
 				message: message,
 				requestId: req.requestId || 'unknown',
 				timestamp: new Date().toISOString(),

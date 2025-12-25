@@ -2,9 +2,9 @@ import * as Constructors from '@infrastructure';
 import * as Interfaces from '@interfaces';
 
 import { InMemoryAuthCodeRepository, InMemoryUserRepository } from '@infrastructure';
+import { GenerateAuthCodeUseCase, LoginUseCase, ValidateClientUseCase } from '@application';
+import { AuthCodeController, LoginController } from '@presentation';
 import { Config } from '@config';
-import { LoginUseCase } from '@application';
-import { LoginController } from '@presentation';
 
 /**
  * Creates and returns a new instance of the `Config` class implementing the `IConfig` interface.
@@ -131,4 +131,60 @@ export function createLoginUseCase(c: Interfaces.IContainer): Interfaces.ILoginU
 
 export function createLoginController(c: Interfaces.IContainer): LoginController {
 	return new LoginController(c.resolve('LoginUserCase'), c.resolve('Logger'), c.resolve('Config'));
+}
+
+/**
+ * Creates and returns an instance of an in-memory implementation of the `IOAuthClientRepository`.
+ *
+ * @param c - The dependency injection container implementing {@link Interfaces.IContainer}.
+ *            Used to resolve required dependencies for the controller.
+ * @returns {Interfaces.IOAuthClientRepository} An in-memory OAuth client repository instance.
+ */
+export function createOAuthClientRepository(): Interfaces.IOAuthClientRepository {
+	return new Constructors.InMemoryOAuthClientRepository();
+}
+
+/**
+ * Factory function to create an instance of `IGenerateAuthCodeUseCase`.
+ *
+ * This function resolves the required dependencies from the provided container,
+ * including the authorization code repository, client validation use case, logger,
+ * and the configuration value for authorization code expiration.
+ *
+ * @param c - The dependency injection container implementing `Interfaces.IContainer`.
+ * @returns An instance of `IGenerateAuthCodeUseCase`.
+ */
+
+export function createGenerateAuthCodeUseCase(c: Interfaces.IContainer): Interfaces.IGenerateAuthCodeUseCase {
+	const { authCodeExpiresInMinutes } = c.resolve('Config');
+	return new GenerateAuthCodeUseCase(
+		c.resolve('AuthCodeRepository'),
+		c.resolve('ValidateClientUseCase'),
+		c.resolve('Logger'),
+		authCodeExpiresInMinutes
+	);
+}
+
+/**
+ * Factory function to create an instance of `IValidateClientUseCase`.
+ *
+ * @param c - The dependency injection container implementing `Interfaces.IContainer`.
+ *            Used to resolve required dependencies for the use case.
+ * @returns An instance of `IValidateClientUseCase` initialized with the resolved
+ *          `OAuthClientRepository` and `Logger` dependencies.
+ */
+
+export function createValidateClientUseCase(c: Interfaces.IContainer): Interfaces.IValidateClientUseCase {
+	return new ValidateClientUseCase(c.resolve('OAuthClientRepository'), c.resolve('Logger'));
+}
+
+/**
+ * Factory function to create an instance of {@link AuthCodeController}.
+ *
+ * @param c - The dependency injection container implementing {@link Interfaces.IContainer}.
+ * @returns An initialized {@link AuthCodeController} with its dependencies resolved.
+ */
+
+export function createAuthCodeController(c: Interfaces.IContainer): AuthCodeController {
+	return new AuthCodeController(c.resolve('GenerateAuthCodeUseCase'));
 }

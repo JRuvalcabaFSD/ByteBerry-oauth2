@@ -2,6 +2,7 @@
 export * from './entities/user.entity.js';
 export * from './entities/session.entity.js';
 export * from './entities/auth-code.entity.js';
+export * from './entities/oauth-client.entity.js';
 
 //Errors
 export * from './errors/domain.errors.js';

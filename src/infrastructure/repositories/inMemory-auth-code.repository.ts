@@ -5,7 +5,7 @@ export class InMemoryAuthCodeRepository implements IAuthCodeRepository {
 	private readonly store = new Map<string, AuthCodeEntity>();
 
 	public async save(code: AuthCodeEntity): Promise<void> {
-		code.markAsUsed();
+		// code.markAsUsed();
 		this.store.set(code.code, code);
 	}
 	public async findByCode(code: string): Promise<AuthCodeEntity | null> {

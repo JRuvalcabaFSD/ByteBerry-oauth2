@@ -11,12 +11,11 @@ export function createAppRouter(c: IContainer): Router {
 	const config = c.resolve('Config');
 	const clock = c.resolve('Clock');
 	const healthService = c.resolve('HealthService');
-	const loginController = c.resolve('LoginController');
 
 	const baseurl = `${config.serviceUrl}:${config.port}`;
 
 	//Auth
-	router.use('/auth', createAuthRoutes(loginController));
+	router.use('/auth', createAuthRoutes(c));
 
 	//Health routes
 	router.use('/health', createHealthRoutes(healthService));

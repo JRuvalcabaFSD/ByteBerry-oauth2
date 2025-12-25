@@ -49,6 +49,9 @@
 
 			<!-- Form -->
 			<form id="loginForm" class="space-y-6">
+				<!-- ✨ NUEVO: Campo hidden para return_url -->
+				<input type="hidden" name="return_url" value="<%= returnUrl || '' %>">
+
 				<!-- Email/Username Input -->
 				<div>
 					<label for="emailOrUserName" class="block text-sm font-medium text-gray-300 mb-2">
@@ -56,7 +59,7 @@
 					</label>
 					<input type="text" id="emailOrUserName" name="emailOrUserName" placeholder="admin@byteberry.dev" required
 						autocomplete="username"
-						class="w-full px-4 py-3 bg-dark-200 border border-gray-600 rfffounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
+						class="w-full px-4 py-3 bg-dark-200 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200">
 				</div>
 
 				<!-- Password Input -->
@@ -126,7 +129,7 @@
 		</div>
 	</div>
 
-	<script<% if (typeof nonce !=='undefined' ) { %> nonce = "<%= nonce %>" <% } %>>
+	<script nonce="<%= nonce %>">
 		const form = document.getElementById('loginForm');
 		const btnLogin = document.getElementById('btnLogin');
 		const btnText = document.getElementById('btnText');
@@ -146,22 +149,22 @@
 
 			// Si hay una lista de errores, creamos una lista HTML
 			if (errors && errors.length > 0) {
-						const listHtml = `
-								<p class="font-bold mb-1">${message}</p>
-								<ul class="list-disc list-inside ml-2">
-										${errors.map(err => `<li>${err}</li>`).join('')}
-								</ul>
-						`;
-						errorText.innerHTML = listHtml;
-				} else {
-						// Si no hay array, mostramos solo el mensaje de texto
-						errorText.textContent = message;
-				}
+				const listHtml = `
+					<p class="font-bold mb-1">${message}</p>
+					<ul class="list-disc list-inside ml-2">
+						${errors.map(err => `<li>${err}</li>`).join('')}
+					</ul>
+				`;
+				errorText.innerHTML = listHtml;
+			} else {
+				// Si no hay array, mostramos solo el mensaje de texto
+				errorText.textContent = message;
+			}
 
-				errorDiv.classList.remove('hidden');
-				setTimeout(() => {
-						errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-				}, 100);
+			errorDiv.classList.remove('hidden');
+			setTimeout(() => {
+				errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}, 100);
 		};
 
 		function showSuccess(message) {
@@ -184,12 +187,13 @@
 					</path>
 				</svg>
 				Iniciando sesión...
-				`;
+			`;
 
 			const formData = new FormData(form);
 			const emailOrUserName = formData.get('emailOrUserName');
 			const password = formData.get('password');
 			const rememberMe = formData.get('rememberMe') === 'on';
+			const returnUrl = formData.get('return_url'); // ✨ NUEVO: Extraer return_url
 
 			try {
 				const response = await fetch('/auth/login', {
@@ -199,26 +203,31 @@
 						emailOrUserName: emailOrUserName,
 						password: password,
 						rememberMe: rememberMe,
+						return_url: returnUrl || undefined, // ✨ NUEVO: Enviar return_url
 					}),
 				});
+
+				// ✨ NUEVO: Manejar redirect del servidor
+				if (response.redirected) {
+					window.location.href = response.url;
+					return;
+				}
 
 				const data = await response.json();
 
 				if (response.ok) {
 					showSuccess(data.message || 'Login exitoso');
-					// setTimeout(() => {
-					// 	const urlParams = new URLSearchParams(window.location.search);
-					// 	const returnUrl = urlParams.get('return_url') || '/dashboard';
-					// 	window.location.href = returnUrl;
-					// }, 1000);
-					btnLogin.disabled = false;
-					btnText.innerHTML = 'Iniciar Sesión';
+
+					// ✨ MODIFICADO: Usar return_url si existe, sino ir a dashboard
+					setTimeout(() => {
+						const redirectUrl = returnUrl || '/dashboard';
+						window.location.href = redirectUrl;
+					}, 1000);
 				} else {
-
 					const mainMessage = data.message || 'Error al iniciar sesión';
-					const detailErrors = data.errors || []
+					const detailErrors = data.errors || [];
 
-					showError(mainMessage, data.errors || []);
+					showError(mainMessage, detailErrors);
 					btnLogin.disabled = false;
 					btnText.textContent = 'Iniciar Sesión';
 				}

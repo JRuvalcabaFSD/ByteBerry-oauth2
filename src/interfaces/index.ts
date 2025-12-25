@@ -12,6 +12,7 @@ export * from './http/http-request.interface.js';
 export * from './repositories/user.repository.interface.js';
 export * from './repositories/session.repository.interface.js';
 export * from './repositories/auth-code.repository.interface.js';
+export * from './repositories/oauth-client.repository.interface.js';
 
 //Services
 export * from './services/clock.service.interface.js';
@@ -21,3 +22,5 @@ export * from './services/health.service.interface.js';
 
 //Use Cases
 export * from './use-cases/login.use-case.interface.js';
+export * from './use-cases/generate-auth-code.use-case.interface.js';
+export * from './use-cases/validate-client.use-case.interface.js';

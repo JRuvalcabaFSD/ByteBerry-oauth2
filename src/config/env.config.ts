@@ -15,6 +15,13 @@ export class Config implements IConfig {
 	public readonly corsOrigins: string[];
 	public readonly serviceUrl: string;
 
+	public readonly authorizationEndpoint: string;
+	public readonly tokenEndpoint: string;
+	public readonly jwksEndpoint: string;
+	public readonly authCodeExpiresInMinutes: number;
+	public readonly pkceRequired: boolean;
+	public readonly pkceMethods: string[];
+
 	constructor() {
 		try {
 			// ========================================
@@ -36,6 +43,21 @@ export class Config implements IConfig {
 
 			this.logLevel = logLevel;
 			this.logRequests = logRequest;
+
+			// ========================================
+			// OAuth2 Configuration
+			// ========================================
+			this.authorizationEndpoint = this.normalizeUrls(
+				env.get('OAUTH2_AUTHORIZATION_ENDPOINT').default('https://localhost:4000/auth/authorize').asUrlString()
+			);
+			this.tokenEndpoint = this.normalizeUrls(env.get('OAUTH2_TOKEN_ENDPOINT').default('https://localhost:4000/auth/token').asUrlString());
+			this.jwksEndpoint = this.normalizeUrls(
+				env.get('OAUTH2_JWKS_ENDPOINT').default('https://localhost:4000/auth/.well-known/jwks.json').asUrlString()
+			);
+
+			this.authCodeExpiresInMinutes = env.get('OAUTH2_AUTH_CODE_EXPIRES_IN').default(10).asIntPositive();
+			this.pkceRequired = env.get('OAUTH2_PKCE_REQUIRED').default('true').asBool();
+			this.pkceMethods = env.get('OAUTH2_PKCE_METHODS').default('S256').asArray(',');
 		} catch (error) {
 			throw new ConfigError(`Failed to validate environment variables ${getErrMsg(error)}`, this.generateContext());
 		}

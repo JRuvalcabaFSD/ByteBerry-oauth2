@@ -1,11 +1,20 @@
-import { LoginController } from '@presentation';
 import { Router } from 'express';
 
+import { createSessionMiddleware } from '@infrastructure';
+import { IContainer } from '@interfaces';
+
 //TODO documentar
-export function createAuthRoutes(controller: LoginController): Router {
+export function createAuthRoutes(c: IContainer): Router {
 	const router = Router();
 
-	router.get('/login', controller.getLoginForm);
-	router.post('/login', controller.login);
+	const loginController = c.resolve('LoginController');
+	const authCodeController = c.resolve('AuthCodeController');
+
+	const requireSession = createSessionMiddleware(c.resolve('SessionRepository'), c.resolve('Logger'));
+
+	router.get('/login', loginController.getLoginForm);
+	router.post('/login', loginController.login);
+	router.get('/authorize', requireSession, authCodeController.handle);
+
 	return router;
 }

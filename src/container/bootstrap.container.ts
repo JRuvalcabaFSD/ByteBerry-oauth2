@@ -9,7 +9,7 @@ export function bootstrapContainer(): IContainer {
 	const container = new Container();
 
 	registerCoreServices(container);
-	registerUserServices(container);
+	registerRepositories(container);
 	registerUseCases(container);
 	registerControllers(container);
 
@@ -40,18 +40,22 @@ function registerCoreServices(c: IContainer): void {
 	c.registerSingleton('HealthService', Factories.createHealthService);
 }
 
-function registerUserServices(c: IContainer): void {
+function registerRepositories(c: IContainer): void {
 	c.registerSingleton('UserRepository', Factories.createUserRepository);
 	c.registerSingleton('SessionRepository', Factories.createSessionRepository);
 	c.registerSingleton('AuthCodeRepository', Factories.createAuthCodeRepository);
+	c.registerSingleton('OAuthClientRepository', Factories.createOAuthClientRepository);
 }
 
 function registerUseCases(c: IContainer): void {
 	c.registerSingleton('LoginUserCase', Factories.createLoginUseCase);
+	c.registerSingleton('GenerateAuthCodeUseCase', Factories.createGenerateAuthCodeUseCase);
+	c.registerSingleton('ValidateClientUseCase', Factories.createValidateClientUseCase);
 }
 
 function registerControllers(c: IContainer): void {
 	c.registerSingleton('LoginController', Factories.createLoginController);
+	c.registerSingleton('AuthCodeController', Factories.createAuthCodeController);
 }
 
 /**

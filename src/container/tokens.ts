@@ -1,5 +1,5 @@
 import * as Interfaces from '@interfaces';
-import { LoginController } from '@presentation';
+import { AuthCodeController, LoginController } from '@presentation';
 
 //TODO documentar
 export const Services = {
@@ -15,12 +15,16 @@ export const Services = {
 	UserRepository: {} as Interfaces.IUserRepository,
 	SessionRepository: {} as Interfaces.ISessionRepository,
 	AuthCodeRepository: {} as Interfaces.IAuthCodeRepository,
+	OAuthClientRepository: {} as Interfaces.IOAuthClientRepository,
 
 	//Use Cases
 	LoginUserCase: {} as Interfaces.ILoginUseCase,
+	GenerateAuthCodeUseCase: {} as Interfaces.IGenerateAuthCodeUseCase,
+	ValidateClientUseCase: {} as Interfaces.IValidateClientUseCase,
 
 	//Controllers
 	LoginController: {} as LoginController,
+	AuthCodeController: {} as AuthCodeController,
 };
 
 /**
