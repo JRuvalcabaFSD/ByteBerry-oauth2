@@ -2,7 +2,7 @@ import os from 'os';
 import type { Request, Response } from 'express';
 
 import * as Interfaces from '@interfaces';
-import { getErrMsg, LogContextClass, withLoggerContext } from '@shared';
+import { getErrMsg, LogContextClass, LogContextMethod, withLoggerContext } from '@shared';
 import { criticalServices, Token } from '@container';
 
 /**
@@ -123,10 +123,9 @@ export class HealthService implements Interfaces.IHealthService {
 				status: response.status,
 				responseTime: this.clock.timestamp() - startTime,
 				dependenciesCount: Object.keys(response.dependencies).length,
-				// TODO F1
-				// jwksAvailable: response.jwks.status === 'healthy',
-				// jwksKeyCount: response.jwks.keyCount,
-				// jwksResponseTime: response.jwks.responseTime,
+				jwksAvailable: response.jwks.status === 'healthy',
+				jwksKeyCount: response.jwks.keyCount,
+				jwksResponseTime: response.jwks.responseTime,
 
 				// TODO F2
 				// databaseConnected: response.database?.connected ?? false,
@@ -173,13 +172,12 @@ export class HealthService implements Interfaces.IHealthService {
 	): Promise<Interfaces.HealthResponse | Interfaces.DeepHealthResponse> {
 		const dependencies = await this.checkDependencies(services);
 		const systemInfo = this.getSystemInfo();
-		// TODO F1
-		// const jwksHealth = await this.checkJwksAvailability();
+		const jwksHealth = await this.checkJwksAvailability();
 		// TODO F2
 		// const databaseHealth = await this.checkDatabaseHealth();
 
-		// TODO Implement F1 - F2 property
-		const overallStatus = this.determineOverallStatus(dependencies);
+		// TODO Implement F2 property
+		const overallStatus = this.determineOverallStatus(dependencies, jwksHealth);
 
 		const response: Partial<Interfaces.DeepHealthResponse> = {
 			status: overallStatus,
@@ -193,8 +191,7 @@ export class HealthService implements Interfaces.IHealthService {
 
 		if (type === 'deep') {
 			response.dependencies = dependencies;
-			// TODO F1
-			// response.jwks = jwksHealth;
+			response.jwks = jwksHealth;
 			// TODO F2
 			// response.database = databaseHealth;
 			response.system = systemInfo;
@@ -337,9 +334,8 @@ export class HealthService implements Interfaces.IHealthService {
 	 */
 
 	private determineOverallStatus(
-		dependencies: Record<string, Interfaces.DependencyResponse>
-		// TODO F1
-		// jwksHealth: Interfaces.JwksHealthResponse,
+		dependencies: Record<string, Interfaces.DependencyResponse>,
+		jwksHealth: Interfaces.JwksHealthResponse
 		// TODO F2
 		// databaseHealth: Interfaces.DatabaseHealthResponse
 	): 'healthy' | 'unhealthy' | 'degraded' {
@@ -349,10 +345,9 @@ export class HealthService implements Interfaces.IHealthService {
 			return 'unhealthy';
 		}
 
-		// TODO F1
-		// if (jwksHealth.status !== 'healthy') {
-		// 	return 'unhealthy';
-		// }
+		if (jwksHealth.status !== 'healthy') {
+			return 'unhealthy';
+		}
 
 		// TODO F2
 		// if (!databaseHealth.connected) {
@@ -423,7 +418,6 @@ export class HealthService implements Interfaces.IHealthService {
 		}
 	}
 
-	// TODO F1
 	/**
 	 * Checks the availability and validity of the JWKS (JSON Web Key Set) service.
 	 *
@@ -440,113 +434,113 @@ export class HealthService implements Interfaces.IHealthService {
 	 * If the JWKS service is operational and returns valid RSA keys, the status is reported as 'healthy'.
 	 */
 
-	// @LogContextMethod()
-	// private async checkJwksAvailability(): Promise<Interfaces.JwksHealthResponse> {
-	// 	const startTime = this.clock.timestamp();
+	@LogContextMethod()
+	private async checkJwksAvailability(): Promise<Interfaces.JwksHealthResponse> {
+		const startTime = this.clock.timestamp();
 
-	// 	try {
-	// 		const jwksService = this.c.resolve('JwksService');
+		try {
+			const jwksService = this.c.resolve('JwksService');
 
-	// 		if (!jwksService) {
-	// 			const responseTime = this.clock.timestamp() - startTime;
-	// 			this.logger.warn('JWKS Service not available in container', { responseTime });
-	// 			return {
-	// 				status: 'unhealthy',
-	// 				message: 'JWKS Service is not register or resolvable in container',
-	// 				keyCount: 0,
-	// 				responseTime,
-	// 			};
-	// 		}
+			if (!jwksService) {
+				const responseTime = this.clock.timestamp() - startTime;
+				this.logger.warn('JWKS Service not available in container', { responseTime });
+				return {
+					status: 'unhealthy',
+					message: 'JWKS Service is not register or resolvable in container',
+					keyCount: 0,
+					responseTime,
+				};
+			}
 
-	// 		const jwksResponse = await jwksService.getJwks();
+			const jwksResponse = await jwksService.getJwks();
 
-	// 		if (!jwksResponse || !jwksResponse.keys || !Array.isArray(jwksResponse.keys)) {
-	// 			const responseTime = this.clock.timestamp() - startTime;
-	// 			this.logger.warn('JWKS Service returned invalid response structure', {
-	// 				responseTime,
-	// 				hasResponse: !!jwksResponse,
-	// 				hasKeys: !!jwksResponse?.keys,
-	// 				isKeyArray: Array.isArray(jwksResponse.keys),
-	// 			});
+			if (!jwksResponse || !jwksResponse.keys || !Array.isArray(jwksResponse.keys)) {
+				const responseTime = this.clock.timestamp() - startTime;
+				this.logger.warn('JWKS Service returned invalid response structure', {
+					responseTime,
+					hasResponse: !!jwksResponse,
+					hasKeys: !!jwksResponse?.keys,
+					isKeyArray: Array.isArray(jwksResponse.keys),
+				});
 
-	// 			return {
-	// 				status: 'unhealthy',
-	// 				message: 'JWKS Service returned invalid response structure',
-	// 				keyCount: 0,
-	// 				responseTime,
-	// 			};
-	// 		}
+				return {
+					status: 'unhealthy',
+					message: 'JWKS Service returned invalid response structure',
+					keyCount: 0,
+					responseTime,
+				};
+			}
 
-	// 		const keyCount = jwksResponse.keys.length;
-	// 		const responseTime = this.clock.timestamp() - startTime;
+			const keyCount = jwksResponse.keys.length;
+			const responseTime = this.clock.timestamp() - startTime;
 
-	// 		if (keyCount === 0) {
-	// 			this.logger.warn('JWKS Service returned empty key set', { responseTime });
-	// 			return {
-	// 				status: 'unhealthy',
-	// 				message: 'JWKS Service returned empty key set - not cryptographic keys',
-	// 				keyCount: 0,
-	// 				responseTime,
-	// 			};
-	// 		}
+			if (keyCount === 0) {
+				this.logger.warn('JWKS Service returned empty key set', { responseTime });
+				return {
+					status: 'unhealthy',
+					message: 'JWKS Service returned empty key set - not cryptographic keys',
+					keyCount: 0,
+					responseTime,
+				};
+			}
 
-	// 		const firstKey = jwksResponse.keys[0];
-	// 		const requiredFields = ['kty', 'kid', 'use', 'alg', 'n', 'e'];
-	// 		const hasRequiredFields = requiredFields.every((field) => Object.prototype.hasOwnProperty.call(firstKey, field));
+			const firstKey = jwksResponse.keys[0];
+			const requiredFields = ['kty', 'kid', 'use', 'alg', 'n', 'e'];
+			const hasRequiredFields = requiredFields.every((field) => Object.prototype.hasOwnProperty.call(firstKey, field));
 
-	// 		if (!hasRequiredFields) {
-	// 			const missingFields = requiredFields.filter((field) => !Object.prototype.hasOwnProperty.call(firstKey, field));
-	// 			this.logger.warn('JWKS contains malformed keys', { responseTime, keyCount, missingFields, firstKeyFields: Object.keys(firstKey) });
-	// 			return {
-	// 				status: 'unhealthy',
-	// 				message: `JWKS contains malformed keys missing required fields: ${missingFields.join(', ')}}`,
-	// 				keyCount,
-	// 				responseTime,
-	// 			};
-	// 		}
+			if (!hasRequiredFields) {
+				const missingFields = requiredFields.filter((field) => !Object.prototype.hasOwnProperty.call(firstKey, field));
+				this.logger.warn('JWKS contains malformed keys', { responseTime, keyCount, missingFields, firstKeyFields: Object.keys(firstKey) });
+				return {
+					status: 'unhealthy',
+					message: `JWKS contains malformed keys missing required fields: ${missingFields.join(', ')}}`,
+					keyCount,
+					responseTime,
+				};
+			}
 
-	// 		if (firstKey.kty !== 'RSA' || firstKey.alg !== 'RS256') {
-	// 			this.logger.warn('JWKS contains unsupported key type or algorithm', {
-	// 				responseTime,
-	// 				keyCount,
-	// 				keyType: firstKey.kty,
-	// 				algorithm: firstKey.alg,
-	// 			});
+			if (firstKey.kty !== 'RSA' || firstKey.alg !== 'RS256') {
+				this.logger.warn('JWKS contains unsupported key type or algorithm', {
+					responseTime,
+					keyCount,
+					keyType: firstKey.kty,
+					algorithm: firstKey.alg,
+				});
 
-	// 			return {
-	// 				status: 'unhealthy',
-	// 				message: `JWKS contains unsupported key type (${firstKey.kty})or algorithm (${firstKey.alg})`,
-	// 				keyCount,
-	// 				responseTime,
-	// 			};
-	// 		}
+				return {
+					status: 'unhealthy',
+					message: `JWKS contains unsupported key type (${firstKey.kty})or algorithm (${firstKey.alg})`,
+					keyCount,
+					responseTime,
+				};
+			}
 
-	// 		this.logger.debug('JWKS availability check successful', { responseTime, keyCount, keyIds: jwksResponse.keys.map((k) => k.kid) });
+			this.logger.debug('JWKS availability check successful', { responseTime, keyCount, keyIds: jwksResponse.keys.map((k) => k.kid) });
 
-	// 		return {
-	// 			status: 'healthy',
-	// 			message: `JWKS Service operational with ${keyCount} valid RSA keys${keyCount === 1 ? '' : 's'} for JWT operations`,
-	// 			keyCount,
-	// 			responseTime,
-	// 		};
-	// 	} catch (error) {
-	// 		const responseTime = this.clock.timestamp() - startTime;
-	// 		const errorMessage = getErrMsg(error);
+			return {
+				status: 'healthy',
+				message: `JWKS Service operational with ${keyCount} valid RSA keys${keyCount === 1 ? '' : 's'} for JWT operations`,
+				keyCount,
+				responseTime,
+			};
+		} catch (error) {
+			const responseTime = this.clock.timestamp() - startTime;
+			const errorMessage = getErrMsg(error);
 
-	// 		this.logger.error('JWKS availability check failed', {
-	// 			error: errorMessage,
-	// 			responseTime,
-	// 			stack: error instanceof Error ? error.stack : undefined,
-	// 		});
+			this.logger.error('JWKS availability check failed', {
+				error: errorMessage,
+				responseTime,
+				stack: error instanceof Error ? error.stack : undefined,
+			});
 
-	// 		return {
-	// 			status: 'unhealthy',
-	// 			message: `JWKS service check failed: ${errorMessage}`,
-	// 			keyCount: 0,
-	// 			responseTime,
-	// 		};
-	// 	}
-	// }
+			return {
+				status: 'unhealthy',
+				message: `JWKS service check failed: ${errorMessage}`,
+				keyCount: 0,
+				responseTime,
+			};
+		}
+	}
 
 	// TODO F2
 	/**
