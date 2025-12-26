@@ -3,11 +3,12 @@ import * as Interfaces from '@interfaces';
 
 import { InMemoryAuthCodeRepository, InMemoryUserRepository } from '@infrastructure';
 import { ExchangeTokenUseCase, GenerateAuthCodeUseCase, LoginUseCase, ValidateClientUseCase } from '@application';
-import { AuthCodeController, LoginController } from '@presentation';
+import { AuthCodeController, JwksController, LoginController } from '@presentation';
 import { Config } from '@config';
 import { NodeHashService } from 'src/infrastructure/services/sh256-hash.service.js';
 import { PkceVerifierUseCase } from 'src/application/use-cases/pkce-verifier.use-case.js';
 import { TokenController } from 'src/presentation/controllers/token.controller.js';
+import { GetJwksUseCase } from 'src/application/use-cases/get-jwks.use-case.js';
 
 /**
  * Creates and returns a new instance of the `Config` class implementing the `IConfig` interface.
@@ -254,4 +255,44 @@ export function createExchangeTokenUseCase(c: Interfaces.IContainer): Interfaces
 
 export function createTokenController(c: Interfaces.IContainer): TokenController {
 	return new TokenController(c.resolve('ExchangeTokenUseCase'));
+}
+
+/**
+ * Creates an instance of `IJwksService` using the provided dependency injection container.
+ *
+ * This factory function resolves the `KeyLoaderService` from the container to obtain
+ * the public key and key ID, which are then used to construct a new `JwksService`.
+ *
+ * @param c - The dependency injection container implementing `Interfaces.IContainer`.
+ * @returns An instance of `Interfaces.IJwksService` initialized with the resolved public key and key ID.
+ */
+
+export function createJwksService(c: Interfaces.IContainer): Interfaces.IJwksService {
+	const keys = c.resolve('KeyLoaderService');
+	const publicKey = keys.getPublicKey();
+	const keyId = keys.getKeyId();
+	return new Constructors.JwksService(publicKey, keyId);
+}
+
+/**
+ * Factory function to create an instance of `GetJwksUseCase`.
+ *
+ * @param c - The dependency injection container implementing `Interfaces.IContainer`.
+ *            It is expected to provide a `JwksService` instance when resolved.
+ * @returns A new instance of `GetJwksUseCase` initialized with the resolved `JwksService`.
+ */
+
+export function createGetJwksUseCase(c: Interfaces.IContainer): Interfaces.IGetJwksUseCase {
+	return new GetJwksUseCase(c.resolve('JwksService'));
+}
+
+/**
+ * Factory function to create an instance of {@link JwksController}.
+ *
+ * @param c - The dependency injection container used to resolve dependencies.
+ * @returns A new instance of {@link JwksController} initialized with the resolved `GetJWksUseCase`.
+ */
+
+export function createJwksController(c: Interfaces.IContainer): JwksController {
+	return new JwksController(c.resolve('GetJWksUseCase'));
 }

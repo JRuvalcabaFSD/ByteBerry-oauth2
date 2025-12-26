@@ -22,3 +22,4 @@ export * from './services/winston-logger.service.js';
 export * from './services/health.service.js';
 export * from './services/key-loader.service.js';
 export * from './services/jwt.service.js';
+export * from './services/jwks.service.js';

@@ -54,18 +54,21 @@ function registerUseCases(c: IContainer): void {
 	c.registerSingleton('ValidateClientUseCase', Factories.createValidateClientUseCase);
 	c.registerSingleton('PKCEVerifierUseCase', Factories.createPKCEVerifierUseCase);
 	c.registerSingleton('ExchangeTokenUseCase', Factories.createExchangeTokenUseCase);
+	c.registerSingleton('GetJWksUseCase', Factories.createGetJwksUseCase);
 }
 
 function registerControllers(c: IContainer): void {
 	c.registerSingleton('LoginController', Factories.createLoginController);
 	c.registerSingleton('AuthCodeController', Factories.createAuthCodeController);
 	c.registerSingleton('TokenController', Factories.createTokenController);
+	c.registerSingleton('JwksController', Factories.createJwksController);
 }
 
 function OAuthServices(c: IContainer): void {
 	c.registerSingleton('HashService', Factories.createHashService);
 	c.registerSingleton('KeyLoaderService', Factories.createKeyLoaderService);
 	c.registerSingleton('JwtService', Factories.createJwtService);
+	c.registerSingleton('JwksService', Factories.createJwksService);
 }
 
 /**

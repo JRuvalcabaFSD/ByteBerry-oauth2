@@ -22,6 +22,7 @@ export * from './services/health.service.interface.js';
 export * from './services/hash-service.interface.js';
 export * from './services/jwt.service.interface.js';
 export * from './services/rsa-keys-loader.service.interface.js';
+export * from './services/jwks.service.interface.js';
 
 //Use Cases
 export * from './use-cases/login.use-case.interface.js';
@@ -29,3 +30,4 @@ export * from './use-cases/generate-auth-code.use-case.interface.js';
 export * from './use-cases/validate-client.use-case.interface.js';
 export * from './use-cases/pkce-verifier.use-case.interface.js';
 export * from './use-cases/exchange-token.use-case.interface.js';
+export * from './use-cases/get-jwks.use-cas.interface.js';

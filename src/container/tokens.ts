@@ -1,7 +1,6 @@
 import { KeyLoader } from '@infrastructure';
 import * as Interfaces from '@interfaces';
-import { AuthCodeController, LoginController } from '@presentation';
-import { TokenController } from 'src/presentation/controllers/token.controller.js';
+import { AuthCodeController, JwksController, LoginController, TokenController } from '@presentation';
 
 //TODO documentar
 export const Services = {
@@ -17,6 +16,7 @@ export const Services = {
 	HashService: {} as Interfaces.IHashService,
 	KeyLoaderService: {} as KeyLoader,
 	JwtService: {} as Interfaces.IJwtService,
+	JwksService: {} as Interfaces.IJwksService,
 
 	//Repositories
 	UserRepository: {} as Interfaces.IUserRepository,
@@ -30,11 +30,13 @@ export const Services = {
 	ValidateClientUseCase: {} as Interfaces.IValidateClientUseCase,
 	PKCEVerifierUseCase: {} as Interfaces.IPkceVerifierUseCase,
 	ExchangeTokenUseCase: {} as Interfaces.IExchangeTokenUseCase,
+	GetJWksUseCase: {} as Interfaces.IGetJwksUseCase,
 
 	//Controllers
 	LoginController: {} as LoginController,
 	AuthCodeController: {} as AuthCodeController,
 	TokenController: {} as TokenController,
+	JwksController: {} as JwksController,
 };
 
 /**
