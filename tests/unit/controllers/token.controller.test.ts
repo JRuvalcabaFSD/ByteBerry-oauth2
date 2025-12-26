@@ -76,7 +76,8 @@ describe('TokenController', () => {
 
 		await controller.handle(req as Request, res as Response, next);
 
-		const callArg = vi.mocked(res.json).mock.calls[0][0];
+		expect(res.json).toHaveBeenCalled();
+		const callArg = (res.json as any).mock.calls[0][0];
 		expect(callArg).toHaveProperty('access_token');
 		expect(callArg).toHaveProperty('token_type', 'Bearer');
 		expect(callArg).toHaveProperty('expires_in');

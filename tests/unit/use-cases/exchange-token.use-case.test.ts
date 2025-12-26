@@ -2,7 +2,7 @@ import { ExchangeTokenUseCase } from '@application';
 import { TokenRequestDTO } from '@application';
 import { AuthCodeEntity, UserEntity, ClientIdVO, CodeChallengeVO } from '@domain';
 import type { IAuthCodeRepository, IUserRepository, IOAuthClientRepository, IJwtService, IPkceVerifierUseCase, ILogger, IContainer } from '@interfaces';
-import { InvalidAuthCodeError, InvalidClientError, OAuthError } from '@shared';
+import { InvalidAuthCodeError, OAuthError } from '@shared';
 
 describe('ExchangeTokenUseCase', () => {
 	let codeRepository: IAuthCodeRepository;
@@ -68,7 +68,7 @@ describe('ExchangeTokenUseCase', () => {
 			registerSingleton: vi.fn(),
 			registerInstance: vi.fn(),
 			isRegistered: vi.fn(),
-		};
+		} as unknown as IContainer;
 
 		useCase = new ExchangeTokenUseCase(container);
 	});
