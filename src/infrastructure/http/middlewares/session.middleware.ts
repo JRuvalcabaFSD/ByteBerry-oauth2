@@ -1,7 +1,6 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 
 import { ILogger, ISessionRepository } from '@interfaces';
-import { UnauthorizedError } from '@shared';
 
 /**
  * Creates an Express middleware for validating user sessions using a session repository.

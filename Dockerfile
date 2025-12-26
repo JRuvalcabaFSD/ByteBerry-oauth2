@@ -14,7 +14,9 @@ COPY package.json pnpm-lock.yaml ./
 # COPY prisma ./prisma/
 
 # Instalar SOLO dependencias de producción
-RUN pnpm install --prod --no-frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+	pnpm config set store-dir /pnpm/store && \
+	pnpm install --prod --no-frozen-lockfile
 
 
 # ============================================================================
@@ -31,7 +33,9 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Instalar TODAS las dependencias
-RUN pnpm install
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+	pnpm config set store-dir /pnpm/store && \
+	pnpm install --no-frozen-lockfile
 
 
 # TODO F2
@@ -113,16 +117,14 @@ COPY --from=builder --chown=nodejs:nodejs /app/package.json ./
 # COPY prisma.config.ts ./
 
 # Copiar scripts necesarios
-# TODO F1
-# COPY --chown=nodejs:nodejs scripts/docker-entrypoint.sh ./scripts/
-# COPY --chown=nodejs:nodejs scripts/generate-keys.mjs ./scripts/
+COPY --chown=nodejs:nodejs scripts/docker-entrypoint.sh ./scripts/
+COPY --chown=nodejs:nodejs scripts/generate-keys.mjs ./scripts/
 COPY --chown=nodejs:nodejs scripts/healthCheck.cjs ./scripts/
 
 # Hacer scripts ejecutables
-RUN chmod +x scripts/healthCheck.cjs
-# TODO F1
-# chmod +x scripts/docker-entrypoint.sh && \
-# chmod +x scripts/generate-keys.mjs && \
+RUN chmod +x scripts/healthCheck.cjs && \
+	chmod +x scripts/docker-entrypoint.sh && \
+	chmod +x scripts/generate-keys.mjs
 
 # Cambiar a usuario no-root
 USER nodejs
@@ -134,9 +136,8 @@ EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
 	CMD ["node", "scripts/healthCheck.cjs"]
 
-# TODO F1
 # Entry point
-# ENTRYPOINT ["/usr/bin/dumb-init", "--", "./scripts/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "./scripts/docker-entrypoint.sh"]
 
 
 # Variables de entorno por defecto

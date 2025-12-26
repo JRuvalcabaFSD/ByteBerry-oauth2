@@ -16,7 +16,6 @@ async function main() {
 
 	const ctxLogger = withLoggerContext(container.resolve('Logger'), 'main');
 	const { serviceUrl, port } = container.resolve('Config');
-	const x = container.resolve('LoginController');
 
 	ctxLogger.info(`service available in the url: ${serviceUrl}:${port}`);
 }

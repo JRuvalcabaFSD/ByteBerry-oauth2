@@ -39,12 +39,29 @@ describe('HealthService - Extended Coverage', () => {
 			isValid: () => true,
 		};
 
+		// Mock para JwksService saludable
+		const mockJwksService = {
+			getJwks: vi.fn().mockResolvedValue({
+				keys: [
+					{
+						kty: 'RSA',
+						kid: 'test-kid',
+						use: 'sig',
+						alg: 'RS256',
+						n: 'test-n',
+						e: 'AQAB',
+					},
+				],
+			}),
+		};
+
 		mockContainer = {
 			resolve: vi.fn((token: string) => {
 				if (token === 'Config') return mockConfig;
 				if (token === 'Clock') return mockClock;
 				if (token === 'Logger') return mockLogger;
 				if (token === 'UUid') return mockUuid;
+				if (token === 'JwksService') return mockJwksService;
 				return { test: 'service' };
 			}),
 			isRegistered: vi.fn(() => true),
@@ -164,19 +181,23 @@ describe('HealthService - Extended Coverage', () => {
 		});
 
 		it('should return degraded if some dependencies are degraded', async () => {
-			mockContainer.resolve = vi.fn((token) => {
-				if (token === 'Config') return mockConfig;
-				if (token === 'Clock') return mockClock;
-				if (token === 'Logger') return mockLogger;
-				if (token === 'UUid') return mockUuid;
-				return {} as any;
-			}) as any;
-
+			// Creamos un mock de HealthService para forzar una dependencia 'degraded'
 			const service = new HealthService(mockContainer);
-			const response = await service.checkHealth('deep', 'test-id', []);
-
-			// Con dependencias vacías, el status debería ser 'degraded'
-			expect(['healthy', 'degraded']).toContain(response.status);
+			// Mockeamos checkDependencies para devolver una dependencia degradada (usando type cast a any para evitar error de linter)
+			const degradedDep = { status: 'degraded', message: 'degraded', responseTime: 1 };
+			(service as any).checkDependencies = vi.fn().mockResolvedValue({
+				DegradedService: degradedDep,
+			});
+			// También mockeamos checkJwksAvailability para devolver saludable (usando type cast a any)
+			(service as any).checkJwksAvailability = vi.fn().mockResolvedValue({
+				status: 'healthy',
+				message: 'ok',
+				keyCount: 1,
+				responseTime: 1,
+			});
+			// Ejecutamos el health check
+			const response = await service.checkHealth('deep', 'test-id', ['DegradedService']);
+			expect(response.status).toBe('degraded');
 		});
 	});
 
