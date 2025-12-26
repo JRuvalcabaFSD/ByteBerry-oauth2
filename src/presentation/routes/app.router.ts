@@ -62,6 +62,9 @@ function getRoutesList(baseUrl: string): Record<string, unknown> | string[] {
 		{ name: 'health', value: `${baseUrl}/health` },
 		{ name: 'deepHealth', value: `${baseUrl}/health/deep` },
 		{ name: 'login', value: `${baseUrl}/auth/login` },
+		{ name: 'authorize', value: `${baseUrl}/auth/authorize` },
+		{ name: 'token', value: `${baseUrl}/auth/token` },
+		{ name: 'JWKS', value: `${baseUrl}/auth/.well-known/jwks.json` },
 	];
 
 	return routes.reduce(

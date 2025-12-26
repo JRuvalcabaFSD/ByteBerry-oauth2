@@ -13,3 +13,4 @@ export * from './use-cases/login.use-case.js';
 export * from './use-cases/pkce-verifier.use-case.js';
 export * from './use-cases/validate-client.use-case.js';
 export * from './use-cases/exchange-token.use-case.js';
+export * from './use-cases/get-jwks.use-case.js';

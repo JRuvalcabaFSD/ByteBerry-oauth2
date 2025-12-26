@@ -1,14 +1,17 @@
 import * as Constructors from '@infrastructure';
 import * as Interfaces from '@interfaces';
 
-import { InMemoryAuthCodeRepository, InMemoryUserRepository } from '@infrastructure';
-import { ExchangeTokenUseCase, GenerateAuthCodeUseCase, LoginUseCase, ValidateClientUseCase } from '@application';
-import { AuthCodeController, JwksController, LoginController } from '@presentation';
+import { InMemoryAuthCodeRepository, InMemoryUserRepository, NodeHashService } from '@infrastructure';
+import {
+	ExchangeTokenUseCase,
+	GenerateAuthCodeUseCase,
+	GetJwksUseCase,
+	LoginUseCase,
+	PkceVerifierUseCase,
+	ValidateClientUseCase,
+} from '@application';
+import { AuthCodeController, JwksController, LoginController, TokenController } from '@presentation';
 import { Config } from '@config';
-import { NodeHashService } from 'src/infrastructure/services/sh256-hash.service.js';
-import { PkceVerifierUseCase } from 'src/application/use-cases/pkce-verifier.use-case.js';
-import { TokenController } from 'src/presentation/controllers/token.controller.js';
-import { GetJwksUseCase } from 'src/application/use-cases/get-jwks.use-case.js';
 
 /**
  * Creates and returns a new instance of the `Config` class implementing the `IConfig` interface.

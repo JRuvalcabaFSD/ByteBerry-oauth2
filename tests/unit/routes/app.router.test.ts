@@ -1,4 +1,13 @@
 
+// Definir el mockSessionMiddleware en el scope global antes de los imports
+let mockSessionMiddleware: any = (req: any, res: any, next: any) => next();
+
+// Mock manual de createSessionMiddleware para Vitest (debe estar antes de los imports que lo usan)
+import { vi } from 'vitest';
+vi.mock('@infrastructure', () => ({
+  createSessionMiddleware: () => mockSessionMiddleware,
+}));
+
 import { createAppRouter } from '@presentation';
 import { IContainer, IConfig, IClock, IHealthService } from '@interfaces';
 import type { Request, Response } from 'express';
@@ -8,8 +17,18 @@ describe('App Router', () => {
 	let mockClock: IClock;
 	let mockHealthService: IHealthService;
 	let mockContainer: IContainer;
+	// Mocks para rutas de autenticación
+	let mockLoginController: any;
+	let mockAuthCodeController: any;
+	let mockTokenController: any;
+	let mockJwksController: any;
+	let mockSessionRepository: any;
+	let mockLogger: any;
+	// Definir el mockSessionMiddleware en el scope superior como variable global
 
-	beforeEach(() => {
+	// Mock manual de createSessionMiddleware para Vitest (debe estar fuera de beforeEach)
+
+ 	beforeEach(() => {
 		mockConfig = {
 			serviceName: 'TestService',
 			version: '1.0.0',
@@ -35,11 +54,35 @@ describe('App Router', () => {
 			handleHealthError: vi.fn(),
 		} as any;
 
+		// Mocks para controladores de autenticación
+		mockLoginController = {
+			getLoginForm: vi.fn(),
+			login: vi.fn(),
+		};
+		mockAuthCodeController = {
+			handle: vi.fn(),
+		};
+		mockTokenController = {
+			handle: vi.fn(),
+		};
+		mockJwksController = {
+			handle: vi.fn(),
+		};
+		mockSessionRepository = {};
+		mockLogger = {};
+
 		mockContainer = {
 			resolve: vi.fn((token: string) => {
 				if (token === 'Config') return mockConfig;
 				if (token === 'Clock') return mockClock;
 				if (token === 'HealthService') return mockHealthService;
+				if (token === 'LoginController') return mockLoginController;
+				if (token === 'AuthCodeController') return mockAuthCodeController;
+				if (token === 'TokenController') return mockTokenController;
+				if (token === 'JwksController') return mockJwksController;
+				if (token === 'SessionRepository') return mockSessionRepository;
+				if (token === 'Logger') return mockLogger;
+				if (token === 'SessionMiddleware') return mockSessionMiddleware;
 				return null;
 			}),
 			register: vi.fn(),
@@ -47,6 +90,11 @@ describe('App Router', () => {
 			registerInstance: vi.fn(),
 			isRegistered: vi.fn(),
 		} as any;
+
+		// Mock manual de createSessionMiddleware para Vitest
+		vi.mock('@infrastructure', () => ({
+			createSessionMiddleware: () => mockSessionMiddleware,
+		}));
 	});
 
 	describe('createAppRouter', () => {

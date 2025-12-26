@@ -13,7 +13,7 @@ export * from './http/httpServer.js';
 export * from './repositories/inMemory-auth-code.repository.js';
 export * from './repositories/inMemory-session.repository.js';
 export * from './repositories/inMemory-user.repository.js';
-export * from './repositories/InMemory-oauth-client.repository.js';
+export * from './repositories/inMemory-oauth-client.repository.js';
 
 //Services
 export * from './services/clock.service.js';
@@ -23,3 +23,4 @@ export * from './services/health.service.js';
 export * from './services/key-loader.service.js';
 export * from './services/jwt.service.js';
 export * from './services/jwks.service.js';
+export * from './services/sha256-hash.service.js';

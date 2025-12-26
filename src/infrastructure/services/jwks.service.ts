@@ -98,7 +98,7 @@ export class JwksService implements IJwksService {
 	 * @throws {Error} If the public key is not provided or is not PEM encoded.
 	 */
 
-	private validatePublicKey(): void {
+	protected validatePublicKey(): void {
 		if (!this.publicKey || this.publicKey.trim().length === 0) throw new Error('Public key is required');
 
 		if (!this.publicKey.includes('BEGIN PUBLIC KEY')) throw new Error('Invalid public key format - must be PEM encoded');

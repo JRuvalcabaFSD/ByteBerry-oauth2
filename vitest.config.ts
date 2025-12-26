@@ -27,6 +27,7 @@ export default defineConfig({
 				'tests/**',
 				'**/*.test.ts',
 				'**/*.integration.test.ts',
+				'**/*inMemory*',
 			],
 			reporter: ['text', 'html', 'clover', 'json', 'lcov'],
 		},
