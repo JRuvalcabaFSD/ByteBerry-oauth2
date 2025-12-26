@@ -6,7 +6,12 @@
 	"files.exclude": {
 		"**/node_modules": true,
 		"dist": true,
+		"keys": true,
+		"coverage": true,
 		"logs": true
 	},
-	"cSpell.words": ["SSSZ"]
+	"cSpell.words": ["SSSZ"],
+	"files.associations": {
+		"*.css": "tailwindcss"
+	}
 }

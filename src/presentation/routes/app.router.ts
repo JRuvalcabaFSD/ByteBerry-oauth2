@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { HomeResponse, IContainer } from '@interfaces';
 import { Router } from 'express';
 import { createHealthRoutes } from './health.routers.js';
+import { createAuthRoutes } from './auth.routes.js';
 
 //TODO documentar
 export function createAppRouter(c: IContainer): Router {
@@ -12,6 +13,9 @@ export function createAppRouter(c: IContainer): Router {
 	const healthService = c.resolve('HealthService');
 
 	const baseurl = `${config.serviceUrl}:${config.port}`;
+
+	//Auth
+	router.use('/auth', createAuthRoutes(c));
 
 	//Health routes
 	router.use('/health', createHealthRoutes(healthService));
@@ -57,6 +61,10 @@ function getRoutesList(baseUrl: string): Record<string, unknown> | string[] {
 		{ name: 'home', value: `${baseUrl}/` },
 		{ name: 'health', value: `${baseUrl}/health` },
 		{ name: 'deepHealth', value: `${baseUrl}/health/deep` },
+		{ name: 'login', value: `${baseUrl}/auth/login` },
+		{ name: 'authorize', value: `${baseUrl}/auth/authorize` },
+		{ name: 'token', value: `${baseUrl}/auth/token` },
+		{ name: 'JWKS', value: `${baseUrl}/auth/.well-known/jwks.json` },
 	];
 
 	return routes.reduce(

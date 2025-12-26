@@ -15,6 +15,19 @@ export class Config implements IConfig {
 	public readonly corsOrigins: string[];
 	public readonly serviceUrl: string;
 
+	public readonly authorizationEndpoint: string;
+	public readonly tokenEndpoint: string;
+	public readonly jwksEndpoint: string;
+	public readonly authCodeExpiresInMinutes: number;
+	public readonly pkceRequired: boolean;
+	public readonly pkceMethods: string[];
+	public readonly jwtPrivateKey?: string | undefined;
+	public readonly jwtPublicKey?: string | undefined;
+	public readonly jwtKeyId: string;
+	public readonly jwtIssuer: string;
+	public readonly jwtAudience: string[];
+	public readonly jwtAccessTokenExpiresIn: number;
+
 	constructor() {
 		try {
 			// ========================================
@@ -36,6 +49,27 @@ export class Config implements IConfig {
 
 			this.logLevel = logLevel;
 			this.logRequests = logRequest;
+
+			// ========================================
+			// OAuth2 Configuration
+			// ========================================
+			this.authorizationEndpoint = this.normalizeUrls(
+				env.get('OAUTH2_AUTHORIZATION_ENDPOINT').default('https://localhost:4000/auth/authorize').asUrlString()
+			);
+			this.tokenEndpoint = this.normalizeUrls(env.get('OAUTH2_TOKEN_ENDPOINT').default('https://localhost:4000/auth/token').asUrlString());
+			this.jwksEndpoint = this.normalizeUrls(
+				env.get('OAUTH2_JWKS_ENDPOINT').default('https://localhost:4000/auth/.well-known/jwks.json').asUrlString()
+			);
+
+			this.authCodeExpiresInMinutes = env.get('OAUTH2_AUTH_CODE_EXPIRES_IN').default(10).asIntPositive();
+			this.pkceRequired = env.get('OAUTH2_PKCE_REQUIRED').default('true').asBool();
+			this.pkceMethods = env.get('OAUTH2_PKCE_METHODS').default('S256').asArray(',');
+			this.jwtPrivateKey = this.validateJWtPrivateKey();
+			this.jwtPublicKey = this.validateJWtPublicKey();
+			this.jwtKeyId = env.get('JWT_KEY_ID').default('default-key-1').asString();
+			this.jwtIssuer = env.get('JWT_ISSUER').default('https://byteberry.jrmdev.org').asString();
+			this.jwtAudience = env.get('JWT_AUDIENCE').default('byteberry-expenses,byteberry-bff').asArray(',');
+			this.jwtAccessTokenExpiresIn = env.get('JWT_ACCESS_TOKEN_EXPIRES_IN').default('900').asIntPositive();
 		} catch (error) {
 			throw new ConfigError(`Failed to validate environment variables ${getErrMsg(error)}`, this.generateContext());
 		}
@@ -211,5 +245,31 @@ export class Config implements IConfig {
 			acc.push(normalizeSingleUrl(url));
 			return acc;
 		}, []) as T;
+	}
+
+	private validateJWtPublicKey(): string | undefined {
+		const publicKey = env.get('JWT_PUBLIC_KEY').asString();
+
+		if (!publicKey) return undefined;
+		if (!publicKey.includes('BEGIN PUBLIC KEY'))
+			throw new ConfigError('JWT_PUBLIC_KEY must be in PEM format with proper headers', {
+				hasPrivateKey: !!publicKey,
+				keyFormat: 'Invalid - missing PEM headers',
+			});
+
+		return publicKey.replace(/\\n/g, '\n');
+	}
+
+	private validateJWtPrivateKey(): string | undefined {
+		const privateKey = env.get('JWT_PRIVATE_KEY').asString();
+
+		if (!privateKey) return undefined;
+		if (!privateKey.includes('BEGIN PRIVATE KEY'))
+			throw new ConfigError('JWT_PRIVATE_KEY must be in PEM format with proper headers', {
+				hasPrivateKey: !!privateKey,
+				keyFormat: 'Invalid - missing PEM headers',
+			});
+
+		return privateKey.replace(/\\n/g, '\n');
 	}
 }

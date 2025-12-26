@@ -1,13 +1,16 @@
-import { getErrMsg, LogContextClass, LogContextMethod } from '@shared';
-import express, { Application } from 'express';
 import { Server } from 'http';
+import express, { Application } from 'express';
+import cookieParser from 'cookie-parser';
 
 import * as Middlewares from '@infrastructure';
 
+import { getErrMsg, LogContextClass, LogContextMethod } from '@shared';
 import type { IClock, IConfig, IContainer, IHttpServer, ILogger, ServerInfo } from '@interfaces';
 import { createLoggingMiddleware } from '@infrastructure';
 import { createAppRouter } from '@presentation';
 import { AppError } from '@domain';
+import path, { join } from 'path';
+import { fileURLToPath } from 'url';
 
 /**
  * Represents an HTTP server implementation using Express, providing lifecycle management,
@@ -46,6 +49,7 @@ export class HttpServer implements IHttpServer {
 		this.config = container.resolve('Config');
 		this.clock = container.resolve('Clock');
 		this.logger = container.resolve('Logger');
+		this.setupViewEngine();
 		this.setupMiddlewares();
 		this.app.use(createAppRouter(this.container));
 		this.setupHandledError();
@@ -179,6 +183,7 @@ export class HttpServer implements IHttpServer {
 		this.app.use(createLoggingMiddleware(this.logger, this.clock, this.config.logRequests));
 		this.app.use(express.json({ limit: '10mb' }));
 		this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+		this.app.use(cookieParser());
 	}
 
 	/**
@@ -191,5 +196,14 @@ export class HttpServer implements IHttpServer {
 
 	private setupHandledError(): void {
 		this.app.use(Middlewares.createErrorMiddleware(this.logger, this.config));
+	}
+
+	private setupViewEngine(): void {
+		const __filename = fileURLToPath(import.meta.url);
+		const __dirname = path.dirname(__filename);
+
+		this.app.set('views', join(__dirname, '../../../views'));
+		this.app.set('view engine', 'ejs');
+		this.app.use(express.static(join(__dirname, '../../../public')));
 	}
 }

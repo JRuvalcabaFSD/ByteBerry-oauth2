@@ -21,6 +21,7 @@ vi.mock('express', () => {
 	const express = vi.fn(() => expressAppMock);
 	(express as any).json = vi.fn(() => vi.fn());
 	(express as any).urlencoded = vi.fn(() => vi.fn());
+	(express as any).static = vi.fn(() => vi.fn());
 	return { default: express, Router };
 });
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';

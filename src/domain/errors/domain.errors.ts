@@ -8,7 +8,7 @@
  * - `'oauth'`: Errors specific to OAuth authentication/authorization.
  * - `'domain'`: General domain-specific errors.
  */
-export type ErrorType = 'bootstrap' | 'config' | 'container' | 'http' | 'oauth' | 'domain';
+export type ErrorType = 'bootstrap' | 'config' | 'container' | 'http' | 'oauth' | 'domain' | 'login';
 
 /**
  * Represents a custom application error with a specific error type.
@@ -36,5 +36,31 @@ export class AppError extends Error {
 		this.errorType = type;
 
 		Error.captureStackTrace(this, AppError);
+	}
+}
+
+/**
+ * Represents an error that occurs when a value object fails validation or encounters an invalid state.
+ * Extends the {@link AppError} class and is used to signal domain-specific errors related to value objects.
+ *
+ * @remarks
+ * This error is typically thrown when a value object does not meet the required invariants or constraints.
+ *
+ * @example
+ * ```typescript
+ * if (!isValidEmail(email)) {
+ *   throw new ValueObjectError('Invalid email address');
+ * }
+ * ```
+ *
+ * @param msg - A descriptive message explaining the reason for the error.
+ */
+
+export class ValueObjectError extends AppError {
+	constructor(msg: string) {
+		super(msg, 'domain');
+		this.name = 'ValueObjectError';
+
+		Error.captureStackTrace(this, ValueObjectError);
 	}
 }

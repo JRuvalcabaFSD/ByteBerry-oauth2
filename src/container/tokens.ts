@@ -1,4 +1,6 @@
+import { KeyLoader } from '@infrastructure';
 import * as Interfaces from '@interfaces';
+import { AuthCodeController, JwksController, LoginController, TokenController } from '@presentation';
 
 //TODO documentar
 export const Services = {
@@ -9,6 +11,32 @@ export const Services = {
 	Logger: {} as Interfaces.ILogger,
 	HttpServer: {} as Interfaces.IHttpServer,
 	HealthService: {} as Interfaces.IHealthService,
+
+	//Oauth Services
+	HashService: {} as Interfaces.IHashService,
+	KeyLoaderService: {} as KeyLoader,
+	JwtService: {} as Interfaces.IJwtService,
+	JwksService: {} as Interfaces.IJwksService,
+
+	//Repositories
+	UserRepository: {} as Interfaces.IUserRepository,
+	SessionRepository: {} as Interfaces.ISessionRepository,
+	AuthCodeRepository: {} as Interfaces.IAuthCodeRepository,
+	OAuthClientRepository: {} as Interfaces.IOAuthClientRepository,
+
+	//Use Cases
+	LoginUserCase: {} as Interfaces.ILoginUseCase,
+	GenerateAuthCodeUseCase: {} as Interfaces.IGenerateAuthCodeUseCase,
+	ValidateClientUseCase: {} as Interfaces.IValidateClientUseCase,
+	PKCEVerifierUseCase: {} as Interfaces.IPkceVerifierUseCase,
+	ExchangeTokenUseCase: {} as Interfaces.IExchangeTokenUseCase,
+	GetJWksUseCase: {} as Interfaces.IGetJwksUseCase,
+
+	//Controllers
+	LoginController: {} as LoginController,
+	AuthCodeController: {} as AuthCodeController,
+	TokenController: {} as TokenController,
+	JwksController: {} as JwksController,
 };
 
 /**

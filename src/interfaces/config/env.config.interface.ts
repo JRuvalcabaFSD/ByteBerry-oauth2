@@ -30,6 +30,21 @@ export interface IConfig {
 	readonly corsOrigins: string[];
 	readonly serviceUrl: string;
 
+	//OAuth
+	readonly authCodeExpiresInMinutes: number;
+	readonly authorizationEndpoint: string;
+	readonly jwtIssuer: string;
+	readonly jwtAudience: string[];
+	readonly jwtAccessTokenExpiresIn: number;
+
+	readonly jwksEndpoint: string;
+	readonly jwtKeyId: string;
+	readonly jwtPrivateKey?: string | undefined;
+	readonly jwtPublicKey?: string | undefined;
+	readonly pkceMethods: string[];
+	readonly pkceRequired: boolean;
+	readonly tokenEndpoint: string;
+
 	//functions
 	isDevelopment(): boolean;
 	isProduction(): boolean;

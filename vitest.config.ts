@@ -5,6 +5,7 @@ export default defineConfig({
 	test: {
 		globals: true,
 		environment: 'node',
+		silent: true,
 
 		// Cobertura - deshabilitada por defecto para desarrollo
 		coverage: {
@@ -26,6 +27,7 @@ export default defineConfig({
 				'tests/**',
 				'**/*.test.ts',
 				'**/*.integration.test.ts',
+				'**/*inMemory*',
 			],
 			reporter: ['text', 'html', 'clover', 'json', 'lcov'],
 		},

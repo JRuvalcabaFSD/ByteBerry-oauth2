@@ -9,12 +9,29 @@ export function bootstrapContainer(): IContainer {
 	const container = new Container();
 
 	registerCoreServices(container);
+	registerRepositories(container);
+	registerUseCases(container);
+	registerControllers(container);
+	OAuthServices(container);
 
 	validate(container, criticalServices);
 
 	return container;
 }
 
+/**
+ * Registers the core singleton services into the provided dependency injection container.
+ *
+ * @param c - The dependency injection container where core services will be registered.
+ *
+ * The following services are registered as singletons:
+ * - 'Config': Application configuration service.
+ * - 'Clock': Time and date utility service.
+ * - 'UUid': UUID generation service.
+ * - 'Logger': Logging service.
+ * - 'HttpServer': HTTP server instance.
+ * - 'HealthService': Application health check service.
+ */
 function registerCoreServices(c: IContainer): void {
 	c.registerSingleton('Config', Factories.createConfig);
 	c.registerSingleton('Clock', Factories.createClockService);
@@ -22,6 +39,36 @@ function registerCoreServices(c: IContainer): void {
 	c.registerSingleton('Logger', Factories.createLoggerService);
 	c.registerSingleton('HttpServer', Factories.createHttpServer);
 	c.registerSingleton('HealthService', Factories.createHealthService);
+}
+
+function registerRepositories(c: IContainer): void {
+	c.registerSingleton('UserRepository', Factories.createUserRepository);
+	c.registerSingleton('SessionRepository', Factories.createSessionRepository);
+	c.registerSingleton('AuthCodeRepository', Factories.createAuthCodeRepository);
+	c.registerSingleton('OAuthClientRepository', Factories.createOAuthClientRepository);
+}
+
+function registerUseCases(c: IContainer): void {
+	c.registerSingleton('LoginUserCase', Factories.createLoginUseCase);
+	c.registerSingleton('GenerateAuthCodeUseCase', Factories.createGenerateAuthCodeUseCase);
+	c.registerSingleton('ValidateClientUseCase', Factories.createValidateClientUseCase);
+	c.registerSingleton('PKCEVerifierUseCase', Factories.createPKCEVerifierUseCase);
+	c.registerSingleton('ExchangeTokenUseCase', Factories.createExchangeTokenUseCase);
+	c.registerSingleton('GetJWksUseCase', Factories.createGetJwksUseCase);
+}
+
+function registerControllers(c: IContainer): void {
+	c.registerSingleton('LoginController', Factories.createLoginController);
+	c.registerSingleton('AuthCodeController', Factories.createAuthCodeController);
+	c.registerSingleton('TokenController', Factories.createTokenController);
+	c.registerSingleton('JwksController', Factories.createJwksController);
+}
+
+function OAuthServices(c: IContainer): void {
+	c.registerSingleton('HashService', Factories.createHashService);
+	c.registerSingleton('KeyLoaderService', Factories.createKeyLoaderService);
+	c.registerSingleton('JwtService', Factories.createJwtService);
+	c.registerSingleton('JwksService', Factories.createJwksService);
 }
 
 /**
