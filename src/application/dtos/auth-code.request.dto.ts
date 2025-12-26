@@ -1,4 +1,4 @@
-import { OAuthValidationError } from '@shared';
+import { InvalidOAuthRequestError } from '@shared';
 
 /**
  * Represents the data required to request an OAuth2 authorization code.
@@ -40,7 +40,7 @@ interface AuthCodeRequestData {
  * @property state - (Optional) Opaque value to maintain state between request and callback.
  * @property scope - (Optional) Space-delimited list of requested scopes.
  *
- * @throws OAuthValidationError
+ * @throws InvalidOAuthRequestError
  * Thrown if any required parameter is missing or invalid.
  */
 
@@ -68,31 +68,31 @@ export class AuthCodeRequestDTO {
 	 * - `codeChallengeMethod`: Must be either "S256" or "plain".
 	 * - `state`: Optional, but if present, must be less than 500 characters.
 	 *
-	 * Throws an `OAuthValidationError` if any validation fails.
+	 * Throws an `InvalidOAuthRequestError` if any validation fails.
 	 *
 	 * @param query - The query parameters as a record of string keys and values.
 	 * @returns An instance of `AuthCodeRequestDTO` populated from the query.
-	 * @throws {OAuthValidationError} If any required parameter is missing or invalid.
+	 * @throws {InvalidOAuthRequestError} If any required parameter is missing or invalid.
 	 */
 
 	public static fromQuery(query: Record<string, string>): AuthCodeRequestDTO {
-		if (!query || Object.keys(query).length === 0) throw new OAuthValidationError('Missing required parameters');
-		if (!query.client_id || query.client_id.trim().length === 0) throw new OAuthValidationError('Client ID is required');
-		if (!query.redirect_uri || query.redirect_uri.trim().length === 0) throw new OAuthValidationError('Redirect URI is required');
-		if (!query.response_type || query.response_type !== 'code') throw new OAuthValidationError('Response type must be "code');
-		if (!query.code_challenge || query.code_challenge.trim().length === 0) throw new OAuthValidationError('Code Challenge is required');
-		if (query.code_challenge.length < 43) throw new OAuthValidationError('Code Challenge must be at least 43 characters');
-		if (!/^[A-Za-z0-9_-]+$/.test(query.code_challenge)) throw new OAuthValidationError('Code Challenge must be pure baseUrl encoded');
-		if (!query.code_challenge_method) throw new OAuthValidationError('Code Challenge method is required');
+		if (!query || Object.keys(query).length === 0) throw new InvalidOAuthRequestError('Missing required parameters');
+		if (!query.client_id || query.client_id.trim().length === 0) throw new InvalidOAuthRequestError('Client ID is required');
+		if (!query.redirect_uri || query.redirect_uri.trim().length === 0) throw new InvalidOAuthRequestError('Redirect URI is required');
+		if (!query.response_type || query.response_type !== 'code') throw new InvalidOAuthRequestError('Response type must be "code');
+		if (!query.code_challenge || query.code_challenge.trim().length === 0) throw new InvalidOAuthRequestError('Code Challenge is required');
+		if (query.code_challenge.length < 43) throw new InvalidOAuthRequestError('Code Challenge must be at least 43 characters');
+		if (!/^[A-Za-z0-9_-]+$/.test(query.code_challenge)) throw new InvalidOAuthRequestError('Code Challenge must be pure baseUrl encoded');
+		if (!query.code_challenge_method) throw new InvalidOAuthRequestError('Code Challenge method is required');
 		if (query.code_challenge_method !== 'S256' && query.code_challenge_method !== 'plain')
-			throw new OAuthValidationError('Code Challenge method must be S256 or plain');
+			throw new InvalidOAuthRequestError('Code Challenge method must be S256 or plain');
 
-		if (query.state && query.state.trim().length > 500) throw new OAuthValidationError('state must be less than 500 characters');
+		if (query.state && query.state.trim().length > 500) throw new InvalidOAuthRequestError('state must be less than 500 characters');
 
 		try {
 			new URL(query.redirect_uri);
 		} catch {
-			throw new OAuthValidationError('Redirect URI must be a valid URL');
+			throw new InvalidOAuthRequestError('Redirect URI must be a valid URL');
 		}
 
 		return new AuthCodeRequestDTO({

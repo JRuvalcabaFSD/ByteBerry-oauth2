@@ -86,7 +86,7 @@ export class LoginController {
 
 	public login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 		try {
-			const request = LoginRequestDTO.toBody(req.body, req.ip);
+			const request = LoginRequestDTO.fromBody(req.body, req.ip);
 
 			this.logger.debug('Processing login request', {
 				emailOrUserName: request.emailOrUserName,

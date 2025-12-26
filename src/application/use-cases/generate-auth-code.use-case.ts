@@ -49,7 +49,7 @@ export class GenerateAuthCodeUseCase implements IGenerateAuthCodeUseCase {
 			const clientInfo = await this.validateClient.execute({
 				clientId: request.clientId,
 				redirectUri: request.redirectUri,
-				grandType: 'authorization_code',
+				grantType: 'authorization_code',
 			});
 
 			this.logger.debug('Client validated for authorization', {

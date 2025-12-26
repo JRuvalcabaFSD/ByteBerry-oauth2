@@ -12,6 +12,7 @@ export function bootstrapContainer(): IContainer {
 	registerRepositories(container);
 	registerUseCases(container);
 	registerControllers(container);
+	OAuthServices(container);
 
 	validate(container, criticalServices);
 
@@ -51,11 +52,20 @@ function registerUseCases(c: IContainer): void {
 	c.registerSingleton('LoginUserCase', Factories.createLoginUseCase);
 	c.registerSingleton('GenerateAuthCodeUseCase', Factories.createGenerateAuthCodeUseCase);
 	c.registerSingleton('ValidateClientUseCase', Factories.createValidateClientUseCase);
+	c.registerSingleton('PKCEVerifierUseCase', Factories.createPKCEVerifierUseCase);
+	c.registerSingleton('ExchangeTokenUseCase', Factories.createExchangeTokenUseCase);
 }
 
 function registerControllers(c: IContainer): void {
 	c.registerSingleton('LoginController', Factories.createLoginController);
 	c.registerSingleton('AuthCodeController', Factories.createAuthCodeController);
+	c.registerSingleton('TokenController', Factories.createTokenController);
+}
+
+function OAuthServices(c: IContainer): void {
+	c.registerSingleton('HashService', Factories.createHashService);
+	c.registerSingleton('KeyLoaderService', Factories.createKeyLoaderService);
+	c.registerSingleton('JwtService', Factories.createJwtService);
 }
 
 /**

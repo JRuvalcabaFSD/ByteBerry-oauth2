@@ -2,9 +2,12 @@ import * as Constructors from '@infrastructure';
 import * as Interfaces from '@interfaces';
 
 import { InMemoryAuthCodeRepository, InMemoryUserRepository } from '@infrastructure';
-import { GenerateAuthCodeUseCase, LoginUseCase, ValidateClientUseCase } from '@application';
+import { ExchangeTokenUseCase, GenerateAuthCodeUseCase, LoginUseCase, ValidateClientUseCase } from '@application';
 import { AuthCodeController, LoginController } from '@presentation';
 import { Config } from '@config';
+import { NodeHashService } from 'src/infrastructure/services/sh256-hash.service.js';
+import { PkceVerifierUseCase } from 'src/application/use-cases/pkce-verifier.use-case.js';
+import { TokenController } from 'src/presentation/controllers/token.controller.js';
 
 /**
  * Creates and returns a new instance of the `Config` class implementing the `IConfig` interface.
@@ -187,4 +190,68 @@ export function createValidateClientUseCase(c: Interfaces.IContainer): Interface
 
 export function createAuthCodeController(c: Interfaces.IContainer): AuthCodeController {
 	return new AuthCodeController(c.resolve('GenerateAuthCodeUseCase'));
+}
+
+/**
+ * Factory function that creates and returns an instance of a class implementing the `IHashService` interface.
+ *
+ * @returns {Interfaces.IHashService} An instance of `NodeHashService` that provides hashing functionalities.
+ */
+export function createHashService(): Interfaces.IHashService {
+	return new NodeHashService();
+}
+
+/**
+ * Factory function to create an instance of `PkceVerifierUseCase`.
+ *
+ * @param c - The dependency injection container providing required services.
+ * @returns An initialized `IPkceVerifierUseCase` with injected `HashService` and `Logger`.
+ */
+
+export function createPKCEVerifierUseCase(c: Interfaces.IContainer): Interfaces.IPkceVerifierUseCase {
+	return new PkceVerifierUseCase(c.resolve('HashService'), c.resolve('Logger'));
+}
+
+/**
+ * Factory function to create an instance of {@link Constructors.KeyLoader}.
+ *
+ * @param c - The dependency injection container used to resolve required dependencies.
+ * @returns An instance of {@link Constructors.KeyLoader} initialized with the resolved configuration.
+ */
+
+export function createKeyLoaderService(c: Interfaces.IContainer): Constructors.KeyLoader {
+	return new Constructors.KeyLoader(c.resolve('Config'));
+}
+
+/**
+ * Factory function to create an instance of `IJwtService`.
+ *
+ * @param c - The dependency injection container used to resolve required services.
+ * @returns An instance of `IJwtService` initialized with configuration, key loader, and logger services.
+ */
+
+export function createJwtService(c: Interfaces.IContainer): Interfaces.IJwtService {
+	return new Constructors.JwtService(c.resolve('Config'), c.resolve('KeyLoaderService'), c.resolve('Logger'));
+}
+
+/**
+ * Factory function to create an instance of {@link Interfaces.IExchangeTokenUseCase}.
+ *
+ * @param c - The dependency injection container implementing {@link Interfaces.IContainer}.
+ * @returns An instance of {@link Interfaces.IExchangeTokenUseCase}.
+ */
+
+export function createExchangeTokenUseCase(c: Interfaces.IContainer): Interfaces.IExchangeTokenUseCase {
+	return new ExchangeTokenUseCase(c);
+}
+
+/**
+ * Factory function to create an instance of {@link TokenController}.
+ *
+ * @param c - The dependency injection container implementing {@link Interfaces.IContainer}.
+ * @returns A new instance of {@link TokenController} with the required dependencies resolved.
+ */
+
+export function createTokenController(c: Interfaces.IContainer): TokenController {
+	return new TokenController(c.resolve('ExchangeTokenUseCase'));
 }

@@ -31,12 +31,19 @@ export interface IConfig {
 	readonly serviceUrl: string;
 
 	//OAuth
-	readonly authorizationEndpoint: string;
-	readonly tokenEndpoint: string;
-	readonly jwksEndpoint: string;
 	readonly authCodeExpiresInMinutes: number;
-	readonly pkceRequired: boolean;
+	readonly authorizationEndpoint: string;
+	readonly jwtIssuer: string;
+	readonly jwtAudience: string[];
+	readonly jwtAccessTokenExpiresIn: number;
+
+	readonly jwksEndpoint: string;
+	readonly jwtKeyId: string;
+	readonly jwtPrivateKey?: string | undefined;
+	readonly jwtPublicKey?: string | undefined;
 	readonly pkceMethods: string[];
+	readonly pkceRequired: boolean;
+	readonly tokenEndpoint: string;
 
 	//functions
 	isDevelopment(): boolean;

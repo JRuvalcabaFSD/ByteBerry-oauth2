@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import { IGenerateAuthCodeUseCase } from '@interfaces';
 import { AuthCodeRequestDTO } from '@application';
-import { OAuthUnAuthorizedError } from '@shared';
+import { InvalidAuthCodeError } from '@shared';
 
 /**
  * Controller responsible for handling OAuth2 authorization code requests.
@@ -34,7 +34,7 @@ export class AuthCodeController {
 			const request = AuthCodeRequestDTO.fromQuery(req.query as Record<string, string>);
 			const userId = req.user?.userId;
 
-			if (!userId) throw new OAuthUnAuthorizedError('Authentication required');
+			if (!userId) throw new InvalidAuthCodeError('Authentication required');
 
 			const response = await this.useCase.execute(userId, request);
 

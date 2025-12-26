@@ -20,3 +20,5 @@ export * from './services/clock.service.js';
 export * from './services/uuid.service.js';
 export * from './services/winston-logger.service.js';
 export * from './services/health.service.js';
+export * from './services/key-loader.service.js';
+export * from './services/jwt.service.js';

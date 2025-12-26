@@ -187,42 +187,128 @@ export class OAuthError extends HttpError {
 }
 
 /**
- * Represents an OAuth validation error, typically thrown when a request fails validation checks.
- *
- * @extends OAuthError
- *
- * @param msg - The error message describing the validation failure.
- * @param cause - The underlying cause or reason for the validation error.
+ * Represents an error thrown when an OAuth request is invalid.
+ * Extends {@link OAuthError} and sets the HTTP status code to 400.
  *
  * @remarks
- * This error sets the HTTP status code to 400 (Bad Request) and captures the stack trace for debugging purposes.
+ * This error should be used to indicate issues such as missing parameters,
+ * malformed requests, or other client-side errors in the OAuth flow.
+ *
+ * @param msg - A descriptive message explaining why the request is invalid.
  */
 
-export class OAuthValidationError extends OAuthError {
+export class InvalidOAuthRequestError extends OAuthError {
 	constructor(msg: string) {
-		super(msg, 'Validation error', 400);
-		this.name = 'OAuthValidationError';
+		super(msg, 'Invalid request', 400);
+		this.name = 'InvalidOAuthRequestError';
 
-		Error.captureStackTrace(this, OAuthValidationError);
+		Error.captureStackTrace(this, InvalidOAuthRequestError);
 	}
 }
 
 /**
- * Represents an OAuth-specific error indicating that the request is unauthorized.
+ * Represents an OAuth error indicating that the client authentication failed.
  *
- * This error is typically thrown when authentication fails or the user does not have
- * the necessary permissions to access the requested resource.
+ * This error is typically thrown when the client credentials provided in an OAuth request
+ * are invalid, missing, or do not match any registered client.
  *
  * @extends OAuthError
  * @example
- * throw new OAuthUnAuthorizedError('Invalid access token');
+ * throw new InvalidClientError('Client authentication failed');
  */
 
-export class OAuthUnAuthorizedError extends OAuthError {
+export class InvalidClientError extends OAuthError {
 	constructor(msg: string) {
-		super(msg, 'Unauthorized', 401);
-		this.name = 'OAuthUnAuthorizedError';
+		super(msg, 'Invalid Client', 401);
+		this.name = 'InvalidClientError';
 
-		Error.captureStackTrace(this, OAuthUnAuthorizedError);
+		Error.captureStackTrace(this, InvalidClientError);
+	}
+}
+
+/**
+ * Represents an OAuth2 error indicating that the provided grant is invalid.
+ * Typically thrown when the authorization grant or refresh token is malformed,
+ * expired, revoked, or does not match the client request.
+ *
+ * @extends OAuthError
+ * @param msg - A descriptive error message explaining the reason for the invalid grant.
+ */
+
+export class InvalidGrantError extends OAuthError {
+	constructor(msg: string) {
+		super(msg, 'Invalid grant', 401);
+		this.name = 'InvalidGrantError';
+
+		Error.captureStackTrace(this, InvalidGrantError);
+	}
+}
+
+/**
+ * Represents an error thrown when an invalid authorization code is encountered during the OAuth2 flow.
+ *
+ * @remarks
+ * This error extends the {@link OAuthError} class and is typically used to indicate that the provided
+ * authorization code is invalid or has expired. It sets the HTTP status code to 401 (Unauthorized).
+ *
+ * @example
+ * ```typescript
+ * throw new InvalidAuthCodeError('The provided authorization code is invalid.');
+ * ```
+ *
+ * @public
+ */
+
+export class InvalidAuthCodeError extends OAuthError {
+	constructor(msg: string) {
+		super(msg, 'Invalid code', 401);
+		this.name = 'InvalidAuthCodeError';
+
+		Error.captureStackTrace(this, InvalidAuthCodeError);
+	}
+}
+
+/**
+ * Represents an OAuth error indicating that the client is not authorized to perform the requested action.
+ *
+ * This error is typically thrown when a client attempts to access a resource or perform an operation
+ * without the necessary permissions or credentials.
+ *
+ * @extends OAuthError
+ * @example
+ * throw new UnauthorizedClientError('Client is not authorized to access this resource.');
+ */
+
+export class UnauthorizedClientError extends OAuthError {
+	constructor(msg: string) {
+		super(msg, 'Unauthorized client', 401);
+		this.name = 'UnauthorizedClientError';
+
+		Error.captureStackTrace(this, UnauthorizedClientError);
+	}
+}
+
+/**
+ * Represents an error thrown when an OAuth2 token is invalid.
+ *
+ * Extends {@link OAuthError} and sets the HTTP status code to 401 (Unauthorized).
+ *
+ * @remarks
+ * This error should be used when a provided token fails validation or is expired.
+ *
+ * @example
+ * ```typescript
+ * throw new InvalidTokenError('Token is malformed or expired');
+ * ```
+ *
+ * @param msg - A descriptive message explaining the reason for the invalid token error.
+ */
+
+export class InvalidTokenError extends OAuthError {
+	constructor(msg: string) {
+		super(msg, 'Invalid Token', 401);
+		this.name = 'InvalidTokenError';
+
+		Error.captureStackTrace(this, InvalidTokenError);
 	}
 }

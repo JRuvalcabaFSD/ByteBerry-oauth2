@@ -20,7 +20,7 @@ export class LoginRequestDTO {
 		Object.assign(this, data);
 	}
 
-	public static toBody(body: Record<string, string>, ip?: string): LoginRequestDTO {
+	public static fromBody(body: Record<string, string>, ip?: string): LoginRequestDTO {
 		if (!body || Object.keys(body).length === 0) throw new LoginValidationError('Missing required body');
 
 		const errors: string[] = [];

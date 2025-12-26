@@ -1,6 +1,6 @@
-import type { ValidateClientRequestDto, ValidateClientResponseDto } from '@application';
+import { getErrMsg, InvalidClientError, InvalidGrantError, LogContextClass, LogContextMethod, OAuthError } from '@shared';
 import type { ILogger, IOAuthClientRepository, IValidateClientUseCase } from '@interfaces';
-import { getErrMsg, LogContextClass, LogContextMethod, OAuthError, OAuthUnAuthorizedError } from '@shared';
+import type { ValidateClientRequestDto, ValidateClientResponseDto } from '@application';
 
 /**
  * Use case for validating an OAuth client during the authorization process.
@@ -41,18 +41,18 @@ export class ValidateClientUseCase implements IValidateClientUseCase {
 
 			if (!client) {
 				this.logger.warn('Client not found', { clientId: data.clientId });
-				throw new OAuthUnAuthorizedError('Invalid client');
+				throw new InvalidClientError('Invalid client');
 			}
 
 			//We validate the redirection url and the grand type.
 			if (!client.isValidRedirectUri(data.redirectUri)) {
 				this.logger.warn('Invalid redirect URI', { clientId: data.clientId, redirectUri: data.redirectUri });
-				throw new OAuthUnAuthorizedError('Invalid redirect URI');
+				throw new InvalidClientError('Invalid redirect URI');
 			}
 
 			if (!client.supportsGrandType(data.grantType)) {
 				this.logger.warn('Unsupported grand type', { clientId: data.clientId, grandType: data.grantType });
-				throw new OAuthUnAuthorizedError('Unsupported grand type');
+				throw new InvalidGrantError('Unsupported grand type');
 			}
 
 			//We return the validated client
