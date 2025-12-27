@@ -11,7 +11,7 @@ import {
 	ValidateClientUseCase,
 } from '@application';
 import { AuthCodeController, JwksController, LoginController, TokenController } from '@presentation';
-import { Config } from '@config';
+import { Config, DatabaseConfig } from '@config';
 
 /**
  * Creates and returns a new instance of the `Config` class implementing the `IConfig` interface.
@@ -309,4 +309,22 @@ export function createJwksController(c: Interfaces.IContainer): JwksController {
 
 export function createGracefulShutdown(c: Interfaces.IContainer): Constructors.GracefulShutdown {
 	return new Constructors.GracefulShutdown(c.resolve('Logger'));
+}
+
+/**
+ * Creates and returns a new instance of {@link DatabaseConfig} using configuration values
+ * resolved from the provided dependency injection container.
+ *
+ * @param c - The dependency injection container implementing {@link Interfaces.IContainer}.
+ * @returns A configured {@link DatabaseConfig} instance.
+ *
+ * @remarks
+ * This factory function extracts the database connection string and pool settings from the
+ * container's 'Config' service, and the logger from the 'Logger' service, to initialize
+ * the database configuration.
+ */
+
+export function createDBConfig(c: Interfaces.IContainer): DatabaseConfig {
+	const { databaseUrl, databasePoolMax, databasePoolMin } = c.resolve('Config');
+	return new DatabaseConfig({ connectionString: databaseUrl, pollMax: databasePoolMax, poolMin: databasePoolMin }, c.resolve('Logger'));
 }

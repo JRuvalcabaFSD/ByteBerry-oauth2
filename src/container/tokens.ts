@@ -1,6 +1,8 @@
-import { GracefulShutdown, KeyLoader } from '@infrastructure';
 import * as Interfaces from '@interfaces';
+
 import { AuthCodeController, JwksController, LoginController, TokenController } from '@presentation';
+import { GracefulShutdown, KeyLoader } from '@infrastructure';
+import { DatabaseConfig } from '@config';
 
 //TODO documentar
 export const Services = {
@@ -38,6 +40,9 @@ export const Services = {
 	AuthCodeController: {} as AuthCodeController,
 	TokenController: {} as TokenController,
 	JwksController: {} as JwksController,
+
+	//Database
+	DBConfig: {} as DatabaseConfig,
 };
 
 /**

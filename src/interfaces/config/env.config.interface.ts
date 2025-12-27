@@ -36,7 +36,6 @@ export interface IConfig {
 	readonly jwtIssuer: string;
 	readonly jwtAudience: string[];
 	readonly jwtAccessTokenExpiresIn: number;
-
 	readonly jwksEndpoint: string;
 	readonly jwtKeyId: string;
 	readonly jwtPrivateKey?: string | undefined;
@@ -44,6 +43,11 @@ export interface IConfig {
 	readonly pkceMethods: string[];
 	readonly pkceRequired: boolean;
 	readonly tokenEndpoint: string;
+
+	//Database
+	readonly databaseUrl: string;
+	readonly databasePoolMin: number;
+	readonly databasePoolMax: number;
 
 	//functions
 	isDevelopment(): boolean;

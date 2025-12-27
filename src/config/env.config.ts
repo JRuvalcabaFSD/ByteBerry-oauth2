@@ -6,6 +6,7 @@ import pkg from '../../package.json' with { type: 'json' };
 
 //TODO documentar
 export class Config implements IConfig {
+	//Core envs
 	public readonly nodeEnv: NodeEnv;
 	public readonly port: number;
 	public readonly version: string;
@@ -15,6 +16,7 @@ export class Config implements IConfig {
 	public readonly corsOrigins: string[];
 	public readonly serviceUrl: string;
 
+	//OAuth2 envs
 	public readonly authorizationEndpoint: string;
 	public readonly tokenEndpoint: string;
 	public readonly jwksEndpoint: string;
@@ -27,6 +29,11 @@ export class Config implements IConfig {
 	public readonly jwtIssuer: string;
 	public readonly jwtAudience: string[];
 	public readonly jwtAccessTokenExpiresIn: number;
+
+	//Database envs
+	readonly databaseUrl: string;
+	readonly databasePoolMin: number;
+	readonly databasePoolMax: number;
 
 	constructor() {
 		try {
@@ -51,7 +58,7 @@ export class Config implements IConfig {
 			this.logRequests = logRequest;
 
 			// ========================================
-			// OAuth2 Configuration
+			// OAuth2 environments
 			// ========================================
 			this.authorizationEndpoint = this.normalizeUrls(
 				env.get('OAUTH2_AUTHORIZATION_ENDPOINT').default('https://localhost:4000/auth/authorize').asUrlString()
@@ -70,6 +77,13 @@ export class Config implements IConfig {
 			this.jwtIssuer = env.get('JWT_ISSUER').default('https://byteberry.jrmdev.org').asString();
 			this.jwtAudience = env.get('JWT_AUDIENCE').default('byteberry-expenses,byteberry-bff').asArray(',');
 			this.jwtAccessTokenExpiresIn = env.get('JWT_ACCESS_TOKEN_EXPIRES_IN').default('900').asIntPositive();
+
+			// ========================================
+			// Database environments
+			// ========================================
+			this.databaseUrl = env.get('DATABASE_URL').required().asString();
+			this.databasePoolMax = env.get('DATABASE_POOL_MAX').default('2').asIntPositive();
+			this.databasePoolMin = env.get('DATABASE_POOL_MIN').default('10').asIntPositive();
 		} catch (error) {
 			throw new ConfigError(`Failed to validate environment variables ${getErrMsg(error)}`, this.generateContext());
 		}

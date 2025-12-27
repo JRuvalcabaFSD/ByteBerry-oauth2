@@ -30,7 +30,7 @@
 		"db:test:setup": "docker-compose -f docker-compose-test.yml up -d && sleep 2 && dotenv -e .env.test -- pnpm db migrate deploy",
 		"db:up": "docker-compose up -d",
 		"db": "prisma",
-		"dev:app": "tsc --noEmit && tsx --watch src/app.ts",
+		"dev:app": "pnpm type-check && tsx --watch src/app.ts",
 		"dev:css": "tailwindcss -i ./views/input.css -o ./public/css/output.css --postcss --watch",
 		"dev": "pnpm run dev:app --parallel & pnpm run dev:css",
 		"docker:build": "TEST_VERSION=dev ./scripts/docker-build.sh",
