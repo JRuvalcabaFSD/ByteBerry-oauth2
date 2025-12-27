@@ -17,6 +17,7 @@ export default defineConfig([
 			'node_modules/**',
 			'scripts/**',
 			'generated/**',
+			'prisma/*.ts',
 			'*.ejs',
 		],
 	},

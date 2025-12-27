@@ -37,7 +37,8 @@
 		"src/**/*",
 		"tests/**/*",
 		"src/shared/@types/**/*",
-		"tests/vitest-globals.d.ts"
+		"tests/vitest-globals.d.ts",
+		"prisma/seed.ts"
 	],
 	"exclude": ["node_modules", "dist"]
 }
