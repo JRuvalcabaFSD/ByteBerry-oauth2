@@ -245,3 +245,5 @@ keys/
 
 # css files
 *.css
+
+/generated/prisma

@@ -1,0 +1,28 @@
+services:
+  # Base de datos para el servicio OAuth2
+  oauth2-db:
+    image: postgres:15-alpine
+    networks:
+      - byteberry-network
+    container_name: oauth2-db
+    ports:
+      - "5432:5432" # ← SOLO PARA DESARROLLO LOCAL
+    environment:
+      POSTGRES_USER: oauth2_user
+      POSTGRES_PASSWORD: oauth2_pass
+      POSTGRES_DB: byteberry_oauth2_dev
+    volumes:
+      - oauth2_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oauth2_user -d byteberry_oauth2_dev"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  oauth2_db_data:
+
+networks:
+  byteberry-network:
+    name: byteberry-network
+    driver: bridge
