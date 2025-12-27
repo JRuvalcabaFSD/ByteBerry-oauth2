@@ -13,3 +13,145 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// ============================================================================
+// USER MANAGEMENT
+// ============================================================================
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  username      String?  @unique
+  passwordHash  String
+  fullName      String?
+  roles         String[] // ['user', 'admin']
+  isActive      Boolean  @default(true)
+  emailVerified Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  sessions           Session[]
+  authorizationCodes AuthorizationCode[]
+  userConsents       UserConsent[]
+
+  @@index([email])
+  @@index([username])
+  @@map("users")
+}
+
+// ============================================================================
+// SESSION MANAGEMENT
+// ============================================================================
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  userAgent String?
+  ipAddress String?
+  metadata  Json? // Flexible JSON for additional session data
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt]) // For cleanup queries
+  @@map("sessions")
+}
+
+// ============================================================================
+// OAUTH2 CLIENT MANAGEMENT
+// ============================================================================
+
+model OAuthClient {
+  id           String   @id @default(cuid())
+  clientId     String   @unique
+  clientSecret String // Hashed in application layer
+  clientName   String
+  redirectUris String[] // Array of allowed redirect URIs
+  grantTypes   String[] // ['authorization_code', 'refresh_token']
+  isPublic     Boolean  @default(false) // PKCE required if true
+  isActive     Boolean  @default(true) // For soft delete
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  authorizationCodes AuthorizationCode[]
+  userConsents       UserConsent[]
+
+  @@index([clientId])
+  @@map("oauth_clients")
+}
+
+// ============================================================================
+// AUTHORIZATION CODE FLOW
+// ============================================================================
+
+model AuthorizationCode {
+  id                  String    @id @default(cuid())
+  code                String    @unique
+  userId              String
+  clientId            String
+  redirectUri         String
+  codeChallenge       String // PKCE code challenge
+  codeChallengeMethod String // 'S256' or 'plain'
+  scope               String? // Requested scopes (space-separated)
+  state               String? // OAuth2 state parameter
+  expiresAt           DateTime
+  used                Boolean   @default(false)
+  usedAt              DateTime?
+  createdAt           DateTime  @default(now())
+
+  // Relations
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+
+  @@index([code])
+  @@index([userId])
+  @@index([clientId])
+  @@index([expiresAt]) // For cleanup queries
+  @@map("authorization_codes")
+}
+
+// ============================================================================
+// USER CONSENT MANAGEMENT
+// ============================================================================
+
+model UserConsent {
+  id        String    @id @default(cuid())
+  userId    String
+  clientId  String
+  scopes    String[] // Granted scopes
+  grantedAt DateTime  @default(now())
+  expiresAt DateTime? // Optional expiration
+  revokedAt DateTime? // Soft delete via revocation
+
+  // Relations
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+
+  // A user can only have one consent per client (updated when re-authorizing)
+  @@unique([userId, clientId])
+  @@index([userId])
+  @@index([clientId])
+  @@index([revokedAt]) // For filtering active consents
+  @@map("user_consents")
+}
+
+// ============================================================================
+// SCOPE DEFINITIONS
+// ============================================================================
+
+model ScopeDefinition {
+  id          String   @id @default(cuid())
+  name        String   @unique // 'read', 'write', 'admin'
+  description String // Human-readable description
+  isDefault   Boolean  @default(false) // Auto-granted on first consent
+  createdAt   DateTime @default(now())
+
+  @@index([name])
+  @@map("scope_definitions")
+}
